@@ -63,6 +63,36 @@ export async function POST(request: NextRequest) {
     // Create streaming response
     const stream = new ReadableStream({
       async start(controller) {
+        let isControllerClosed = false
+        
+        // Helper function to safely enqueue data
+        const safeEnqueue = (data: Uint8Array) => {
+          if (!isControllerClosed) {
+            try {
+              controller.enqueue(data)
+              return true
+            } catch (error) {
+              console.log('Controller closed during enqueue, stopping stream')
+              isControllerClosed = true
+              return false
+            }
+          }
+          return false
+        }
+
+        // Helper function to safely close controller
+        const safeClose = () => {
+          if (!isControllerClosed) {
+            try {
+              controller.close()
+              isControllerClosed = true
+            } catch (error) {
+              console.log('Controller already closed')
+              isControllerClosed = true
+            }
+          }
+        }
+
         try {
           let result;
           
@@ -123,52 +153,61 @@ export async function POST(request: NextRequest) {
 
           // Stream the response token by token
           for await (const chunk of result.stream) {
+            if (isControllerClosed) {
+              console.log('Controller closed, breaking stream loop')
+              break
+            }
+
             const chunkText = chunk.text()
             
             if (chunkText) {
-              // Check if controller is still open before sending
-              try {
-                const data = JSON.stringify({ 
-                  token: chunkText,
-                  timestamp: new Date().toISOString()
-                })
-                
-                controller.enqueue(
-                  new TextEncoder().encode(`data: ${data}\n\n`)
-                )
-              } catch (error) {
-                console.log('Controller already closed, stopping stream')
+              const data = JSON.stringify({ 
+                token: chunkText,
+                timestamp: new Date().toISOString()
+              })
+              
+              const success = safeEnqueue(
+                new TextEncoder().encode(`data: ${data}\n\n`)
+              )
+              
+              if (!success) {
+                console.log('Failed to enqueue chunk, stopping stream')
                 break
               }
             }
           }
 
-          // Send completion signal only if controller is still open
-          try {
-            controller.enqueue(
-              new TextEncoder().encode(`data: ${JSON.stringify({ done: true })}\n\n`)
+          // Send completion signal
+          if (!isControllerClosed) {
+            const completionData = JSON.stringify({ done: true })
+            safeEnqueue(
+              new TextEncoder().encode(`data: ${completionData}\n\n`)
             )
-            
-            controller.close()
-          } catch (error) {
-            console.log('Controller already closed during completion')
           }
+          
+          safeClose()
 
         } catch (error) {
           console.error('Streaming error:', error)
           
-          // Send error to client
-          const errorData = JSON.stringify({
-            error: true,
-            message: error instanceof Error ? error.message : 'Streaming error occurred'
-          })
+          // Send error to client if controller is still open
+          if (!isControllerClosed) {
+            const errorData = JSON.stringify({
+              error: true,
+              message: error instanceof Error ? error.message : 'Streaming error occurred'
+            })
+            
+            safeEnqueue(
+              new TextEncoder().encode(`data: ${errorData}\n\n`)
+            )
+          }
           
-          controller.enqueue(
-            new TextEncoder().encode(`data: ${errorData}\n\n`)
-          )
-          
-          controller.close()
+          safeClose()
         }
+      },
+      
+      cancel() {
+        console.log('Stream cancelled by client')
       }
     })
 
@@ -198,4 +237,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
