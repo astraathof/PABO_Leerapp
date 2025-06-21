@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DocumentManager from './DocumentManager'
 import KerndoelenViewer from './KerndoelenViewer'
 import DevelopmentTheoryViewer from './DevelopmentTheoryViewer'
@@ -253,8 +253,8 @@ export default function PABOLeerApp() {
   const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null)
   const [showDocumentManager, setShowDocumentManager] = useState(false)
 
-  // Check URL hash for direct navigation
-  useState(() => {
+  // Check URL hash for direct navigation - moved to useEffect to avoid SSR issues
+  useEffect(() => {
     const hash = window.location.hash
     if (hash === '#burgerschap-chat') {
       setActiveModule('module8')
@@ -264,7 +264,7 @@ export default function PABOLeerApp() {
     } else if (hash === '#documents') {
       setShowDocumentManager(true)
     }
-  })
+  }, [])
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
