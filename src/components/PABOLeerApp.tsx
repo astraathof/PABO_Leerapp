@@ -251,6 +251,7 @@ export default function PABOLeerApp() {
   const [activeModule, setActiveModule] = useState<string | null>(null)
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
   const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null)
+  const [showDocumentManager, setShowDocumentManager] = useState(false)
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -282,6 +283,10 @@ export default function PABOLeerApp() {
   }
 
   const renderComponent = () => {
+    if (showDocumentManager) {
+      return <DocumentManager />
+    }
+
     if (!activeModule || !activeComponent) return null
 
     const moduleData = modules.find(m => m.id === activeModule)
@@ -314,8 +319,6 @@ export default function PABOLeerApp() {
           return index === moduleIndex
         })
         return <SocraticChatBot module={moduleData.title} opdrachten={moduleOpdrachten} />
-      case 'Document Manager':
-        return <DocumentManager />
       // Fallback components for missing ones
       case 'Differentiatie Strategieën':
       case 'Inclusief Onderwijs':
@@ -337,6 +340,40 @@ export default function PABOLeerApp() {
   const filteredModules = selectedLearningPath 
     ? modules.filter(module => module.learningPath === selectedLearningPath)
     : modules
+
+  // Show Document Manager
+  if (showDocumentManager) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowDocumentManager(false)}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <span className="text-xl">🔙</span>
+                  <span className="font-medium">Terug naar overzicht</span>
+                </button>
+                <div className="h-6 w-px bg-gray-300"></div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">📚</span>
+                  <span className="font-semibold text-gray-900">Mijn Documenten</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <DocumentManager />
+        </div>
+      </div>
+    )
+  }
 
   if (activeModule && activeComponent) {
     const moduleData = modules.find(m => m.id === activeModule)
@@ -537,7 +574,7 @@ export default function PABOLeerApp() {
                 </button>
               )}
               <button
-                onClick={() => setActiveComponent('Document Manager')}
+                onClick={() => setShowDocumentManager(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
               >
                 <span>📚</span>
@@ -597,7 +634,7 @@ export default function PABOLeerApp() {
               ✨ Spraakherkenning • 📊 Real-time feedback • 🧠 Context-bewuste responses • 🎭 Multi-modal learning
             </p>
             <button
-              onClick={() => setActiveComponent('Document Manager')}
+              onClick={() => setShowDocumentManager(true)}
               className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
               📤 Start met documenten uploaden
