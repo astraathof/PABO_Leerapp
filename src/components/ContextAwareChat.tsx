@@ -46,6 +46,20 @@ export default function ContextAwareChat({
     scrollToBottom()
   }, [messages])
 
+  // Add welcome message when documents are selected
+  useEffect(() => {
+    if (selectedDocuments.length > 0 && messages.length === 0) {
+      const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
+      const welcomeMessage: ChatMessage = {
+        id: 'welcome-' + Date.now(),
+        role: 'assistant',
+        content: `🎉 Geweldig! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:\n\n${selectedDocs.map(doc => `📄 ${doc.fileName} (${doc.detectedType})`).join('\n')}\n\nIk kan nu gepersonaliseerde begeleiding geven op basis van jouw specifieke schoolsituatie. Stel gerust vragen over hoe je theorie kunt koppelen aan jouw schoolpraktijk!\n\n💡 **Voorbeeldvragen:**\n• "Wat staat er in ons schoolplan over burgerschap?"\n• "Hoe kan ik de visie van onze school toepassen in mijn lessen?"\n• "Vergelijk onze aanpak met de theorie die ik geleerd heb"`,
+        timestamp: new Date()
+      }
+      setMessages([welcomeMessage])
+    }
+  }, [selectedDocuments, availableDocuments])
+
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputMessage
     if (!textToSend.trim() || isLoading) return
@@ -77,9 +91,16 @@ export default function ContextAwareChat({
       
       if (selectedDocuments.length > 0) {
         const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
-        enhancedContext += `\n\nSCHOOLDOCUMENTEN CONTEXT:\n${selectedDocs.map(doc => 
-          `${doc.fileName} (${doc.detectedType}):\n${doc.text.substring(0, 2000)}...`
-        ).join('\n\n')}`
+        enhancedContext += `\n\n=== SCHOOLDOCUMENTEN CONTEXT ===\n`
+        enhancedContext += `De student heeft ${selectedDocs.length} schooldocument(en) geüpload:\n\n`
+        
+        selectedDocs.forEach(doc => {
+          enhancedContext += `DOCUMENT: ${doc.fileName} (${doc.detectedType})\n`
+          enhancedContext += `INHOUD (eerste 3000 karakters):\n${doc.text.substring(0, 3000)}\n\n`
+        })
+        
+        enhancedContext += `=== EINDE SCHOOLDOCUMENTEN ===\n\n`
+        enhancedContext += `INSTRUCTIE: Gebruik deze schooldocumenten om specifieke, gepersonaliseerde antwoorden te geven. Verwijs naar concrete passages uit de documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
       }
 
       if (conversationHistory) {
@@ -217,6 +238,21 @@ export default function ContextAwareChat({
           </div>
         </div>
         
+        {selectedDocuments.length > 0 && (
+          <div className="mb-3">
+            <span className="text-sm text-blue-600 mr-2 font-medium">📄 Actieve documenten:</span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {availableDocuments
+                .filter(doc => selectedDocuments.includes(doc.id))
+                .map((doc, index) => (
+                <span key={index} className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs border border-green-200">
+                  {doc.fileName}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {conversationContext.length > 0 && (
           <div className="flex flex-wrap gap-1">
             <span className="text-sm text-blue-600 mr-2">Gespreksonderwerpen:</span>
@@ -231,11 +267,16 @@ export default function ContextAwareChat({
 
       {/* Chat Messages */}
       <div className="bg-white rounded-lg border border-gray-200 h-96 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
+        {messages.length === 0 && selectedDocuments.length === 0 && (
           <div className="text-center text-gray-500 py-8">
             <div className="text-4xl mb-2">🤖</div>
             <p>Start een gesprek met je AI-mentor!</p>
             <p className="text-sm mt-1">Gebruik spraak, typ of kies een snelle actie hieronder.</p>
+            <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-700">
+                💡 <strong>Tip:</strong> Activeer eerst "document-integratie" hieronder om je schooldocumenten te gebruiken!
+              </p>
+            </div>
           </div>
         )}
         
@@ -303,7 +344,10 @@ export default function ContextAwareChat({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Typ je vraag, gebruik spraak, of kies een snelle actie..."
+            placeholder={selectedDocuments.length > 0 ? 
+              "Stel een vraag over je schooldocumenten..." : 
+              "Typ je vraag, gebruik spraak, of activeer eerst document-integratie..."
+            }
             className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={3}
             disabled={isLoading}
@@ -333,15 +377,24 @@ export default function ContextAwareChat({
       <div className="bg-gray-50 rounded-lg p-4">
         <p className="text-sm font-medium text-gray-700 mb-3">🚀 Snelle acties:</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {[
+          {selectedDocuments.length > 0 ? [
+            "Wat staat er in ons schoolplan over dit onderwerp?",
+            "Hoe kan ik dit toepassen in mijn klas?",
+            "Vergelijk dit met onze schoolvisie",
+            "Geef concrete voorbeelden uit onze context",
+            "Wat zijn de volgende stappen voor onze school?",
+            "Hoe monitoren we dit volgens ons beleid?",
+            "Koppel dit aan onze leerdoelen",
+            "Maak dit concreet voor onze leerlingen"
+          ] : [
             "Leg dit uit met een voorbeeld",
             "Hoe pas ik dit toe in de praktijk?",
             "Wat zijn de volgende stappen?",
-            "Koppel dit aan mijn schooldocumenten",
             "Geef me een reflectievraag",
             "Wat zegt de theorie hierover?",
             "Hoe observeer ik dit bij leerlingen?",
-            "Maak dit concreet voor mijn groep"
+            "Maak dit concreet voor mijn groep",
+            "Koppel dit aan de kerndoelen"
           ].map((action, index) => (
             <button
               key={index}
