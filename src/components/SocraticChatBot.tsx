@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import ContextAwareChat from './ContextAwareChat'
+import MultiModalUpload from './MultiModalUpload'
 
 interface Opdracht {
   titel: string
@@ -8,13 +10,6 @@ interface Opdracht {
   type: 'reflectie' | 'analyse' | 'ontwerp' | 'toepassing'
   startVraag: string
   context: string
-}
-
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
 }
 
 interface UploadedDocument {
@@ -27,6 +22,15 @@ interface UploadedDocument {
   uploadDate: Date
 }
 
+interface UploadedFile {
+  id: string
+  file: File
+  type: 'image' | 'audio' | 'document' | 'video'
+  preview?: string
+  transcription?: string
+  analysis?: string
+}
+
 interface SocraticChatBotProps {
   module: string
   opdrachten: Opdracht[]
@@ -34,14 +38,12 @@ interface SocraticChatBotProps {
 
 export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotProps) {
   const [selectedOpdracht, setSelectedOpdracht] = useState<Opdracht | null>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [inputMessage, setInputMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [studentLevel, setStudentLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
   const [availableDocuments, setAvailableDocuments] = useState<UploadedDocument[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
   const [useDocuments, setUseDocuments] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [useMultiModal, setUseMultiModal] = useState(false)
 
   // Load documents from localStorage
   useEffect(() => {
@@ -55,119 +57,16 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     }
   }, [])
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
   const startOpdracht = (opdracht: Opdracht) => {
     setSelectedOpdracht(opdracht)
-    
-    let welcomeMessage = `Welkom bij de opdracht "${opdracht.titel}"! 
-
-${opdracht.beschrijving}
-
-Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral vragen ga stellen om je zelf tot inzichten te laten komen.`
-
-    if (useDocuments && selectedDocuments.length > 0) {
-      const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
-      welcomeMessage += `\n\n📄 Ik ga je helpen deze opdracht te koppelen aan jouw schooldocumenten:\n${selectedDocs.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}`
-    }
-
-    welcomeMessage += `\n\n${opdracht.startVraag}`
-
-    setMessages([
-      {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: welcomeMessage,
-        timestamp: new Date()
-      }
-    ])
-  }
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading || !selectedOpdracht) return
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
-    setInputMessage('')
-    setIsLoading(true)
-
-    try {
-      // Prepare context with selected documents
-      let contextWithDocuments = selectedOpdracht.context
-      
-      if (useDocuments && selectedDocuments.length > 0) {
-        const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
-        contextWithDocuments += `\n\nSCHOOLDOCUMENTEN CONTEXT:\n${selectedDocs.map(doc => 
-          `${doc.fileName} (${doc.detectedType}):\n${doc.text.substring(0, 2000)}...`
-        ).join('\n\n')}`
-      }
-
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputMessage,
-          context: contextWithDocuments,
-          module: module,
-          studentLevel: studentLevel
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Er is een fout opgetreden')
-      }
-
-      const data = await response.json()
-      
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date()
-      }
-
-      setMessages(prev => [...prev, assistantMessage])
-    } catch (error) {
-      console.error('Chat error:', error)
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Sorry, er is een fout opgetreden. Probeer het opnieuw.',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
   }
 
   const resetChat = () => {
     setSelectedOpdracht(null)
-    setMessages([])
-    setInputMessage('')
     setSelectedDocuments([])
     setUseDocuments(false)
+    setUploadedFiles([])
+    setUseMultiModal(false)
   }
 
   const toggleDocumentSelection = (docId: string) => {
@@ -204,6 +103,34 @@ Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral v
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Multi-Modal Upload */}
+        <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-purple-800">🎭 Multi-Modal Learning</h3>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={useMultiModal}
+                onChange={(e) => setUseMultiModal(e.target.checked)}
+                className="rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+              />
+              <span className="text-purple-700 text-sm">Activeer multi-modal upload</span>
+            </label>
+          </div>
+          
+          {useMultiModal && (
+            <div className="space-y-3">
+              <p className="text-purple-700 text-sm">
+                Upload afbeeldingen, audio, video's en documenten voor rijkere AI-interacties:
+              </p>
+              <MultiModalUpload
+                onFilesChange={setUploadedFiles}
+                maxFiles={5}
+              />
+            </div>
+          )}
         </div>
 
         {/* Document Integration */}
@@ -287,41 +214,56 @@ Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral v
                     <span className="mr-2">🤖</span>
                     <span>AI-begeleiding met socratische methode</span>
                   </div>
-                  {useDocuments && selectedDocuments.length > 0 && (
-                    <div className="flex items-center text-sm text-green-600">
-                      <span className="mr-2">📚</span>
-                      <span>{selectedDocuments.length} document(en) geïntegreerd</span>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2 text-sm">
+                    {useDocuments && selectedDocuments.length > 0 && (
+                      <div className="flex items-center text-green-600">
+                        <span className="mr-1">📚</span>
+                        <span>{selectedDocuments.length} docs</span>
+                      </div>
+                    )}
+                    {useMultiModal && uploadedFiles.length > 0 && (
+                      <div className="flex items-center text-purple-600">
+                        <span className="mr-1">🎭</span>
+                        <span>{uploadedFiles.length} files</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Info Box */}
+        {/* Enhanced Info Box */}
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
-          <h3 className="font-semibold text-purple-800 mb-2">🧠 Wat is socratische begeleiding?</h3>
+          <h3 className="font-semibold text-purple-800 mb-2">🧠 Geavanceerde AI-begeleiding</h3>
           <p className="text-purple-700 text-sm mb-3">
-            In plaats van directe antwoorden te geven, stel ik je vragen die je helpen zelf tot inzichten te komen. 
-            Dit bevordert dieper begrip en kritisch denken.
+            Deze AI-mentor gebruikt de socratische methode en is uitgerust met geavanceerde features:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div className="flex items-start space-x-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-purple-700">Vragen die je laten nadenken</span>
+              <span className="text-green-600">🎙️</span>
+              <span className="text-purple-700">Spraakherkenning voor hands-free interactie</span>
             </div>
             <div className="flex items-start space-x-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-purple-700">Praktijkvoorbeelden uit onderwijs</span>
+              <span className="text-green-600">⚡</span>
+              <span className="text-purple-700">Real-time feedback tijdens het typen</span>
             </div>
             <div className="flex items-start space-x-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-purple-700">Verbanden tussen theorie en praktijk</span>
+              <span className="text-green-600">🧠</span>
+              <span className="text-purple-700">Context-bewuste responses</span>
             </div>
             <div className="flex items-start space-x-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-purple-700">Koppeling aan jouw schooldocumenten</span>
+              <span className="text-green-600">🎭</span>
+              <span className="text-purple-700">Multi-modal learning (tekst, audio, video)</span>
+            </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-green-600">📚</span>
+              <span className="text-purple-700">Integratie met schooldocumenten</span>
+            </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-green-600">🌊</span>
+              <span className="text-purple-700">Streaming responses voor real-time ervaring</span>
             </div>
           </div>
         </div>
@@ -335,11 +277,16 @@ Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral v
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-4 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold">🤖 AI Socratische Begeleiding</h3>
+            <h3 className="font-semibold">🤖 Geavanceerde AI Socratische Begeleiding</h3>
             <p className="text-blue-100 text-sm">Opdracht: {selectedOpdracht.titel}</p>
-            {useDocuments && selectedDocuments.length > 0 && (
-              <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
-            )}
+            <div className="flex items-center space-x-3 mt-1">
+              {useDocuments && selectedDocuments.length > 0 && (
+                <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
+              )}
+              {useMultiModal && uploadedFiles.length > 0 && (
+                <p className="text-blue-100 text-xs">🎭 Met {uploadedFiles.length} multi-modal bestand(en)</p>
+              )}
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -358,92 +305,14 @@ Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral v
         </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="bg-white rounded-lg border border-gray-200 h-96 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              <p className={`text-xs mt-1 ${
-                message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
-              }`}>
-                {message.timestamp.toLocaleTimeString()}
-              </p>
-            </div>
-          </div>
-        ))}
-        
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg px-4 py-3 max-w-xs">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Chat Input */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex space-x-3">
-          <textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Typ je antwoord of vraag hier... (Enter om te verzenden)"
-            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows={2}
-            disabled={isLoading}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!inputMessage.trim() || isLoading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? '⏳' : '🚀'}
-          </button>
-        </div>
-        
-        <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-          <span>💡 Tip: Wees specifiek in je antwoorden voor betere begeleiding</span>
-          <span>{inputMessage.length}/500</span>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <p className="text-sm font-medium text-gray-700 mb-2">🚀 Snelle acties:</p>
-        <div className="flex flex-wrap gap-2">
-          {[
-            "Ik begrijp het niet helemaal...",
-            "Kun je een voorbeeld geven?",
-            "Hoe pas ik dit toe in de praktijk?",
-            "Wat zijn de volgende stappen?"
-          ].map((action, index) => (
-            <button
-              key={index}
-              onClick={() => setInputMessage(action)}
-              className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-            >
-              {action}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Context-Aware Chat Component */}
+      <ContextAwareChat
+        module={module}
+        context={selectedOpdracht.context}
+        studentLevel={studentLevel}
+        availableDocuments={availableDocuments}
+        selectedDocuments={selectedDocuments}
+      />
     </div>
   )
 }
