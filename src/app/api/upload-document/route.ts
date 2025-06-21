@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
-import pdf from 'pdf-parse'
+import * as pdfjsLib from 'pdfjs-dist'
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+
+async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  try {
+    const uint8Array = new Uint8Array(buffer)
+    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise
+    let fullText = ''
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const textContent = await page.getTextContent()
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ')
+      fullText += pageText + '\n'
+    }
+    
+    return fullText.trim()
+  } catch (error) {
+    console.error('PDF extraction error:', error)
+    throw new Error('Kon PDF niet verwerken')
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,8 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Bepaal bestandstype en extraheer tekst
     if (file.name.toLowerCase().endsWith('.pdf')) {
-      const data = await pdf(buffer)
-      extractedText = data.text
+      extractedText = await extractTextFromPDF(buffer)
       documentType = 'PDF'
     } else if (file.name.toLowerCase().endsWith('.docx')) {
       const result = await mammoth.extractRawText({ buffer })
