@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import SocraticChatBot from './SocraticChatBot'
 import DocumentManager from './DocumentManager'
+import KerndoelenViewer from './KerndoelenViewer'
 import { 
   CitoScoreChart, 
   LVSTrendChart, 
   EDIObservationCard, 
-  LearningLineVisual,
+  LearningLineVisual, 
   SELDevelopmentChart,
   DifferentiationMatrix,
   SkillsRadarChart,
@@ -18,10 +19,13 @@ interface Module {
   id: number
   title: string
   description: string
+  icon: string
+  color: string
   leerdoelen: string[]
   theorie: {
     concepten: { naam: string; uitleg: string; voorbeeld?: string }[]
     praktijktips: string[]
+    visualComponents?: any[]
   }
   interactieveOpdrachten: {
     titel: string
@@ -33,7 +37,6 @@ interface Module {
   bronnen: string[]
   completed: boolean
   hasDocumentUpload?: boolean
-  hasVisualComponents?: boolean
 }
 
 const modules: Module[] = [
@@ -41,6 +44,8 @@ const modules: Module[] = [
     id: 1,
     title: "Doorlopende Leerlijnen & Kerncurriculum",
     description: "Leer de 58 kerndoelen kennen en koppel deze aan leerlijnen en jaarplanningen",
+    icon: "📚",
+    color: "from-blue-500 to-blue-600",
     leerdoelen: [
       "Benoem de 58 wettelijke kerndoelen en herken concept-kerndoelen 2025",
       "Koppel kerndoel → leerlijn → leerjaar voor taal EN rekenen", 
@@ -70,6 +75,36 @@ const modules: Module[] = [
         "Koppel kerndoelen aan je methode door doelenbomen te maken",
         "Plan 8 blokken per jaar met 4-5 weken per blok voor overzicht",
         "Reserveer tijd voor herhaling en verdieping tussen blokken"
+      ],
+      visualComponents: [
+        {
+          type: 'LearningLineVisual',
+          data: {
+            subject: 'Getalbegrip',
+            progression: [
+              {
+                grade: '1-2',
+                skills: ['Tellen tot 20', 'Getalsymbolen herkennen', 'Meer/minder vergelijken'],
+                example: 'Kinderen tellen speelgoed en zien dat 5 meer is dan 3'
+              },
+              {
+                grade: '3-4', 
+                skills: ['Getallen tot 100', 'Plaats van cijfers', 'Optellen en aftrekken'],
+                example: 'Begrijpen dat 47 bestaat uit 4 tientallen en 7 eenheden'
+              },
+              {
+                grade: '5-6',
+                skills: ['Getallen tot 10.000', 'Vermenigvuldigen', 'Breuken introduceren'],
+                example: 'Zien dat 1/2 pizza hetzelfde is als 2/4 pizza'
+              },
+              {
+                grade: '7-8',
+                skills: ['Getallen tot 1.000.000', 'Kommagetallen', 'Procenten'],
+                example: 'Begrijpen dat 0,5 = 1/2 = 50%'
+              }
+            ]
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -97,13 +132,14 @@ const modules: Module[] = [
     ],
     bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 2,
     title: "Pedagogisch Handelen & Kindontwikkeling",
     description: "Begrijp ontwikkelingstheorieën en pas deze toe in je pedagogische handelen",
+    icon: "🧠",
+    color: "from-purple-500 to-purple-600",
     leerdoelen: [
       "Leg fasen van cognitieve en sociaal-emotionele ontwikkeling uit",
       "Ontwerp een les met EDI + scaffolding principes",
@@ -137,6 +173,63 @@ const modules: Module[] = [
         "Gebruik concrete materialen voor abstracte begrippen (groep 3-6)",
         "Geef kinderen tijd om te denken voordat je antwoord verwacht",
         "Varieer in ondersteuning: visueel, auditief, tactiel"
+      ],
+      visualComponents: [
+        {
+          type: 'SELDevelopmentChart',
+          data: {
+            stages: [
+              {
+                age: '4-6 jaar (groep 1-2)',
+                stage: 'Basis emotieregulatie',
+                characteristics: [
+                  'Leren gevoelens benoemen',
+                  'Eenvoudige conflictoplossing',
+                  'Spelen met anderen',
+                  'Regels begrijpen'
+                ],
+                interventions: [
+                  'Gevoelensthermometer gebruiken',
+                  'Modeleren van gedrag',
+                  'Duidelijke structuur bieden',
+                  'Positieve bekrachtiging'
+                ]
+              },
+              {
+                age: '6-8 jaar (groep 3-4)',
+                stage: 'Sociale vaardigheden',
+                characteristics: [
+                  'Empathie ontwikkelen',
+                  'Vriendschappen vormen',
+                  'Samenwerken in groepjes',
+                  'Verantwoordelijkheid nemen'
+                ],
+                interventions: [
+                  'Rollenspellen doen',
+                  'Klassenregels samen maken',
+                  'Complimenten geven',
+                  'Conflictbemiddeling leren'
+                ]
+              },
+              {
+                age: '8-12 jaar (groep 5-8)',
+                stage: 'Zelfstandigheid',
+                characteristics: [
+                  'Zelfbeeld ontwikkelen',
+                  'Doelen stellen',
+                  'Kritiek kunnen ontvangen',
+                  'Leiderschap tonen'
+                ],
+                interventions: [
+                  'Reflectiegesprekken voeren',
+                  'Keuzemogelijkheden bieden',
+                  'Feedback-cultuur creëren',
+                  'Mentorschap stimuleren'
+                ]
+              }
+            ]
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -164,13 +257,14 @@ const modules: Module[] = [
     ],
     bronnen: ["G. Marzano, Classroom Management", "John Hattie, Visible Learning"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 3,
     title: "Sociaal-Emotionele Ontwikkeling & Klassenklimaat",
     description: "Creëer een positief klassenklimaat en ondersteun SEL-ontwikkeling",
+    icon: "❤️",
+    color: "from-pink-500 to-pink-600",
     leerdoelen: [
       "Onderscheid drie SEL-methodieken en benoem kernprincipes",
       "Kies en motiveer SEL-programma passend bij schoolcontext", 
@@ -231,13 +325,14 @@ const modules: Module[] = [
     ],
     bronnen: ["Kanjertraining.nl", "NJi Dossier SEL"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 4,
     title: "Didactisch Ontwerp & Differentiatie",
     description: "Ontwerp lessen die aansluiten bij alle leerlingen door slimme differentiatie",
+    icon: "🎯",
+    color: "from-green-500 to-green-600",
     leerdoelen: [
       "Pas convergente én divergente differentiatie toe in lesontwerp",
       "Gebruik taxonomie van Bloom voor leerdoelen",
@@ -276,6 +371,33 @@ const modules: Module[] = [
         "Gebruik 'must, should, could' voor verschillende niveaus",
         "Geef keuze in werkvormen maar niet in leerdoelen",
         "Check begrip om de 10 minuten met snelle assessment"
+      ],
+      visualComponents: [
+        {
+          type: 'DifferentiationMatrix',
+          data: {
+            activities: [
+              {
+                level: 'Zwakke leerlingen',
+                must: 'Basis rekensommen met hulpmiddelen',
+                should: 'Zelfde sommen zonder hulpmiddelen',
+                could: 'Extra oefening met spel'
+              },
+              {
+                level: 'Gemiddelde leerlingen', 
+                must: 'Standaard rekensommen',
+                should: 'Toepassingsopgaven',
+                could: 'Uitdagende puzzels'
+              },
+              {
+                level: 'Sterke leerlingen',
+                must: 'Snelle afronding basis',
+                should: 'Complexe vraagstukken',
+                could: 'Eigen onderzoek doen'
+              }
+            ]
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -303,13 +425,14 @@ const modules: Module[] = [
     ],
     bronnen: ["SLO Differentiatiegids", "F. Wiliam, Embedded Formative Assessment"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 5,
     title: "Data-geïnformeerd Werken & Kwaliteitszorg",
     description: "Gebruik data om onderwijs te verbeteren en kwaliteit te borgen",
+    icon: "📊",
+    color: "from-indigo-500 to-indigo-600",
     leerdoelen: [
       "Interpreteer LVS-data op leerling-, groeps- en schoolniveau",
       "Hanteer PDCA-cyclus binnen kwaliteitszorg",
@@ -348,6 +471,33 @@ const modules: Module[] = [
         "Gebruik data voor gesprek, niet als oordeel over kind of leerkracht",
         "Combineer harde data met zachte informatie (observaties, gesprekken)",
         "Maak data visueel met grafieken voor ouders en team"
+      ],
+      visualComponents: [
+        {
+          type: 'CitoScoreChart',
+          data: {
+            title: 'Cito Rekenen Groep 6 - Schooljaar 2023-2024',
+            data: [
+              { level: 'A', percentage: 8, national: 5, color: 'bg-red-500' },
+              { level: 'B', percentage: 27, national: 20, color: 'bg-orange-500' },
+              { level: 'C', percentage: 40, national: 45, color: 'bg-yellow-500' },
+              { level: 'D', percentage: 20, national: 25, color: 'bg-green-500' },
+              { level: 'E', percentage: 5, national: 5, color: 'bg-blue-500' }
+            ],
+            explanation: 'Zorgelijk: 8% niveau A (landelijk 5%). Actie: extra ondersteuning voor zwakke rekenaars en analyse van rekenonderwijs.'
+          }
+        },
+        {
+          type: 'LVSTrendChart',
+          data: {
+            subject: 'Begrijpend Lezen',
+            data: [
+              { month: 'Sep', percentage: 45, target: 70 },
+              { month: 'Jan', percentage: 52, target: 70 },
+              { month: 'Jun', percentage: 58, target: 70 }
+            ]
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -375,13 +525,14 @@ const modules: Module[] = [
     ],
     bronnen: ["PO-Raad 'Werken met Data' toolkit", "Inspectie OK/2024"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 6,
     title: "Innovatie & 21e-eeuwse Vaardigheden",
     description: "Bereid leerlingen voor op de toekomst met moderne vaardigheden en innovatieve didactiek",
+    icon: "🚀",
+    color: "from-cyan-500 to-cyan-600",
     leerdoelen: [
       "Benoem 12 vaardigheden (SLO-model) en integreer 3 in lesconcept",
       "Beschrijf innovatiecyclus (design thinking) voor schoolontwikkeling",
@@ -420,6 +571,21 @@ const modules: Module[] = [
         "Gebruik echte problemen uit de buurt/school voor projecten",
         "Laat kinderen zelf tools kiezen voor presentaties",
         "Evalueer niet alleen eindproduct maar ook proces en samenwerking"
+      ],
+      visualComponents: [
+        {
+          type: 'SkillsRadarChart',
+          data: {
+            skills: [
+              { name: 'Kritisch denken', level: 3, description: 'Informatie analyseren en beoordelen' },
+              { name: 'Creativiteit', level: 4, description: 'Originele ideeën ontwikkelen' },
+              { name: 'Samenwerking', level: 4, description: 'Effectief in teams werken' },
+              { name: 'Communicatie', level: 3, description: 'Duidelijk ideeën overbrengen' },
+              { name: 'ICT-vaardigheden', level: 2, description: 'Digitale tools gebruiken' },
+              { name: 'Probleemoplossen', level: 3, description: 'Systematisch problemen aanpakken' }
+            ]
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -447,13 +613,14 @@ const modules: Module[] = [
     ],
     bronnen: ["Kennisnet Innovatiehub", "SLO 21-eeuwse vaardigheden"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 7,
     title: "Professioneel Leiderschap & Schoolplan",
     description: "Ontwikkel leiderschapsvaardigheden en begrijp schoolorganisatie",
+    icon: "👑",
+    color: "from-yellow-500 to-yellow-600",
     leerdoelen: [
       "Beschrijf Beroepsstandaard Schoolleider PO en koppel eigen competenties",
       "Analyseer schoolplan en begrijp cyclus van visie naar evaluatie",
@@ -492,6 +659,19 @@ const modules: Module[] = [
         "Zoek bondgenoten die enthousiast zijn over vernieuwing",
         "Vier kleine successen om momentum te behouden",
         "Investeer in relaties met alle stakeholders"
+      ],
+      visualComponents: [
+        {
+          type: 'LeadershipDashboard',
+          data: {
+            metrics: [
+              { title: 'Tevredenheid Team', value: '8.2/10', trend: 'up', color: 'bg-green-500' },
+              { title: 'Leerresultaten', value: '85%', trend: 'up', color: 'bg-blue-500' },
+              { title: 'Oudertevredenheid', value: '7.8/10', trend: 'stable', color: 'bg-yellow-500' },
+              { title: 'Innovatieprojecten', value: '12', trend: 'up', color: 'bg-purple-500' }
+            ]
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -519,13 +699,14 @@ const modules: Module[] = [
     ],
     bronnen: ["Schoolleidersregister", "Kotter, Leading Change"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 8,
     title: "Burgerschap & (AI-)Digitale Geletterdheid",
     description: "Bereid kinderen voor op digitale samenleving en actief burgerschap",
+    icon: "🤝",
+    color: "from-teal-500 to-teal-600",
     leerdoelen: [
       "Benoem wettelijke burgerschapsdoelen PO en inspectienormen 2025-2026",
       "Koppel burgerschapsdoelen aan leerlijnen taal, rekenen en 21e-eeuwse vaardigheden",
@@ -597,13 +778,14 @@ const modules: Module[] = [
     ],
     bronnen: ["SLO Burgerschapscurriculum", "Mediawijsheid.nl", "UNESCO AI Education"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   },
   {
     id: 9,
     title: "Schoolleiderschap - Resultaatsturing & Lesobservatie",
     description: "Leer sturen op resultaten en voer effectieve lesobservaties uit",
+    icon: "📈",
+    color: "from-red-500 to-red-600",
     leerdoelen: [
       "Interpreteer Cito-scores en LVS-data voor schoolsturing",
       "Voer effectieve lesobservaties uit met EDI-kijkwijzers",
@@ -644,6 +826,23 @@ const modules: Module[] = [
         "Geef binnen 48 uur feedback na observatie",
         "Koppel observaties aan schoolbrede ontwikkeldoelen",
         "Maak afspraken SMART en controleerbaar"
+      ],
+      visualComponents: [
+        {
+          type: 'EDIObservationCard',
+          data: {
+            phase: 'Fase 1: Lesdoel & Voorkennis',
+            score: 3,
+            maxScore: 4,
+            criteria: [
+              'Lesdoel helder gecommuniceerd',
+              'Gekoppeld aan voorkennis',
+              'Leerlingen begrijpen wat ze gaan leren',
+              'Succes criteria duidelijk'
+            ],
+            feedback: 'Goed: duidelijk lesdoel. Verbeterpunt: meer tijd voor voorkennis activeren en checken of alle leerlingen het doel begrijpen.'
+          }
+        }
       ]
     },
     interactieveOpdrachten: [
@@ -678,15 +877,15 @@ const modules: Module[] = [
     ],
     bronnen: ["Cito Terugkoppeling Handleiding", "EDI Observatieprotocol", "GROW Coaching Model"],
     completed: false,
-    hasDocumentUpload: true,
-    hasVisualComponents: true
+    hasDocumentUpload: true
   }
 ]
 
 export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
-  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat' | 'documenten' | 'visueel'>('overzicht')
+  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat' | 'documenten' | 'kerndoelen'>('overzicht')
   const [completedModules, setCompletedModules] = useState<number[]>([])
+  const [showDocumentManager, setShowDocumentManager] = useState(false)
 
   const toggleModuleCompletion = (moduleId: number) => {
     setCompletedModules(prev => 
@@ -700,178 +899,26 @@ export default function PABOLeerApp() {
     return Math.round((completedModules.length / modules.length) * 100)
   }
 
-  const renderVisualComponents = (moduleId: number) => {
-    switch (moduleId) {
-      case 1: // Leerlijnen
-        return (
-          <div className="space-y-6">
-            <LearningLineVisual
-              subject="Rekenen - Getalbegrip"
-              progression={[
-                {
-                  grade: "1-2",
-                  skills: ["Tellen tot 20", "Getalsymbolen herkennen", "Meer/minder vergelijken"],
-                  example: "Kinderen tellen speelgoed en zeggen welke stapel meer heeft"
-                },
-                {
-                  grade: "3-4", 
-                  skills: ["Getallen tot 100", "Plaats van cijfers", "Optellen en aftrekken"],
-                  example: "37 + 25 met materiaal en op de getallenlijn"
-                },
-                {
-                  grade: "5-6",
-                  skills: ["Getallen tot 10.000", "Vermenigvuldigen", "Breuken introduceren"],
-                  example: "1/4 van 20 appels berekenen met plaatjes"
-                },
-                {
-                  grade: "7-8",
-                  skills: ["Getallen tot 1.000.000", "Kommagetallen", "Verhoudingen"],
-                  example: "Schaalberekeningen bij kaarten en tekeningen"
-                }
-              ]}
-            />
+  // Show Document Manager
+  if (showDocumentManager) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-800">📚 Document Manager</h1>
+              <button
+                onClick={() => setShowDocumentManager(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                ← Terug naar modules
+              </button>
+            </div>
           </div>
-        )
-      
-      case 3: // SEL
-        return (
-          <div className="space-y-6">
-            <SELDevelopmentChart
-              stages={[
-                {
-                  age: "4-6 jaar",
-                  stage: "Basis emotieherkenning",
-                  characteristics: ["Benoemen van basisemoties", "Eerste zelfregulatie", "Parallel spelen"],
-                  interventions: ["Gevoelensthermometer", "Ademhalingsoefeningen", "Gestructureerd spel"]
-                },
-                {
-                  age: "6-8 jaar", 
-                  stage: "Sociale bewustwording",
-                  characteristics: ["Empathie ontwikkeling", "Vriendschappen vormen", "Regels begrijpen"],
-                  interventions: ["Kanjertraining", "Klassengesprekken", "Rollenspellen"]
-                },
-                {
-                  age: "8-10 jaar",
-                  stage: "Complexe emoties",
-                  characteristics: ["Meerdere emoties tegelijk", "Groepsdruk herkennen", "Conflictoplossing"],
-                  interventions: ["Peer mediation", "Sociale vaardigheidstraining", "Mindfulness"]
-                },
-                {
-                  age: "10-12 jaar",
-                  stage: "Emotionele regulatie",
-                  characteristics: ["Zelfcontrole", "Verantwoordelijkheid", "Leiderschap"],
-                  interventions: ["Mentorschap", "Projectleiderschap", "Reflectievaardigheden"]
-                }
-              ]}
-            />
-          </div>
-        )
-
-      case 4: // Differentiatie
-        return (
-          <div className="space-y-6">
-            <DifferentiationMatrix
-              activities={[
-                {
-                  level: "Groep 3 Rekenen",
-                  must: "Tellen tot 20, optellen tot 10",
-                  should: "Aftrekken tot 10, getallijn gebruiken", 
-                  could: "Hoofdrekenen, eigen strategieën"
-                },
-                {
-                  level: "Groep 5 Taal",
-                  must: "Werkwoorden vervoegen, spelling basis",
-                  should: "Zinsbouw, leestekens gebruiken",
-                  could: "Creatief schrijven, stijlfiguren"
-                },
-                {
-                  level: "Groep 7 Project",
-                  must: "Informatie zoeken, presenteren",
-                  should: "Bronnen vergelijken, samenwerken",
-                  could: "Onderzoek opzetten, kritisch evalueren"
-                }
-              ]}
-            />
-          </div>
-        )
-
-      case 5: // Data
-        return (
-          <div className="space-y-6">
-            <CitoScoreChart
-              title="Cito Rekenen Groep 6 - Schooljaar 2023-2024"
-              data={[
-                { level: "A", percentage: 8, national: 5, color: "bg-red-500" },
-                { level: "B", percentage: 27, national: 20, color: "bg-orange-500" },
-                { level: "C", percentage: 40, national: 45, color: "bg-yellow-500" },
-                { level: "D", percentage: 20, national: 25, color: "bg-green-500" },
-                { level: "E", percentage: 5, national: 5, color: "bg-blue-500" }
-              ]}
-              explanation="Zorgelijk: 8% niveau A (landelijk 5%). Actie: extra ondersteuning voor zwakke rekenaars en analyse van rekenonderwijs."
-            />
-            
-            <LVSTrendChart
-              subject="Begrijpend Lezen Groep 5"
-              data={[
-                { month: "Sep", percentage: 45, target: 70 },
-                { month: "Jan", percentage: 52, target: 70 },
-                { month: "Jun", percentage: 58, target: 70 }
-              ]}
-            />
-          </div>
-        )
-
-      case 6: // 21e eeuw
-        return (
-          <div className="space-y-6">
-            <SkillsRadarChart
-              skills={[
-                { name: "Kritisch denken", level: 3, description: "Informatie analyseren en evalueren" },
-                { name: "Creativiteit", level: 4, description: "Originele ideeën en oplossingen bedenken" },
-                { name: "Samenwerking", level: 3, description: "Effectief werken in teams" },
-                { name: "Communicatie", level: 4, description: "Duidelijk en overtuigend communiceren" },
-                { name: "ICT-vaardigheden", level: 2, description: "Digitale tools effectief gebruiken" },
-                { name: "Probleemoplossen", level: 3, description: "Systematisch problemen aanpakken" }
-              ]}
-            />
-          </div>
-        )
-
-      case 9: // Schoolleiderschap
-        return (
-          <div className="space-y-6">
-            <LeadershipDashboard
-              metrics={[
-                { title: "Cito Gemiddelde", value: "537", trend: "up", color: "bg-green-500" },
-                { title: "Tevredenheid", value: "8.2", trend: "stable", color: "bg-blue-500" },
-                { title: "Verzuim %", value: "3.1%", trend: "down", color: "bg-orange-500" },
-                { title: "Doorstroom VO", value: "92%", trend: "up", color: "bg-purple-500" }
-              ]}
-            />
-            
-            <EDIObservationCard
-              phase="Fase 1: Lesdoel & Voorkennis"
-              score={3}
-              maxScore={4}
-              criteria={[
-                "Lesdoel helder gecommuniceerd",
-                "Gekoppeld aan voorkennis",
-                "Leerlingen begrijpen wat ze gaan leren",
-                "Succes criteria benoemd"
-              ]}
-              feedback="Goed: duidelijk lesdoel. Verbeterpunt: maak succes criteria explicieter voor leerlingen."
-            />
-          </div>
-        )
-
-      default:
-        return (
-          <div className="text-center py-8 text-gray-500">
-            <div className="text-4xl mb-2">📊</div>
-            <p>Visuele componenten worden binnenkort toegevoegd voor deze module</p>
-          </div>
-        )
-    }
+          <DocumentManager />
+        </div>
+      </div>
+    )
   }
 
   if (selectedModule) {
@@ -881,9 +928,14 @@ export default function PABOLeerApp() {
       { id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' }
     ]
 
-    // Add visual components tab if module supports it
-    if (selectedModule.hasVisualComponents) {
-      tabs.push({ id: 'visueel', label: '📊 Visueel Leren', icon: '📊' })
+    // Add document tab if module supports it
+    if (selectedModule.hasDocumentUpload) {
+      tabs.push({ id: 'documenten', label: '📄 Documenten', icon: '📄' })
+    }
+
+    // Add kerndoelen tab for module 1
+    if (selectedModule.id === 1) {
+      tabs.push({ id: 'kerndoelen', label: '🎯 58 Kerndoelen', icon: '🎯' })
     }
 
     return (
@@ -899,11 +951,16 @@ export default function PABOLeerApp() {
                 >
                   ← Terug naar overzicht
                 </button>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-800">
-                    Module {selectedModule.id}: {selectedModule.title}
-                  </h1>
-                  <p className="text-gray-600 mt-1">{selectedModule.description}</p>
+                <div className="flex items-center space-x-3">
+                  <div className={`w-12 h-12 bg-gradient-to-r ${selectedModule.color} rounded-full flex items-center justify-center text-white text-xl`}>
+                    {selectedModule.icon}
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-800">
+                      Module {selectedModule.id}: {selectedModule.title}
+                    </h1>
+                    <p className="text-gray-600 mt-1">{selectedModule.description}</p>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -923,12 +980,12 @@ export default function PABOLeerApp() {
 
           {/* Tab Navigation */}
           <div className="bg-white rounded-xl shadow-lg mb-6">
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-gray-200 overflow-x-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+                  className={`flex-shrink-0 px-6 py-4 text-center font-medium transition-colors ${
                     activeTab === tab.id
                       ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                       : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
@@ -1023,6 +1080,37 @@ export default function PABOLeerApp() {
                     </div>
                   </div>
 
+                  {/* Visual Learning Components */}
+                  {selectedModule.theorie.visualComponents && (
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Visuele Leercomponenten</h3>
+                      <div className="space-y-6">
+                        {selectedModule.theorie.visualComponents.map((component, index) => {
+                          switch (component.type) {
+                            case 'CitoScoreChart':
+                              return <CitoScoreChart key={index} {...component.data} />
+                            case 'LVSTrendChart':
+                              return <LVSTrendChart key={index} {...component.data} />
+                            case 'EDIObservationCard':
+                              return <EDIObservationCard key={index} {...component.data} />
+                            case 'LearningLineVisual':
+                              return <LearningLineVisual key={index} {...component.data} />
+                            case 'SELDevelopmentChart':
+                              return <SELDevelopmentChart key={index} {...component.data} />
+                            case 'DifferentiationMatrix':
+                              return <DifferentiationMatrix key={index} {...component.data} />
+                            case 'SkillsRadarChart':
+                              return <SkillsRadarChart key={index} {...component.data} />
+                            case 'LeadershipDashboard':
+                              return <LeadershipDashboard key={index} {...component.data} />
+                            default:
+                              return null
+                          }
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Praktijktips */}
                   <div>
                     <h3 className="text-xl font-bold text-gray-800 mb-4">💡 Praktijktips</h3>
@@ -1049,15 +1137,15 @@ export default function PABOLeerApp() {
                 </div>
               )}
 
-              {activeTab === 'visueel' && selectedModule.hasVisualComponents && (
+              {activeTab === 'documenten' && selectedModule.hasDocumentUpload && (
                 <div>
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">📊 Visueel Leren</h3>
-                    <p className="text-gray-600">
-                      Interactieve visualisaties en voorbeelden om de theorie beter te begrijpen
-                    </p>
-                  </div>
-                  {renderVisualComponents(selectedModule.id)}
+                  <DocumentManager />
+                </div>
+              )}
+
+              {activeTab === 'kerndoelen' && selectedModule.id === 1 && (
+                <div>
+                  <KerndoelenViewer />
                 </div>
               )}
             </div>
@@ -1072,33 +1160,38 @@ export default function PABOLeerApp() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <span className="text-2xl">🎓</span>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-6 shadow-lg">
+            <span className="text-3xl">🎓</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">PABO Leerapp</h1>
-          <p className="text-xl text-blue-700 mb-4">
-            Geavanceerde AI-begeleiding voor aanstaande leerkrachten
+          <h1 className="text-5xl font-bold text-gray-800 mb-4">PABO Leerapp</h1>
+          <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
+            Interactieve leermodules voor aanstaande leerkrachten met AI-begeleiding
           </p>
           
           {/* Progress Bar */}
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto mb-6">
             <div className="flex justify-between text-sm text-gray-600 mb-2">
               <span>Voortgang</span>
               <span>{completedModules.length}/{modules.length} modules</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner">
               <div 
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-4 rounded-full transition-all duration-500 shadow-sm"
                 style={{ width: `${getProgressPercentage()}%` }}
               ></div>
             </div>
-            <p className="text-sm text-gray-600 mt-1">{getProgressPercentage()}% voltooid</p>
+            <p className="text-sm text-gray-600 mt-2">{getProgressPercentage()}% voltooid</p>
           </div>
-        </div>
 
-        {/* Document Manager */}
-        <div className="mb-8">
-          <DocumentManager />
+          {/* Quick Actions */}
+          <div className="flex justify-center space-x-4 mb-8">
+            <button
+              onClick={() => setShowDocumentManager(true)}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg font-medium"
+            >
+              📚 Mijn Documenten
+            </button>
+          </div>
         </div>
 
         {/* Modules Grid */}
@@ -1106,18 +1199,19 @@ export default function PABOLeerApp() {
           {modules.map((module) => (
             <div
               key={module.id}
-              className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
+              className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 overflow-hidden ${
                 completedModules.includes(module.id) ? 'ring-2 ring-green-500' : ''
               }`}
               onClick={() => setSelectedModule(module)}
             >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              {/* Module Header */}
+              <div className={`bg-gradient-to-r ${module.color} p-4 text-white`}>
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                      {module.id}
+                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl">
+                      {module.icon}
                     </div>
-                    <div className="text-sm text-gray-500">Module {module.id}</div>
+                    <div className="text-sm opacity-90">Module {module.id}</div>
                   </div>
                   {completedModules.includes(module.id) && (
                     <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
@@ -1125,16 +1219,18 @@ export default function PABOLeerApp() {
                     </div>
                   )}
                 </div>
-                
-                <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+                <h3 className="text-lg font-bold leading-tight">
                   {module.title}
                 </h3>
-                
+              </div>
+
+              {/* Module Content */}
+              <div className="p-6">
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                   {module.description}
                 </p>
                 
-                <div className="space-y-2">
+                <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-500">
                     <span className="mr-2">🎯</span>
                     <span>{module.leerdoelen.length} leerdoelen</span>
@@ -1145,18 +1241,24 @@ export default function PABOLeerApp() {
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <span className="mr-2">🤖</span>
-                    <span>Geavanceerde AI-begeleiding</span>
+                    <span>AI-begeleiding beschikbaar</span>
                   </div>
-                  {module.hasVisualComponents && (
+                  {module.hasDocumentUpload && (
+                    <div className="flex items-center text-sm text-green-600">
+                      <span className="mr-2">📄</span>
+                      <span>Document upload ondersteund</span>
+                    </div>
+                  )}
+                  {module.id === 1 && (
                     <div className="flex items-center text-sm text-purple-600">
-                      <span className="mr-2">📊</span>
-                      <span>Visuele leercomponenten</span>
+                      <span className="mr-2">🎯</span>
+                      <span>58 Kerndoelen interactief</span>
                     </div>
                   )}
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <div className="pt-4 border-t border-gray-200">
+                  <button className={`w-full bg-gradient-to-r ${module.color} text-white py-3 px-4 rounded-lg hover:shadow-lg transition-all font-medium`}>
                     Start Module →
                   </button>
                 </div>
@@ -1165,31 +1267,32 @@ export default function PABOLeerApp() {
           ))}
         </div>
 
-        {/* Enhanced Footer */}
-        <div className="text-center mt-12">
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-4">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">🚀 Geavanceerde AI Features</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <span>🎙️</span>
-                <span className="text-gray-600">Spraakherkenning</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span>⚡</span>
-                <span className="text-gray-600">Real-time feedback</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span>🧠</span>
-                <span className="text-gray-600">Context-aware AI</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span>🎭</span>
-                <span className="text-gray-600">Multi-modal learning</span>
-              </div>
+        {/* Footer */}
+        <div className="text-center mt-16">
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">🚀 Klaar om te beginnen?</h3>
+            <p className="text-gray-600 mb-6">
+              Start met een module die je interesseert, upload je schooldocumenten voor gepersonaliseerd leren, 
+              en ontdek hoe AI-begeleiding je PABO-studie kan verrijken.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowDocumentManager(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                📚 Upload Documenten
+              </button>
+              <button
+                onClick={() => setSelectedModule(modules[0])}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                🎯 Start Module 1
+              </button>
             </div>
           </div>
-          <p className="text-gray-500 text-sm">
-            💜 Gemaakt voor PABO studenten • Geavanceerde AI-begeleiding • Schoolspecifieke documenten • Visueel leren
+          
+          <p className="text-gray-500 text-sm mt-8">
+            💜 Gemaakt voor PABO studenten • Interactief leren met AI-ondersteuning
           </p>
         </div>
       </div>
