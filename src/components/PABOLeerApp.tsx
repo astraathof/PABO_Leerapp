@@ -6,16 +6,19 @@ import DocumentManager from './DocumentManager'
 import KerndoelenViewer from './KerndoelenViewer'
 import DevelopmentTheoryViewer from './DevelopmentTheoryViewer'
 import SELMethodsViewer from './SELMethodsViewer'
-import CitoMonitoringViewer from './CitoMonitoringViewer'
 import ClickableTheoryViewer from './ClickableTheoryViewer'
-import {
-  CitoScoreChart,
-  LVSTrendChart,
-  EDIObservationCard,
-  LearningLineVisual,
-  SELDevelopmentChart,
-  DifferentiationMatrix,
-  SkillsRadarChart,
+import CitoMonitoringViewer from './CitoMonitoringViewer'
+import KerndoelenProgressieTracker from './KerndoelenProgressieTracker'
+import OntwikkelingsStadiaTimeline from './OntwikkelingsStadiaTimeline'
+import SELCompetentieRadar from './SELCompetentieRadar'
+import { 
+  CitoScoreChart, 
+  LVSTrendChart, 
+  EDIObservationCard, 
+  LearningLineVisual, 
+  SELDevelopmentChart, 
+  DifferentiationMatrix, 
+  SkillsRadarChart, 
   LeadershipDashboard,
   CurriculumMappingChart,
   DevelopmentProgressionTracker,
@@ -25,1030 +28,245 @@ import {
 } from './VisualLearningComponents'
 
 interface Module {
-  id: number
+  id: string
   title: string
   description: string
   icon: string
-  gradient: string
-  leerdoelen: string[]
-  theorie: {
-    concepten: { naam: string; uitleg: string; voorbeeld?: string; clickable?: boolean }[]
-    praktijktips: string[]
-  }
-  interactieveOpdrachten: {
+  color: string
+  specialViewers: string[]
+  clickable: boolean
+  opdrachten: {
     titel: string
     beschrijving: string
     type: 'reflectie' | 'analyse' | 'ontwerp' | 'toepassing'
     startVraag: string
     context: string
   }[]
-  bronnen: string[]
-  completed: boolean
-  hasDocumentUpload?: boolean
-  visualComponents?: any[]
-  specialViewers?: string[]
 }
 
 const modules: Module[] = [
   {
-    id: 1,
-    title: "Doorlopende Leerlijnen & Kerncurriculum",
-    description: "Leer de 58 kerndoelen kennen en koppel deze aan leerlijnen en jaarplanningen",
-    icon: "📚",
-    gradient: "from-blue-500 to-blue-700",
-    leerdoelen: [
-      "Benoem de 58 wettelijke kerndoelen en herken concept-kerndoelen 2025",
-      "Koppel kerndoel → leerlijn → leerjaar voor taal EN rekenen", 
-      "Schets een jaarplanning (8 blokken) op basis van een leerlijn",
-      "Vergelijk PO-leerlijn met VO/MBO-leerlijn uit eigen ervaring"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "Kerndoelen",
-          uitleg: "De 58 wettelijke kerndoelen vormen de basis van het Nederlandse primair onderwijs. Ze beschrijven wat leerlingen minimaal moeten kennen en kunnen aan het einde van de basisschool.",
-          voorbeeld: "Kerndoel 9 (Rekenen): 'Leerlingen leren hoofdrekenen, cijferen en rekenen met de rekenmachine.'"
-        },
-        {
-          naam: "Leerlijnen", 
-          uitleg: "Een leerlijn toont de opbouw van kennis en vaardigheden van groep 1 tot 8. Het verbindt kerndoelen met concrete leerdoelen per leerjaar.",
-          voorbeeld: "Leerlijn 'Getalbegrip': groep 1-2 (tellen tot 20) → groep 3-4 (getallen tot 100) → groep 5-6 (tot 10.000) → groep 7-8 (tot 1.000.000)"
-        },
-        {
-          naam: "Referentieniveaus",
-          uitleg: "1F (functioneel), 1S (streefniveau) en 2F bepalen wat leerlingen minimaal moeten beheersen voor vervolgonderwijs.",
-          voorbeeld: "1F Rekenen: basisvaardigheden voor dagelijks leven. 2F Rekenen: voorbereiding op HAVO/VWO"
-        },
-        {
-          naam: "Curriculum Mapping",
-          uitleg: "Systematische analyse van hoe het curriculum is opgebouwd en waar eventuele hiaten of overlappingen zitten.",
-          voorbeeld: "Mapping toont dat rekenen in groep 4 veel aandacht krijgt, maar meetkunde onderbelicht blijft",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Gebruik de SLO Leerlijnenviewer voor concrete uitwerking per groep",
-        "Koppel kerndoelen aan je methode door doelenbomen te maken",
-        "Plan 8 blokken per jaar met 4-5 weken per blok voor overzicht",
-        "Reserveer tijd voor herhaling en verdieping tussen blokken"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module1',
+    title: 'Curriculum & Kerndoelen',
+    description: 'Leer de 58 kerndoelen kennen en hoe je deze implementeert in je lespraktijk',
+    icon: '📚',
+    color: 'bg-blue-600',
+    specialViewers: ['kerndoelen', 'curriculum-mapping', 'kerndoel-progressie', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Kerndoel Detective",
-        beschrijving: "Analyseer een kerndoel en ontdek wat het echt betekent voor je lespraktijk",
-        type: "analyse",
-        startVraag: "Kies een kerndoel uit jouw vakgebied. Wat denk je dat dit kerndoel precies van leerlingen verwacht?",
-        context: "Je gaat een kerndoel uitpluizen en koppelen aan concrete lesdoelen"
+        titel: 'Kerndoel Implementatie Plan',
+        beschrijving: 'Ontwikkel een concreet plan om een kerndoel te implementeren in je groep',
+        type: 'ontwerp',
+        startVraag: 'Welk kerndoel wil je implementeren en waarom is dit belangrijk voor jouw leerlingen?',
+        context: 'Je bent bezig met het plannen van lessen voor de komende periode. Kies een kerndoel dat je nog niet goed hebt uitgewerkt en maak een implementatieplan.'
       },
       {
-        titel: "Leerlijn Architect", 
-        beschrijving: "Ontwerp een leerlijn van groep 1 tot 8 voor een specifiek onderwerp",
-        type: "ontwerp",
-        startVraag: "Welk onderwerp binnen taal of rekenen vind je het moeilijkst om uit te leggen aan kinderen? Waarom denk je dat dat zo is?",
-        context: "Je gaat stap voor stap een leerlijn opbouwen"
-      },
-      {
-        titel: "Jaarplanning Puzzel",
-        beschrijving: "Maak een realistische jaarplanning die aansluit bij leerlijnen",
-        type: "toepassing", 
-        startVraag: "Stel je voor: je krijgt een nieuwe groep 5. Waar begin je met plannen? Wat zijn je eerste overwegingen?",
-        context: "Je maakt een concrete jaarplanning voor een specifieke groep"
-      }
-    ],
-    bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['kerndoelen', 'klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'LearningLineVisual',
-        props: {
-          subject: 'Rekenen - Getalbegrip',
-          progression: [
-            {
-              grade: '1-2',
-              skills: ['Tellen tot 20', 'Getalsymbolen herkennen', 'Meer/minder vergelijken'],
-              example: 'Kinderen tellen speelgoed en zeggen welke stapel meer heeft'
-            },
-            {
-              grade: '3-4', 
-              skills: ['Getallen tot 100', 'Plaats van cijfers', 'Optellen en aftrekken'],
-              example: 'Rekenen met geld: 25 cent + 10 cent = 35 cent'
-            },
-            {
-              grade: '5-6',
-              skills: ['Getallen tot 10.000', 'Vermenigvuldigen', 'Breuken introduceren'],
-              example: '3 x 25 = 75, want 3 keer een kwartje is 75 cent'
-            },
-            {
-              grade: '7-8',
-              skills: ['Getallen tot 1.000.000', 'Kommagetallen', 'Procenten'],
-              example: '1,5 miljoen inwoners = 1.500.000 mensen'
-            }
-          ]
-        }
-      },
-      {
-        type: 'CurriculumMappingChart',
-        props: {
-          subjects: [
-            {
-              name: 'Rekenen',
-              coverage: 85,
-              alignment: 92,
-              gaps: ['Meetkunde in groep 3-4', 'Statistiek bovenbouw']
-            },
-            {
-              name: 'Taal',
-              coverage: 78,
-              alignment: 88,
-              gaps: ['Schrijfvaardigheid groep 5-6', 'Woordenschat systematiek']
-            }
-          ]
-        }
+        titel: 'Curriculum Mapping Analyse',
+        beschrijving: 'Analyseer de samenhang tussen kerndoelen in jouw curriculum',
+        type: 'analyse',
+        startVraag: 'Welke verbanden zie je tussen verschillende kerndoelen in jouw vakgebied?',
+        context: 'Bekijk het curriculum van jouw groep en onderzoek hoe kerndoelen met elkaar samenhangen en elkaar versterken.'
       }
     ]
   },
   {
-    id: 2,
-    title: "Pedagogisch Handelen & Kindontwikkeling",
-    description: "Begrijp ontwikkelingstheorieën en pas deze toe in je pedagogische handelen",
-    icon: "👶",
-    gradient: "from-green-500 to-green-700",
-    leerdoelen: [
-      "Leg fasen van cognitieve en sociaal-emotionele ontwikkeling uit volgens Piaget, Vygotsky en Erikson",
-      "Ontwerp een les met EDI + scaffolding principes voor groep 1-8",
-      "Toon hoe je een veilige leeromgeving creëert per ontwikkelingsfase",
-      "Analyseer kindgedrag vanuit ontwikkelingstheorieën en pas interventies toe"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "Piaget's Ontwikkelingsstadia",
-          uitleg: "Kinderen doorlopen vier stadia: sensomotorisch (0-2), preoperationeel (2-7), concreet operationeel (7-11), formeel operationeel (11+). Elk stadium heeft eigen denkkenmerken.",
-          voorbeeld: "Groep 3-4 (preoperationeel): kinderen denken nog niet logisch, hebben moeite met behoud (water in hoog/breed glas)",
-          clickable: true
-        },
-        {
-          naam: "Vygotsky's Zone van Naaste Ontwikkeling",
-          uitleg: "Het verschil tussen wat een kind alleen kan en wat het met hulp kan. Hier vindt optimaal leren plaats.",
-          voorbeeld: "Kind kan zelfstandig tot 10 tellen, met hulp tot 20. De ZNO ligt tussen 10-20.",
-          clickable: true
-        },
-        {
-          naam: "Scaffolding",
-          uitleg: "Tijdelijke ondersteuning die geleidelijk wordt weggenomen naarmate het kind zelfstandiger wordt.",
-          voorbeeld: "Rekenen: eerst samen doen → met hulpkaart → zelfstandig → automatiseren",
-          clickable: true
-        },
-        {
-          naam: "Erikson's Psychosociale Ontwikkeling",
-          uitleg: "Acht levensfasen met elk een crisis die opgelost moet worden voor gezonde ontwikkeling.",
-          voorbeeld: "Groep 3-8: Vlijt vs. Minderwaardigheid - kinderen willen competent zijn en prestaties leveren",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Observeer kinderen tijdens spel om ontwikkelingsniveau in te schatten",
-        "Gebruik concrete materialen voor abstracte begrippen (groep 3-6)",
-        "Geef kinderen tijd om te denken voordat je antwoord verwacht",
-        "Varieer in ondersteuning: visueel, auditief, tactiel"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module2',
+    title: 'Ontwikkelingspsychologie',
+    description: 'Begrijp hoe kinderen zich ontwikkelen en pas je onderwijs hierop aan',
+    icon: '🧠',
+    color: 'bg-purple-600',
+    specialViewers: ['ontwikkelingstheorieen', 'ontwikkelingsstadia-timeline', 'sel-development', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Ontwikkelingsdetective",
-        beschrijving: "Herken ontwikkelingsstadia in kindgedrag en pas je aanpak aan",
-        type: "analyse",
-        startVraag: "Beschrijf een situatie waarin een kind iets niet begreep. Hoe reageerde je toen? Wat zou je nu anders doen?",
-        context: "Je analyseert kindgedrag vanuit ontwikkelingstheorie"
+        titel: 'Ontwikkelingsgericht Lesgeven',
+        beschrijving: 'Ontwerp een les die aansluit bij het ontwikkelingsniveau van je leerlingen',
+        type: 'ontwerp',
+        startVraag: 'Hoe kun je een les aanpassen aan het cognitieve ontwikkelingsniveau van je leerlingen?',
+        context: 'Je merkt dat sommige leerlingen moeite hebben met abstract denken. Hoe pas je je les aan op hun ontwikkelingsniveau?'
       },
       {
-        titel: "Scaffolding Architect",
-        beschrijving: "Ontwerp een scaffolding-plan voor een complexe vaardigheid",
-        type: "ontwerp",
-        startVraag: "Kies een vaardigheid die kinderen moeilijk vinden. Hoe zou je deze stap voor stap opbouwen?",
-        context: "Je maakt een concreet scaffolding-plan"
-      }
-    ],
-    bronnen: ["G. Marzano, Classroom Management", "Piaget, J. - Cognitive Development"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['ontwikkelingstheorieen', 'klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'SELDevelopmentChart',
-        props: {
-          stages: [
-            {
-              age: '4-6 jaar (groep 1-2)',
-              stage: 'Basis emotieregulatie',
-              characteristics: [
-                'Leren gevoelens benoemen',
-                'Eenvoudige zelfcontrole',
-                'Spelen met anderen'
-              ],
-              interventions: [
-                'Gevoelensthermometer gebruiken',
-                'Ademhalingsoefeningen',
-                'Duidelijke structuur bieden'
-              ]
-            },
-            {
-              age: '6-8 jaar (groep 3-4)',
-              stage: 'Sociale vaardigheden',
-              characteristics: [
-                'Vriendschappen vormen',
-                'Regels begrijpen',
-                'Empathie ontwikkelen'
-              ],
-              interventions: [
-                'Rollenspellen doen',
-                'Conflictoplossing oefenen',
-                'Complimenten geven'
-              ]
-            },
-            {
-              age: '8-10 jaar (groep 5-6)',
-              stage: 'Competentie ontwikkeling',
-              characteristics: [
-                'Prestaties belangrijk',
-                'Vergelijken met anderen',
-                'Zelfbeeld vormen'
-              ],
-              interventions: [
-                'Succeservaringen creëren',
-                'Groepswerk stimuleren',
-                'Individuele doelen stellen'
-              ]
-            },
-            {
-              age: '10-12 jaar (groep 7-8)',
-              stage: 'Identiteit en autonomie',
-              characteristics: [
-                'Meer zelfstandigheid',
-                'Vriendschappen centraal',
-                'Toekomstgericht denken'
-              ],
-              interventions: [
-                'Keuzemogelijkheden bieden',
-                'Verantwoordelijkheid geven',
-                'Toekomstplannen bespreken'
-              ]
-            }
-          ]
-        }
-      },
-      {
-        type: 'DevelopmentProgressionTracker',
-        props: {
-          domains: [
-            {
-              name: 'Cognitieve Ontwikkeling',
-              stages: [
-                {
-                  age: '4-6 jaar',
-                  milestones: ['Symbolisch denken', 'Eenvoudige regels', 'Concrete begrippen'],
-                  redFlags: ['Geen symbolisch spel', 'Extreme egocentrisme', 'Geen regelbegrip'],
-                  support: ['Veel voorlezen', 'Symbolisch spel stimuleren', 'Concrete ervaringen']
-                },
-                {
-                  age: '6-8 jaar',
-                  milestones: ['Logisch denken', 'Behoud begrip', 'Classificeren'],
-                  redFlags: ['Geen behoud begrip', 'Extreme impulsiviteit', 'Geen logische verbanden'],
-                  support: ['Concrete materialen', 'Stap-voor-stap uitleg', 'Veel herhaling']
-                }
-              ]
-            }
-          ]
-        }
+        titel: 'Observatie en Ontwikkeling',
+        beschrijving: 'Reflecteer op observaties van leerlingenontwikkeling',
+        type: 'reflectie',
+        startVraag: 'Wat observeer je bij de ontwikkeling van je leerlingen en hoe interpreteer je dit?',
+        context: 'Je hebt een week lang systematisch geobserveerd. Welke ontwikkelingspatronen zie je en wat betekent dit voor je onderwijs?'
       }
     ]
   },
   {
-    id: 3,
-    title: "Sociaal-Emotionele Ontwikkeling & Klassenklimaat",
-    description: "Creëer een positief klassenklimaat en ondersteun SEL-ontwikkeling",
-    icon: "🤝",
-    gradient: "from-purple-500 to-purple-700",
-    leerdoelen: [
-      "Onderscheid drie SEL-methodieken (Kanjertraining, Lions Quest, Rots & Water) en benoem kernprincipes",
-      "Kies en motiveer SEL-programma passend bij schoolcontext en leerlingpopulatie", 
-      "Formuleer meetbare doelen rond welbevinden en sociale veiligheid per groep",
-      "Ontwerp interventies voor klassenklimaat gebaseerd op SEL-competenties"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "SEL (Social Emotional Learning)",
-          uitleg: "Vijf kerncompetenties: zelfbewustzijn, zelfregulatie, sociale bewustzijn, relatievaardigheden, verantwoordelijke besluitvorming.",
-          voorbeeld: "Zelfregulatie: kind leert ademhalingsoefening bij boosheid in plaats van slaan",
-          clickable: true
-        },
-        {
-          naam: "Klassenklimaat",
-          uitleg: "De sociale en emotionele sfeer in de klas die leren en welzijn beïnvloedt.",
-          voorbeeld: "Positief klimaat: kinderen durven fouten te maken en vragen te stellen",
-          clickable: true
-        },
-        {
-          naam: "Sociale Veiligheid",
-          uitleg: "De mate waarin leerlingen zich veilig voelen om zichzelf te zijn zonder angst voor pesten of uitsluiting.",
-          voorbeeld: "Veilige klas: alle kinderen doen mee, niemand wordt gepest of buitengesloten",
-          clickable: true
-        },
-        {
-          naam: "Weerbaarheid",
-          uitleg: "Het vermogen om voor jezelf op te komen en grenzen te stellen op een respectvolle manier.",
-          voorbeeld: "Kind zegt 'nee' tegen ongewenst gedrag en zoekt hulp bij volwassenen",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Start elke dag met een positieve begroeting van elk kind",
-        "Gebruik 'time-in' in plaats van 'time-out' voor verbinding",
-        "Implementeer dagelijkse kringgesprekken voor sociale vaardigheden",
-        "Train kinderen in conflictoplossing met concrete stappenplannen"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module3',
+    title: 'SEL & Klassenmanagement',
+    description: 'Creëer een positief klassenklimaat en ontwikkel sociale vaardigheden',
+    icon: '❤️',
+    color: 'bg-red-600',
+    specialViewers: ['sel-methodieken', 'sel-competentie-radar', 'klassenklimaat', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "SEL-Methode Verkenner",
-        beschrijving: "Vergelijk verschillende SEL-methodieken en kies de beste voor jouw context",
-        type: "analyse",
-        startVraag: "Denk aan een klas die je kent. Welke sociale uitdagingen zie je daar?",
-        context: "Je verkent welke SEL-aanpak past bij specifieke klassenbehoeften"
+        titel: 'SEL Programma Implementatie',
+        beschrijving: 'Kies en implementeer een SEL-methodiek in je klas',
+        type: 'toepassing',
+        startVraag: 'Welke SEL-methodiek past het beste bij jouw klas en waarom?',
+        context: 'Je wilt het sociale klimaat in je klas verbeteren. Onderzoek verschillende SEL-methodieken en kies er één om te implementeren.'
       },
       {
-        titel: "Klassenklimaat Designer",
-        beschrijving: "Ontwerp een plan om het klassenklimaat te verbeteren",
-        type: "ontwerp",
-        startVraag: "Beschrijf je ideale klassenklimaat. Hoe ziet dat eruit en hoe voelt het?",
-        context: "Je maakt een concreet plan voor klimaatverbetering"
-      }
-    ],
-    bronnen: ["Kanjertraining.nl", "Lions Quest Nederland", "Rots en Water"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['sel-methodieken', 'klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'SELDevelopmentChart',
-        props: {
-          stages: [
-            {
-              age: '4-6 jaar (groep 1-2)',
-              stage: 'Basis emotieregulatie',
-              characteristics: [
-                'Leren gevoelens benoemen',
-                'Eenvoudige zelfcontrole',
-                'Spelen met anderen'
-              ],
-              interventions: [
-                'Gevoelensthermometer gebruiken',
-                'Ademhalingsoefeningen',
-                'Duidelijke structuur bieden'
-              ]
-            },
-            {
-              age: '6-8 jaar (groep 3-4)',
-              stage: 'Sociale vaardigheden',
-              characteristics: [
-                'Vriendschappen vormen',
-                'Regels begrijpen',
-                'Empathie ontwikkelen'
-              ],
-              interventions: [
-                'Rollenspellen doen',
-                'Conflictoplossing oefenen',
-                'Complimenten geven'
-              ]
-            }
-          ]
-        }
+        titel: 'Klassenklimaat Analyse',
+        beschrijving: 'Analyseer het huidige klassenklimaat en stel verbeteringen voor',
+        type: 'analyse',
+        startVraag: 'Hoe zou je het huidige klassenklimaat beschrijven en wat wil je verbeteren?',
+        context: 'Je merkt spanningen in de klas. Analyseer de situatie en bedenk concrete stappen voor verbetering.'
       }
     ]
   },
   {
-    id: 4,
-    title: "Didactisch Ontwerp & Differentiatie",
-    description: "Ontwerp lessen die aansluiten bij alle leerlingen door slimme differentiatie",
-    icon: "🎯",
-    gradient: "from-orange-500 to-orange-700",
-    leerdoelen: [
-      "Pas convergente én divergente differentiatie toe in lesontwerp voor groep 1-8",
-      "Gebruik taxonomie van Bloom voor leerdoelen op verschillende niveaus",
-      "Ontwerp formatieve checkpoints per lesfase (EDI-model)",
-      "Creëer must-should-could opdrachten voor heterogene groepen"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "Convergente Differentiatie",
-          uitleg: "Alle leerlingen werken naar hetzelfde doel, maar via verschillende wegen of met verschillende ondersteuning.",
-          voorbeeld: "Iedereen leert breuken: groep A met materiaal, groep B met plaatjes, groep C abstract",
-          clickable: true
-        },
-        {
-          naam: "Divergente Differentiatie",
-          uitleg: "Leerlingen werken aan verschillende doelen op basis van hun niveau en interesse.",
-          voorbeeld: "Groep A: basis breuken, Groep B: breuken vergelijken, Groep C: breuken bewerkingen",
-          clickable: true
-        },
-        {
-          naam: "Scaffolding Strategieën",
-          uitleg: "Verschillende vormen van ondersteuning die geleidelijk weggenomen worden.",
-          voorbeeld: "Visuele hulp → verbale aanwijzing → zelfstandig werken",
-          clickable: true
-        },
-        {
-          naam: "Bloom's Taxonomie",
-          uitleg: "Zes niveaus van denken: onthouden, begrijpen, toepassen, analyseren, evalueren, creëren.",
-          voorbeeld: "Rekenen: onthouden (tafels) → begrijpen (concept) → toepassen (woordsommen)",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Start met kerngroep (60%), dan uitbreiding naar zwakke en sterke leerlingen",
-        "Gebruik must-should-could structuur voor alle opdrachten",
-        "Creëer leercentra met verschillende niveaus en werkvormen",
-        "Plan dagelijks 10 minuten voor individuele begeleiding"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module4',
+    title: 'Differentiatie & Inclusie',
+    description: 'Leer onderwijs aan te passen aan verschillende leerbehoeften',
+    icon: '🎯',
+    color: 'bg-green-600',
+    specialViewers: ['differentiatie-matrix', 'inclusief-onderwijs', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Differentiatie Designer",
-        beschrijving: "Ontwerp een les met meerdere niveaus voor verschillende leerlingen",
-        type: "ontwerp",
-        startVraag: "Kies een onderwerp dat je wilt gaan onderwijzen. Welke verschillen verwacht je?",
-        context: "Je ontwerpt een gedifferentieerde les stap voor stap"
+        titel: 'Differentiatie Strategieën',
+        beschrijving: 'Ontwikkel concrete differentiatie strategieën voor je lessen',
+        type: 'ontwerp',
+        startVraag: 'Hoe kun je je lessen beter afstemmen op de verschillende niveaus in je klas?',
+        context: 'Je hebt leerlingen met zeer verschillende niveaus. Ontwerp een aanpak om iedereen passend onderwijs te bieden.'
       },
       {
-        titel: "Must-Should-Could Creator",
-        beschrijving: "Maak een complete opdrachtenset voor heterogene groep",
-        type: "toepassing",
-        startVraag: "Denk aan je moeilijkste groep. Hoe zorg je dat iedereen succesvol kan werken?",
-        context: "Je ontwikkelt concrete gedifferentieerde opdrachten"
-      }
-    ],
-    bronnen: ["SLO Differentiatiegids", "Tomlinson - Differentiating Instruction"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'DifferentiationMatrix',
-        props: {
-          activities: [
-            {
-              level: 'Groep 3 Rekenen',
-              must: 'Optellen tot 20 met materiaal',
-              should: 'Optellen tot 20 zonder materiaal', 
-              could: 'Aftrekken tot 20 en woordsommen'
-            },
-            {
-              level: 'Groep 5 Taal',
-              must: 'Werkwoorden herkennen',
-              should: 'Werkwoorden vervoegen (ik/jij/hij)',
-              could: 'Onregelmatige werkwoorden en tijden'
-            },
-            {
-              level: 'Groep 7 Wereldoriëntatie',
-              must: 'Europese landen benoemen',
-              should: 'Hoofdsteden en kenmerken',
-              could: 'EU-samenwerking en geschiedenis'
-            }
-          ]
-        }
+        titel: 'Inclusie in de Praktijk',
+        beschrijving: 'Reflecteer op inclusieve praktijken in je onderwijs',
+        type: 'reflectie',
+        startVraag: 'Hoe zorg je ervoor dat alle leerlingen zich welkom en gewaardeerd voelen?',
+        context: 'Je hebt een diverse klas met leerlingen uit verschillende achtergronden. Hoe creëer je een inclusieve omgeving?'
       }
     ]
   },
   {
-    id: 5,
-    title: "Data-geïnformeerd Werken & Kwaliteitszorg",
-    description: "Gebruik data om onderwijs te verbeteren en kwaliteit te borgen",
-    icon: "📊",
-    gradient: "from-indigo-500 to-indigo-700",
-    leerdoelen: [
-      "Interpreteer LVS-data op leerling-, groeps- en schoolniveau voor interventies",
-      "Hanteer PDCA-cyclus binnen kwaliteitszorg en schoolontwikkeling",
-      "Koppel data aan concrete interventies en SMART-doelen per kwartaal",
-      "Analyseer Cito-trends en stel verbeterplannen op met team"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "LVS (Leerling Volg Systeem)",
-          uitleg: "Systematisch verzamelen en analyseren van leerlinggegevens om ontwikkeling te volgen en onderwijs aan te passen.",
-          voorbeeld: "Cito-toetsen 3x per jaar: september (start), januari (midden), juni (eind) voor trendanalyse",
-          clickable: true
-        },
-        {
-          naam: "PDCA-cyclus",
-          uitleg: "Plan-Do-Check-Act cyclus voor continue verbetering van onderwijsprocessen.",
-          voorbeeld: "Plan: leesdoelen stellen → Do: interventie uitvoeren → Check: resultaten meten → Act: bijstellen",
-          clickable: true
-        },
-        {
-          naam: "Data-gedreven Besluitvorming",
-          uitleg: "Het gebruik van objectieve data voor het nemen van onderbouwde beslissingen over onderwijs.",
-          voorbeeld: "Cito-resultaten tonen leesachterstand groep 4 → extra leesondersteuning inzetten",
-          clickable: true
-        },
-        {
-          naam: "Benchmarking",
-          uitleg: "Vergelijken van eigen resultaten met andere scholen of landelijke gemiddelden.",
-          voorbeeld: "School scoort 15% onder landelijk gemiddeld rekenen → analyse en actieplan",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Bekijk data altijd in context: wat speelde er in de klas/school?",
-        "Gebruik visualisaties om trends duidelijk te maken voor team",
-        "Koppel elke data-analyse aan concrete vervolgacties",
-        "Plan maandelijks teamoverleg met data-bespreking"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module5',
+    title: 'Data & Evaluatie',
+    description: 'Gebruik data om je onderwijs te verbeteren en leerlingen te volgen',
+    icon: '📊',
+    color: 'bg-indigo-600',
+    specialViewers: ['cito-scores', 'lvs-trends', 'data-analyse-dashboard', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Data Detective",
-        beschrijving: "Analyseer LVS-data en ontdek wat de cijfers echt vertellen",
-        type: "analyse",
-        startVraag: "Je ziet dat de rekenprestaties in groep 4 zijn gedaald. Wat zou je willen weten?",
-        context: "Je leert data kritisch interpreteren en vragen stellen"
+        titel: 'Data-gedreven Besluitvorming',
+        beschrijving: 'Analyseer leerlingdata en neem onderbouwde beslissingen',
+        type: 'analyse',
+        startVraag: 'Welke patronen zie je in de data van je leerlingen en wat betekent dit voor je onderwijs?',
+        context: 'Je hebt de laatste Cito-resultaten binnen. Analyseer deze data en bepaal je vervolgstappen.'
       },
       {
-        titel: "PDCA Planner",
-        beschrijving: "Ontwerp een complete PDCA-cyclus voor schoolverbetering",
-        type: "ontwerp",
-        startVraag: "Welk probleem in je school zou je graag systematisch willen aanpakken?",
-        context: "Je maakt een concreet verbeterplan met PDCA-cyclus"
-      }
-    ],
-    bronnen: ["PO-Raad 'Werken met Data' toolkit", "Schildkamp - Data-based Decision Making"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'CitoScoreChart',
-        props: {
-          title: 'Cito Rekenen Groep 6 - Schooljaar 2023-2024',
-          data: [
-            { level: 'A', percentage: 8, national: 5, color: 'bg-red-500' },
-            { level: 'B', percentage: 27, national: 20, color: 'bg-orange-500' },
-            { level: 'C', percentage: 40, national: 45, color: 'bg-yellow-500' },
-            { level: 'D', percentage: 20, national: 25, color: 'bg-green-500' },
-            { level: 'E', percentage: 5, national: 5, color: 'bg-blue-500' }
-          ],
-          explanation: 'Zorgelijk: 8% op niveau A (landelijk 5%). Actie: extra ondersteuning voor zwakke rekenaars en analyse van rekenonderwijs.'
-        }
-      },
-      {
-        type: 'LVSTrendChart',
-        props: {
-          subject: 'Begrijpend Lezen Groep 5',
-          data: [
-            { month: 'Sep', percentage: 45, target: 70 },
-            { month: 'Jan', percentage: 52, target: 70 },
-            { month: 'Jun', percentage: 58, target: 70 }
-          ]
-        }
-      },
-      {
-        type: 'DataAnalysisDashboard',
-        props: {
-          datasets: [
-            {
-              name: 'Cito Rekenen Trends',
-              type: 'trend',
-              data: { sept: 65, jan: 68, juni: 72 },
-              insights: [
-                'Positieve trend gedurende schooljaar',
-                'Interventies in januari hebben effect gehad',
-                'Doel van 75% bijna behaald'
-              ]
-            },
-            {
-              name: 'Groepsvergelijking Taal',
-              type: 'comparison',
-              data: { groep4: 78, groep5: 82, groep6: 75 },
-              insights: [
-                'Groep 6 valt terug ten opzichte van groep 5',
-                'Mogelijk effect van nieuwe leerkracht',
-                'Extra aandacht voor groep 6 nodig'
-              ]
-            }
-          ]
-        }
+        titel: 'Evaluatie Instrumenten',
+        beschrijving: 'Ontwerp effectieve evaluatie-instrumenten voor je lessen',
+        type: 'ontwerp',
+        startVraag: 'Hoe kun je beter meten of je leerlingen de leerdoelen hebben bereikt?',
+        context: 'Je wilt je evaluatiemethoden verbeteren. Ontwerp nieuwe instrumenten die beter aansluiten bij je doelen.'
       }
     ]
   },
   {
-    id: 6,
-    title: "Innovatie & 21e-eeuwse Vaardigheden",
-    description: "Bereid leerlingen voor op de toekomst met moderne vaardigheden",
-    icon: "🚀",
-    gradient: "from-pink-500 to-pink-700",
-    leerdoelen: [
-      "Benoem 12 vaardigheden (SLO-model) en integreer 3 in concreet lesconcept",
-      "Beschrijf innovatiecyclus (design thinking) voor schoolontwikkeling",
-      "Ontwerp project waarin 21e-eeuwse vaardigheden natuurlijk geïntegreerd zijn",
-      "Evalueer en meet 21e-eeuwse vaardigheden met rubrics en portfolio's"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "21e-eeuwse Vaardigheden (SLO)",
-          uitleg: "12 vaardigheden in 4 categorieën: Denken (kritisch, creatief, probleemoplossend), Samenwerken, Tools (ICT, media), Leven (flexibiliteit, initiatief, sociale vaardigheden).",
-          voorbeeld: "Project 'Duurzame school': kritisch denken, samenwerken, ICT, initiatief",
-          clickable: true
-        },
-        {
-          naam: "Design Thinking",
-          uitleg: "Vijf-fasen proces voor innovatie: empathize, define, ideate, prototype, test.",
-          voorbeeld: "Schoolplein verbeteren: interviews → probleem definiëren → ideeën → prototype → testen",
-          clickable: true
-        },
-        {
-          naam: "Computational Thinking",
-          uitleg: "Denkvaardigheden voor probleemoplossing: decompositie, patroonherkenning, abstractie, algoritmes.",
-          voorbeeld: "Opruimen klas: opdelen in stappen, patroon herkennen, algemene regel maken",
-          clickable: true
-        },
-        {
-          naam: "Mediawijsheid",
-          uitleg: "Kritisch omgaan met media en informatie: zoeken, beoordelen, gebruiken, creëren.",
-          voorbeeld: "Nieuwsartikel checken: bron controleren, feiten verifiëren, bias herkennen",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Start klein: integreer 1 21e-eeuwse vaardigheid per les",
-        "Gebruik authentieke, betekenisvolle projecten",
-        "Laat kinderen reflecteren op hun eigen leerproces",
-        "Creëer keuzemogelijkheden in werkvormen en onderwerpen"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module6',
+    title: '21e-eeuwse Vaardigheden',
+    description: 'Ontwikkel vaardigheden die leerlingen nodig hebben voor de toekomst',
+    icon: '💡',
+    color: 'bg-yellow-600',
+    specialViewers: ['skills-radar', 'innovation-cycle', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "21e-eeuwse Vaardigheid Integrator",
-        beschrijving: "Ontwerp een les die moderne vaardigheden natuurlijk integreert",
-        type: "ontwerp",
-        startVraag: "Denk aan een traditionele les. Welke 21e-eeuwse vaardigheden zou je kunnen verweven?",
-        context: "Je maakt een bestaande les toekomstbestendig"
+        titel: '21e-eeuwse Vaardigheden Project',
+        beschrijving: 'Ontwerp een project dat 21e-eeuwse vaardigheden ontwikkelt',
+        type: 'ontwerp',
+        startVraag: 'Welke 21e-eeuwse vaardigheden wil je ontwikkelen en hoe ga je dit aanpakken?',
+        context: 'Je wilt een project starten dat leerlingen voorbereidt op de toekomst. Welke vaardigheden zijn belangrijk en hoe ontwikkel je deze?'
       },
       {
-        titel: "Design Thinking Project",
-        beschrijving: "Gebruik design thinking om een schoolprobleem op te lossen",
-        type: "toepassing",
-        startVraag: "Welk probleem in je school zou je graag willen oplossen met leerlingen?",
-        context: "Je doorloopt alle fasen van design thinking"
-      }
-    ],
-    bronnen: ["SLO 21-eeuwse vaardigheden", "Design Thinking for Educators"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'SkillsRadarChart',
-        props: {
-          skills: [
-            { name: 'Kritisch denken', level: 3, description: 'Informatie analyseren en beoordelen' },
-            { name: 'Creativiteit', level: 4, description: 'Originele ideeën ontwikkelen' },
-            { name: 'Samenwerking', level: 5, description: 'Effectief in teams werken' },
-            { name: 'Communicatie', level: 3, description: 'Duidelijk ideeën overbrengen' },
-            { name: 'ICT-geletterdheid', level: 2, description: 'Technologie effectief gebruiken' },
-            { name: 'Probleemoplossen', level: 4, description: 'Complexe uitdagingen aanpakken' }
-          ]
-        }
-      },
-      {
-        type: 'InnovationCycleVisualizer',
-        props: {
-          phases: [
-            {
-              name: 'Empathize',
-              description: 'Begrijp de gebruiker en hun behoeften',
-              activities: ['Interviews houden', 'Observeren', 'Empathy maps maken'],
-              tools: ['Vragenlijsten', 'Observatieformulieren', 'Video-opnames']
-            },
-            {
-              name: 'Define',
-              description: 'Definieer het probleem helder',
-              activities: ['Probleem formuleren', 'Point of view bepalen', 'How might we vragen'],
-              tools: ['Problem statements', 'Persona\'s', 'Journey maps']
-            },
-            {
-              name: 'Ideate',
-              description: 'Genereer veel creatieve ideeën',
-              activities: ['Brainstormen', 'Schetsen', 'Ideeën combineren'],
-              tools: ['Post-its', 'Mindmaps', 'Crazy 8s']
-            },
-            {
-              name: 'Prototype',
-              description: 'Maak snelle, testbare versies',
-              activities: ['Bouwen', 'Schetsen', 'Rollenspel'],
-              tools: ['Karton', 'LEGO', 'Digitale tools']
-            },
-            {
-              name: 'Test',
-              description: 'Test met echte gebruikers',
-              activities: ['Feedback verzamelen', 'Observeren', 'Itereren'],
-              tools: ['Testprotocollen', 'Feedback formulieren', 'Video-analyse']
-            }
-          ]
-        }
+        titel: 'Digitale Geletterdheid',
+        beschrijving: 'Reflecteer op het ontwikkelen van digitale vaardigheden',
+        type: 'reflectie',
+        startVraag: 'Hoe bereid je leerlingen voor op een digitale samenleving?',
+        context: 'Technologie speelt een steeds grotere rol. Hoe zorg je ervoor dat leerlingen digitaal vaardig en kritisch worden?'
       }
     ]
   },
   {
-    id: 7,
-    title: "Professioneel Leiderschap & Schoolplan",
-    description: "Ontwikkel leiderschapsvaardigheden en begrijp schoolorganisatie",
-    icon: "👑",
-    gradient: "from-teal-500 to-teal-700",
-    leerdoelen: [
-      "Beschrijf Beroepsstandaard Schoolleider PO en koppel eigen competenties",
-      "Analyseer schoolplan en begrijp cyclus van visie naar evaluatie",
-      "Ontwerp verbeterplan gebaseerd op schooldata en teamfeedback",
-      "Demonstreer verschillende leiderschapsstijlen in praktijksituaties"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "Beroepsstandaard Schoolleider PO",
-          uitleg: "Zes competentiegebieden: visie en strategie, onderwijskundig leiderschap, organisatie en personeel, financieel management, externe oriëntatie, verantwoording.",
-          voorbeeld: "Onderwijskundig leiderschap: schoolleider stimuleert teamontwikkeling en monitort onderwijskwaliteit",
-          clickable: true
-        },
-        {
-          naam: "Transformationeel Leiderschap",
-          uitleg: "Leiderschapsstijl gericht op inspireren, motiveren en ontwikkelen van medewerkers.",
-          voorbeeld: "Schoolleider inspireert team met gezamenlijke visie en ondersteunt individuele groei",
-          clickable: true
-        },
-        {
-          naam: "Distributed Leadership",
-          uitleg: "Leiderschap verspreid over meerdere personen in de organisatie.",
-          voorbeeld: "Vakcoördinatoren, bouwcoördinatoren en IB-er delen leiderschapstaken",
-          clickable: true
-        },
-        {
-          naam: "Schoolcultuur",
-          uitleg: "De gedeelde waarden, normen en gewoonten binnen een school.",
-          voorbeeld: "Cultuur van leren: fouten maken mag, feedback wordt gewaardeerd, iedereen groeit",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Begin met luisteren voordat je veranderingen voorstelt",
-        "Geef medewerkers eigenaarschap over hun ontwikkeling",
-        "Creëer psychologische veiligheid voor open communicatie",
-        "Gebruik data om beslissingen te onderbouwen"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module7',
+    title: 'Schoolleiderschap',
+    description: 'Ontwikkel leiderschapsvaardigheden voor onderwijsvernieuwing',
+    icon: '👑',
+    color: 'bg-orange-600',
+    specialViewers: ['leadership-dashboard', 'verandermanagement', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Leiderschapscompetentie Mapper",
-        beschrijving: "Analyseer je eigen leiderschapsvaardigheden en ontwikkelpunten",
-        type: "reflectie",
-        startVraag: "Denk aan een moment waarop je leiding hebt gegeven. Wat ging goed?",
-        context: "Je reflecteert op eigen leiderschapsstijl en competenties"
+        titel: 'Pedagogisch Leiderschap',
+        beschrijving: 'Ontwikkel een visie op pedagogisch leiderschap',
+        type: 'reflectie',
+        startVraag: 'Wat betekent pedagogisch leiderschap voor jou en hoe ga je dit vormgeven?',
+        context: 'Je krijgt meer verantwoordelijkheden in school. Hoe ga je pedagogisch leiderschap invullen?'
       },
       {
-        titel: "Schoolplan Analist",
-        beschrijving: "Analyseer een schoolplan en identificeer verbeterpunten",
-        type: "analyse",
-        startVraag: "Bekijk een schoolplan. Wat valt je op aan de doelen en aanpak?",
-        context: "Je leert schoolplannen kritisch te beoordelen"
-      }
-    ],
-    bronnen: ["Schoolleidersregister", "Beroepsstandaard Schoolleider PO"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'LeadershipDashboard',
-        props: {
-          metrics: [
-            { title: 'Leerlingresultaten', value: '85%', trend: 'up', color: 'bg-green-500' },
-            { title: 'Tevredenheid Team', value: '7.8', trend: 'stable', color: 'bg-blue-500' },
-            { title: 'Oudertevredenheid', value: '8.2', trend: 'up', color: 'bg-purple-500' },
-            { title: 'Financiële Gezondheid', value: '92%', trend: 'down', color: 'bg-orange-500' }
-          ]
-        }
+        titel: 'Verandering Leiden',
+        beschrijving: 'Plan een veranderingsproces in je school',
+        type: 'ontwerp',
+        startVraag: 'Welke verandering wil je doorvoeren en hoe ga je dit aanpakken?',
+        context: 'Je ziet mogelijkheden voor verbetering in je school. Hoe leid je een veranderingsproces?'
       }
     ]
   },
   {
-    id: 8,
-    title: "Burgerschap & (AI-)Digitale Geletterdheid",
-    description: "Bereid kinderen voor op digitale samenleving en actief burgerschap",
-    icon: "🤖",
-    gradient: "from-cyan-500 to-cyan-700",
-    leerdoelen: [
-      "Benoem wettelijke burgerschapsdoelen PO en inspectienormen 2025-2026",
-      "Integreer mediawijsheid en AI-geletterdheid in les of project voor groep 5-8",
-      "Ontwerp democratische activiteiten die burgerschap concreet maken",
-      "Evalueer burgerschapscompetenties met portfolio en observatie"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "Wet Burgerschapsonderwijs 2024",
-          uitleg: "Wettelijke verplichting voor scholen om burgerschap te onderwijzen met focus op democratie, rechtsstaat en grondrechten.",
-          voorbeeld: "Kinderen leren over verkiezingen door klassenverkiezingen en gemeenteraadsbezoek",
-          clickable: true
-        },
-        {
-          naam: "AI-geletterdheid voor Kinderen",
-          uitleg: "Basiskennis over kunstmatige intelligentie: wat is AI, hoe werkt het, wat zijn kansen en risico's.",
-          voorbeeld: "Kinderen ontdekken AI in hun leven: Siri, spelletjes, aanbevelingen YouTube",
-          clickable: true
-        },
-        {
-          naam: "Digitaal Burgerschap",
-          uitleg: "Verantwoordelijk gedrag in digitale omgevingen: privacy, veiligheid, respect, kritisch denken.",
-          voorbeeld: "Kinderen leren hoe ze veilig online communiceren en nepnieuws herkennen",
-          clickable: true
-        },
-        {
-          naam: "Democratische Competenties",
-          uitleg: "Vaardigheden voor participatie in democratie: luisteren, discussiëren, compromissen sluiten, stemmen.",
-          voorbeeld: "Klassenraad waarin kinderen democratisch beslissingen nemen over klassenregels",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Verbind burgerschap aan actuele gebeurtenissen en kinderervaringen",
-        "Gebruik concrete voorbeelden uit de lokale gemeenschap",
-        "Laat kinderen zelf democratische processen ervaren",
-        "Integreer AI-voorbeelden die kinderen kennen uit hun dagelijks leven"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module8',
+    title: 'Burgerschap & Diversiteit',
+    description: 'Vorm actieve burgers en vier diversiteit in je onderwijs',
+    icon: '🏛️',
+    color: 'bg-teal-600',
+    specialViewers: ['citizenship-competency', 'diversiteit', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Burgerschap Curriculum Designer",
-        beschrijving: "Ontwerp een burgerschapscurriculum dat voldoet aan wettelijke eisen",
-        type: "ontwerp",
-        startVraag: "Hoe zou je kinderen willen voorbereiden op hun rol als burger?",
-        context: "Je maakt een concreet burgerschapsplan voor een basisschool"
+        titel: 'Burgerschapsproject',
+        beschrijving: 'Ontwerp een project dat burgerschap ontwikkelt',
+        type: 'ontwerp',
+        startVraag: 'Hoe kun je leerlingen voorbereiden op hun rol als actieve burgers?',
+        context: 'Je wilt burgerschapsonderwijs meer vorm geven. Ontwerp een project dat democratische vaardigheden ontwikkelt.'
       },
       {
-        titel: "AI voor Kids Ontwerper",
-        beschrijving: "Ontwikkel lessen over AI die begrijpelijk zijn voor kinderen",
-        type: "ontwerp",
-        startVraag: "Hoe leg je aan een 10-jarige uit wat kunstmatige intelligentie is?",
-        context: "Je maakt AI-onderwijs toegankelijk voor basisschoolkinderen"
-      }
-    ],
-    bronnen: ["SLO Burgerschapscurriculum", "AI voor Nederland - Onderwijs"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'CitizenshipCompetencyMatrix',
-        props: {
-          competencies: [
-            {
-              domain: 'Democratie & Rechtsstaat',
-              skills: [
-                { name: 'Democratische besluitvorming', level: 3, examples: ['Klassenraad', 'Stemmen', 'Discussiëren'] },
-                { name: 'Rechten en plichten', level: 2, examples: ['Kinderrechten', 'Schoolregels', 'Wetten'] },
-                { name: 'Rechtsstaat begrijpen', level: 2, examples: ['Rechter', 'Politie', 'Eerlijk proces'] }
-              ]
-            },
-            {
-              domain: 'Digitaal Burgerschap',
-              skills: [
-                { name: 'Online veiligheid', level: 4, examples: ['Privacy instellingen', 'Veilig wachtwoord', 'Cyberpesten'] },
-                { name: 'Mediawijsheid', level: 3, examples: ['Nepnieuws herkennen', 'Bronnen checken', 'Reclame herkennen'] },
-                { name: 'AI-bewustzijn', level: 2, examples: ['AI herkennen', 'Algoritmes begrijpen', 'Ethische vragen'] }
-              ]
-            }
-          ]
-        }
+        titel: 'Diversiteit Vieren',
+        beschrijving: 'Reflecteer op het omgaan met diversiteit in je klas',
+        type: 'reflectie',
+        startVraag: 'Hoe maak je diversiteit tot een kracht in je onderwijs?',
+        context: 'Je hebt een zeer diverse klas. Hoe zorg je ervoor dat alle achtergronden gewaardeerd worden?'
       }
     ]
   },
   {
-    id: 9,
-    title: "Schoolleiderschap - Resultaatsturing & Lesobservatie",
-    description: "Leer sturen op resultaten en voer effectieve lesobservaties uit",
-    icon: "📈",
-    gradient: "from-red-500 to-red-700",
-    leerdoelen: [
-      "Interpreteer Cito-scores (A-E én I-V) en LVS-data voor schoolsturing en interventies",
-      "Voer effectieve lesobservaties uit met EDI-kijkwijzers en geef constructieve feedback",
-      "Organiseer data-overleg met coördinatoren (taal, rekenen, bouw, IB, kwaliteit)",
-      "Ontwerp monitoring-cyclus van groep 1-2 (Mijn Kleutergroep) tot B8/doorstroomtoets"
-    ],
-    theorie: {
-      concepten: [
-        {
-          naam: "Cito A-E en I-V Niveaus",
-          uitleg: "Beide systemen zijn identiek: A=I (zwakst) tot E=V (sterkst). Geeft prestaties weer ten opzichte van landelijke norm.",
-          voorbeeld: "Niveau C/III = gemiddeld (45% leerlingen), niveau A/I = zeer zwak (5% leerlingen)",
-          clickable: true
-        },
-        {
-          naam: "B8 Toets en Doorstroomtoets",
-          uitleg: "B8 toets in april bepaalt VO-advies. Doorstroomtoets in mei/juni kan advies bevestigen of bijstellen.",
-          voorbeeld: "B8 toets wijst op HAVO, doorstroomtoets bevestigt dit → definitief HAVO-advies",
-          clickable: true
-        },
-        {
-          naam: "Monitoring Doorlopende Lijn",
-          uitleg: "Systematische monitoring van groep 1 (Mijn Kleutergroep) tot groep 8 (B8 toets) voor continue ontwikkeling.",
-          voorbeeld: "Groep 1-2: ontwikkelingsrapport → Groep 3-8: Cito-data → VO: terugkoppeling resultaten",
-          clickable: true
-        },
-        {
-          naam: "Coördinatorrollen Data",
-          uitleg: "Elke coördinator heeft specifieke taken rond data-analyse en interventies binnen hun domein.",
-          voorbeeld: "Rekencoördinator analyseert Cito Rekenen, stelt interventies voor, werkt samen met IB-er",
-          clickable: true
-        }
-      ],
-      praktijktips: [
-        "Gebruik data als startpunt voor gesprek, niet als eindoordeel",
-        "Organiseer maandelijks data-overleg met alle coördinatoren",
-        "Koppel elke data-analyse aan concrete vervolgacties",
-        "Zorg voor goede overdracht tussen groepen met ontwikkelingsrapporten"
-      ]
-    },
-    interactieveOpdrachten: [
+    id: 'module9',
+    title: 'Schoolleider & Cito',
+    description: 'Leer over schoolleiderschap, Cito-monitoring en kwaliteitszorg',
+    icon: '🎓',
+    color: 'bg-gray-600',
+    specialViewers: ['cito-monitoring', 'coordinatorrollen', 'klikbare-theorie'],
+    clickable: true,
+    opdrachten: [
       {
-        titel: "Cito Data Analist",
-        beschrijving: "Analyseer echte Cito-resultaten en bepaal interventies",
-        type: "analyse",
-        startVraag: "Je ziet deze Cito-resultaten. Wat valt je op en welke vragen roept dit op?",
-        context: "Je leert data kritisch interpreteren en actieplannen maken"
+        titel: 'Cito Data Analyse',
+        beschrijving: 'Analyseer Cito-resultaten en stel verbeteracties voor',
+        type: 'analyse',
+        startVraag: 'Wat vertellen de Cito-resultaten over de kwaliteit van het onderwijs en welke acties zijn nodig?',
+        context: 'Als schoolleider krijg je de jaarlijkse Cito-resultaten. Hoe interpreteer je deze en welke vervolgstappen neem je?'
       },
       {
-        titel: "Coördinator Overleg Organisator",
-        beschrijving: "Plan een effectief data-overleg met alle coördinatoren",
-        type: "toepassing",
-        startVraag: "Hoe organiseer je een productief overleg waarin alle coördinatoren hun data delen?",
-        context: "Je ontwerpt een effectieve overlegstructuur"
-      },
-      {
-        titel: "Monitoring Cyclus Designer",
-        beschrijving: "Ontwerp een complete monitoring-cyclus van groep 1-8",
-        type: "ontwerp",
-        startVraag: "Hoe zorg je voor een doorlopende lijn in monitoring van kleuteronderwijs tot VO?",
-        context: "Je maakt een systematisch monitoringplan"
-      }
-    ],
-    bronnen: ["Cito Terugkoppeling Handleiding", "PO-Raad Data-analyse", "Inspectie Toezichtkader"],
-    completed: false,
-    hasDocumentUpload: true,
-    specialViewers: ['cito-monitoring', 'klikbare-theorie'],
-    visualComponents: [
-      {
-        type: 'EDIObservationCard',
-        props: {
-          phase: 'Fase 1: Lesdoel & Voorkennis',
-          score: 3,
-          maxScore: 4,
-          criteria: [
-            'Lesdoel helder gecommuniceerd',
-            'Gekoppeld aan voorkennis',
-            'Leerlingen begrijpen wat ze gaan leren',
-            'Succes criteria duidelijk'
-          ],
-          feedback: 'Goed: duidelijk lesdoel. Verbeterpunt: meer tijd voor voorkennis activeren.'
-        }
-      },
-      {
-        type: 'CitoScoreChart',
-        props: {
-          title: 'Schoolbrede Cito Analyse - Rekenen Groep 6',
-          data: [
-            { level: 'A/I', percentage: 12, national: 5, color: 'bg-red-500' },
-            { level: 'B/II', percentage: 28, national: 20, color: 'bg-orange-500' },
-            { level: 'C/III', percentage: 35, national: 45, color: 'bg-yellow-500' },
-            { level: 'D/IV', percentage: 20, national: 25, color: 'bg-green-500' },
-            { level: 'E/V', percentage: 5, national: 5, color: 'bg-blue-500' }
-          ],
-          explanation: 'Zorgelijk: 40% onder niveau C (landelijk 25%). Actie: intensief rekenplan met rekencoördinator en IB-er.'
-        }
-      },
-      {
-        type: 'LeadershipDashboard',
-        props: {
-          metrics: [
-            { title: 'Cito Gemiddelde', value: '78%', trend: 'up', color: 'bg-green-500' },
-            { title: 'VO-advies Accuraat', value: '92%', trend: 'stable', color: 'bg-blue-500' },
-            { title: 'Team Data-vaardig', value: '85%', trend: 'up', color: 'bg-purple-500' },
-            { title: 'Interventie Effectief', value: '76%', trend: 'up', color: 'bg-orange-500' }
-          ]
-        }
+        titel: 'Coördinator Rol Ontwikkeling',
+        beschrijving: 'Ontwikkel je rol als coördinator in de school',
+        type: 'ontwerp',
+        startVraag: 'Hoe ga je je rol als coördinator invullen om de onderwijskwaliteit te verbeteren?',
+        context: 'Je wordt gevraagd een coördinatorrol op je te nemen. Hoe ga je deze rol vormgeven en wat zijn je prioriteiten?'
       }
     ]
   }
@@ -1056,423 +274,782 @@ const modules: Module[] = [
 
 export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
-  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'kerndoelen' | 'ontwikkelingstheorieen' | 'sel-methodieken' | 'cito-monitoring' | 'klikbare-theorie' | 'visueel' | 'chat'>('overzicht')
-  const [completedModules, setCompletedModules] = useState<number[]>([])
+  const [activeView, setActiveView] = useState<string>('overzicht')
 
-  const toggleModuleCompletion = (moduleId: number) => {
-    setCompletedModules(prev => 
-      prev.includes(moduleId) 
-        ? prev.filter(id => id !== moduleId)
-        : [...prev, moduleId]
-    )
+  const handleModuleSelect = (module: Module) => {
+    setSelectedModule(module)
+    setActiveView('overzicht')
   }
 
-  const getProgressPercentage = () => {
-    return Math.round((completedModules.length / modules.length) * 100)
+  const renderSpecialViewer = (viewerType: string, moduleId?: string) => {
+    switch (viewerType) {
+      case 'kerndoelen':
+        return <KerndoelenViewer />
+      case 'curriculum-mapping':
+        return (
+          <CurriculumMappingChart 
+            subjects={[
+              {
+                name: "Nederlandse Taal",
+                coverage: 95,
+                alignment: 88,
+                gaps: ["Meer aandacht voor woordenschat", "Schrijfvaardigheid groep 7-8"]
+              },
+              {
+                name: "Rekenen & Wiskunde", 
+                coverage: 92,
+                alignment: 94,
+                gaps: ["Meetkunde uitbreiden", "Meer realistische contexten"]
+              },
+              {
+                name: "Wereldoriëntatie",
+                coverage: 78,
+                alignment: 82,
+                gaps: ["ICT-vaardigheden onderbouwd", "Meer aandacht voor techniek", "Burgerschap concreter maken"]
+              }
+            ]}
+          />
+        )
+      case 'kerndoel-progressie':
+        return <KerndoelenProgressieTracker />
+      case 'ontwikkelingstheorieen':
+        return <DevelopmentTheoryViewer />
+      case 'ontwikkelingsstadia-timeline':
+        return <OntwikkelingsStadiaTimeline />
+      case 'sel-development':
+        return (
+          <SELDevelopmentChart 
+            stages={[
+              {
+                age: "4-6 jaar",
+                stage: "Basis emotieherkenning",
+                characteristics: ["Basisemoties benoemen", "Eigen behoeften uiten", "Eenvoudige sociale regels"],
+                interventions: ["Gevoelenskaarten", "Modelgedrag", "Duidelijke structuur"]
+              },
+              {
+                age: "6-8 jaar", 
+                stage: "Sociale vaardigheden",
+                characteristics: ["Empathie ontwikkelen", "Samenwerken", "Conflicten herkennen"],
+                interventions: ["Rollenspel", "Groepsactiviteiten", "Conflictoplossing"]
+              },
+              {
+                age: "8-10 jaar",
+                stage: "Zelfregulatie",
+                characteristics: ["Emoties reguleren", "Doelen stellen", "Verantwoordelijkheid nemen"],
+                interventions: ["Zelfmonitoring", "Doelen stellen", "Reflectie-activiteiten"]
+              },
+              {
+                age: "10-12 jaar",
+                stage: "Sociale complexiteit",
+                characteristics: ["Complexe relaties", "Moreel redeneren", "Identiteit vorming"],
+                interventions: ["Ethische dilemma's", "Peer mediation", "Identiteitsprojecten"]
+              }
+            ]}
+          />
+        )
+      case 'sel-methodieken':
+        return <SELMethodsViewer />
+      case 'sel-competentie-radar':
+        return <SELCompetentieRadar />
+      case 'klassenklimaat':
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+              <h3 className="text-xl font-bold text-blue-800 mb-4">🏫 Klassenklimaat Analyse</h3>
+              <p className="text-blue-700 mb-4">
+                Een positief klassenklimaat is de basis voor effectief leren. Hier zijn de belangrijkste componenten:
+              </p>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-white rounded p-4 border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2">🔑 Kerncomponenten:</h4>
+                  <ul className="space-y-1 text-sm text-blue-700">
+                    <li>• Veiligheid en vertrouwen</li>
+                    <li>• Positieve relaties</li>
+                    <li>• Duidelijke verwachtingen</li>
+                    <li>• Inclusiviteit</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded p-4 border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2">📊 Meetinstrumenten:</h4>
+                  <ul className="space-y-1 text-sm text-blue-700">
+                    <li>• Leerling enquêtes</li>
+                    <li>• Observatie protocollen</li>
+                    <li>• Klassenklimaat thermometer</li>
+                    <li>• 360-graden feedback</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'differentiatie-matrix':
+        return (
+          <DifferentiationMatrix 
+            activities={[
+              {
+                level: "Groep 3",
+                must: "Getallen 1-20 herkennen",
+                should: "Optellen tot 10",
+                could: "Woordsommen maken"
+              },
+              {
+                level: "Groep 4",
+                must: "Tafels van 2, 5, 10",
+                should: "Alle tafels tot 5",
+                could: "Tafels tot 10 automatiseren"
+              },
+              {
+                level: "Groep 5",
+                must: "Breuken herkennen",
+                should: "Breuken vergelijken",
+                could: "Breuken optellen"
+              },
+              {
+                level: "Groep 6",
+                must: "Procenten begrijpen",
+                should: "Procenten berekenen",
+                could: "Procenten toepassen"
+              }
+            ]}
+          />
+        )
+      case 'inclusief-onderwijs':
+        return (
+          <div className="space-y-6">
+            <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+              <h3 className="text-xl font-bold text-green-800 mb-4">🤝 Inclusief Onderwijs Framework</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-white rounded p-4 border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2">🎯 Principes:</h4>
+                  <ul className="space-y-1 text-sm text-green-700">
+                    <li>• Gelijkwaardige participatie</li>
+                    <li>• Aanpassing aan leerling</li>
+                    <li>• Waardering diversiteit</li>
+                    <li>• Samenwerking professionals</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded p-4 border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2">🛠️ Strategieën:</h4>
+                  <ul className="space-y-1 text-sm text-green-700">
+                    <li>• Universeel ontwerp</li>
+                    <li>• Assistive technologie</li>
+                    <li>• Peer support</li>
+                    <li>• Flexibele groepering</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded p-4 border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2">📊 Monitoring:</h4>
+                  <ul className="space-y-1 text-sm text-green-700">
+                    <li>• Individuele plannen</li>
+                    <li>• Voortgangsmonitoring</li>
+                    <li>• Teamoverleg</li>
+                    <li>• Ouderparticipatie</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'cito-scores':
+        return (
+          <CitoScoreChart 
+            title="Cito Rekenen Resultaten Groep 6"
+            data={[
+              { level: "A", percentage: 8, national: 5, color: "bg-red-500" },
+              { level: "B", percentage: 15, national: 20, color: "bg-orange-500" },
+              { level: "C", percentage: 45, national: 45, color: "bg-yellow-500" },
+              { level: "D", percentage: 25, national: 25, color: "bg-green-500" },
+              { level: "E", percentage: 7, national: 5, color: "bg-blue-500" }
+            ]}
+            explanation="De school scoort iets lager op niveau B, maar hoger op A en E. Dit wijst op meer spreiding in prestaties."
+          />
+        )
+      case 'lvs-trends':
+        return (
+          <LVSTrendChart 
+            subject="Begrijpend Lezen"
+            data={[
+              { month: "Sep", percentage: 72, target: 75 },
+              { month: "Jan", percentage: 78, target: 80 },
+              { month: "Jun", percentage: 82, target: 85 }
+            ]}
+          />
+        )
+      case 'data-analyse-dashboard':
+        return (
+          <DataAnalysisDashboard 
+            datasets={[
+              {
+                name: "Cito Trends 3 jaar",
+                type: "trend",
+                data: { "2022": 78, "2023": 82, "2024": 85 },
+                insights: [
+                  "Stijgende trend in alle vakgebieden",
+                  "Grootste groei in rekenen (+7%)",
+                  "Spelling blijft aandachtspunt"
+                ]
+              },
+              {
+                name: "Groepsvergelijking",
+                type: "comparison", 
+                data: { "Groep 3": 75, "Groep 4": 78, "Groep 5": 82 },
+                insights: [
+                  "Groep 5 presteert bovengemiddeld",
+                  "Groep 3 heeft extra ondersteuning nodig",
+                  "Doorlopende lijn zichtbaar"
+                ]
+              }
+            ]}
+          />
+        )
+      case 'skills-radar':
+        return (
+          <SkillsRadarChart 
+            skills={[
+              { name: "Kritisch Denken", level: 4, description: "Analyseren en evalueren van informatie" },
+              { name: "Creativiteit", level: 3, description: "Originele ideeën en oplossingen bedenken" },
+              { name: "Communicatie", level: 4, description: "Effectief communiceren in verschillende contexten" },
+              { name: "Samenwerking", level: 5, description: "Productief samenwerken in teams" },
+              { name: "Digitale Geletterdheid", level: 3, description: "Effectief gebruik van digitale tools" }
+            ]}
+          />
+        )
+      case 'innovation-cycle':
+        return (
+          <InnovationCycleVisualizer 
+            phases={[
+              {
+                name: "Empathie",
+                description: "Begrijp de gebruiker en hun behoeften",
+                activities: ["Interviews afnemen", "Observeren", "Empathy maps maken"],
+                tools: ["Persona's", "Journey maps", "Stakeholder analysis"]
+              },
+              {
+                name: "Definiëren", 
+                description: "Formuleer het probleem helder",
+                activities: ["Probleem statement", "How might we vragen", "Doelgroep bepalen"],
+                tools: ["Problem statement", "Point of view", "Design challenge"]
+              },
+              {
+                name: "Ideeën",
+                description: "Genereer creatieve oplossingen",
+                activities: ["Brainstormen", "Schetsen", "Ideeën combineren"],
+                tools: ["Brainstorm technieken", "Mind mapping", "SCAMPER methode"]
+              },
+              {
+                name: "Prototype",
+                description: "Maak tastbare versies van ideeën",
+                activities: ["Snelle prototypes", "Materialen testen", "Itereren"],
+                tools: ["Papier prototypes", "Digitale mockups", "Role playing"]
+              },
+              {
+                name: "Testen",
+                description: "Test oplossingen met gebruikers",
+                activities: ["Gebruikerstests", "Feedback verzamelen", "Verbeteren"],
+                tools: ["Test protocollen", "Feedback forms", "Observatie"]
+              }
+            ]}
+          />
+        )
+      case 'leadership-dashboard':
+        return (
+          <LeadershipDashboard 
+            metrics={[
+              { title: "Teamtevredenheid", value: "8.2/10", trend: "up", color: "bg-green-500" },
+              { title: "Leerlingenresultaten", value: "+5%", trend: "up", color: "bg-blue-500" },
+              { title: "Innovatieprojecten", value: "12", trend: "up", color: "bg-purple-500" },
+              { title: "Oudertevredenheid", value: "7.8/10", trend: "stable", color: "bg-orange-500" }
+            ]}
+          />
+        )
+      case 'verandermanagement':
+        return (
+          <div className="space-y-6">
+            <div className="bg-orange-50 rounded-lg p-6 border border-orange-200">
+              <h3 className="text-xl font-bold text-orange-800 mb-4">🔄 Verandermanagement Model</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-orange-700 mb-3">📋 Kotter's 8 Stappen:</h4>
+                  <ol className="space-y-2 text-sm text-orange-600">
+                    <li>1. Urgentie creëren</li>
+                    <li>2. Coalitie vormen</li>
+                    <li>3. Visie ontwikkelen</li>
+                    <li>4. Visie communiceren</li>
+                    <li>5. Empowerment</li>
+                    <li>6. Korte termijn successen</li>
+                    <li>7. Consolideren</li>
+                    <li>8. Verankeren</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-orange-700 mb-3">⚠️ Veelgemaakte Fouten:</h4>
+                  <ul className="space-y-2 text-sm text-orange-600">
+                    <li>• Te snel willen gaan</li>
+                    <li>• Onvoldoende communicatie</li>
+                    <li>• Weerstand negeren</li>
+                    <li>• Geen follow-up</li>
+                    <li>• Top-down benadering</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'citizenship-competency':
+        return (
+          <CitizenshipCompetencyMatrix 
+            competencies={[
+              {
+                domain: "Democratische Participatie",
+                skills: [
+                  { name: "Stemrecht begrijpen", level: 3, examples: ["Klassenraad", "Schoolparlement", "Verkiezingen simuleren"] },
+                  { name: "Meningen uiten", level: 4, examples: ["Debatteren", "Petities", "Democratische besluitvorming"] }
+                ]
+              },
+              {
+                domain: "Sociale Cohesie",
+                skills: [
+                  { name: "Samenwerken", level: 5, examples: ["Groepsprojecten", "Conflictoplossing", "Teambuilding"] },
+                  { name: "Diversiteit waarderen", level: 4, examples: ["Cultuurmarkt", "Interculturele dialoog", "Inclusie"] }
+                ]
+              },
+              {
+                domain: "Kritisch Burgerschap",
+                skills: [
+                  { name: "Media literacy", level: 3, examples: ["Nepnieuws herkennen", "Bronnen checken", "Kritisch lezen"] },
+                  { name: "Maatschappelijke betrokkenheid", level: 4, examples: ["Vrijwilligerswerk", "Buurtprojecten", "Activisme"] }
+                ]
+              }
+            ]}
+          />
+        )
+      case 'diversiteit':
+        return (
+          <div className="space-y-6">
+            <div className="bg-teal-50 rounded-lg p-6 border border-teal-200">
+              <h3 className="text-xl font-bold text-teal-800 mb-4">🌍 Diversiteit & Inclusie Framework</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-white rounded p-4 border border-teal-200">
+                  <h4 className="font-semibold text-teal-800 mb-2">🎭 Culturele Diversiteit:</h4>
+                  <ul className="space-y-1 text-sm text-teal-700">
+                    <li>• Verschillende tradities vieren</li>
+                    <li>• Meertaligheid als kracht</li>
+                    <li>• Interculturele competentie</li>
+                    <li>• Vooroordelen bespreekbaar maken</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded p-4 border border-teal-200">
+                  <h4 className="font-semibold text-teal-800 mb-2">🧠 Cognitieve Diversiteit:</h4>
+                  <ul className="space-y-1 text-sm text-teal-700">
+                    <li>• Verschillende leerstijlen</li>
+                    <li>• Multiple intelligences</li>
+                    <li>• Neurodiversiteit</li>
+                    <li>• Individuele talenten</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded p-4 border border-teal-200">
+                  <h4 className="font-semibold text-teal-800 mb-2">🤝 Sociale Diversiteit:</h4>
+                  <ul className="space-y-1 text-sm text-teal-700">
+                    <li>• Verschillende gezinsvormen</li>
+                    <li>• Socio-economische achtergronden</li>
+                    <li>• Gender identiteit</li>
+                    <li>• Religieuze overtuigingen</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'cito-monitoring':
+        return <CitoMonitoringViewer />
+      case 'coordinatorrollen':
+        return (
+          <div className="space-y-6">
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">👥 Coördinator Rollen & Verantwoordelijkheden</h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  {
+                    rol: "Taalcoördinator",
+                    taken: ["Taalbeleid ontwikkelen", "Cito-lezen analyseren", "Leesmethode evalueren", "Teamscholing"],
+                    focus: "Nederlandse taal kerndoelen 1-5"
+                  },
+                  {
+                    rol: "Rekencoördinator", 
+                    taken: ["Rekenbeleid vormgeven", "Cito-rekenen monitoren", "Nascholing organiseren", "Interventies"],
+                    focus: "Rekenen kerndoelen 6-15"
+                  },
+                  {
+                    rol: "IB-er",
+                    taken: ["Zorgstructuur leiden", "Handelingsplannen", "Externe contacten", "Data-analyse zorg"],
+                    focus: "Alle leerlingen met extra behoeften"
+                  },
+                  {
+                    rol: "Onderbouwcoördinator",
+                    taken: ["Groep 1-4 beleid", "Overgang kleuteronderwijs", "Startpositie groep 3", "Vroege interventies"],
+                    focus: "Fundament leggen"
+                  },
+                  {
+                    rol: "Bovenbouwcoördinator",
+                    taken: ["Groep 7-8 programma", "VO-overgang", "B8 toets organiseren", "Schooladvies"],
+                    focus: "Voorbereiding voortgezet onderwijs"
+                  },
+                  {
+                    rol: "Kwaliteitscoördinator",
+                    taken: ["Schoolontwikkeling", "Data-analyse schoolbreed", "Evaluaties", "Verbeterplannen"],
+                    focus: "Onderwijskwaliteit bewaken"
+                  }
+                ].map((coordinator, index) => (
+                  <div key={index} className="bg-white rounded p-4 border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-2">{coordinator.rol}</h4>
+                    <p className="text-sm text-gray-600 mb-3 italic">{coordinator.focus}</p>
+                    <ul className="space-y-1">
+                      {coordinator.taken.map((taak, tIndex) => (
+                        <li key={tIndex} className="text-sm text-gray-700 flex items-start space-x-2">
+                          <span className="text-blue-500 mt-0.5">•</span>
+                          <span>{taak}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      case 'klikbare-theorie':
+        return <ClickableTheoryViewer moduleId={moduleId} />
+      default:
+        return <div>Viewer niet gevonden</div>
+    }
   }
 
   if (selectedModule) {
-    const tabs = [
-      { id: 'overzicht', label: '📋 Overzicht', icon: '📋' },
-      { id: 'theorie', label: '📚 Theorie', icon: '📚' }
-    ]
-
-    // Add special viewers based on module
-    if (selectedModule.specialViewers?.includes('kerndoelen')) {
-      tabs.push({ id: 'kerndoelen', label: '🎯 Kerndoelen', icon: '🎯' })
-    }
-    if (selectedModule.specialViewers?.includes('ontwikkelingstheorieen')) {
-      tabs.push({ id: 'ontwikkelingstheorieen', label: '🧠 Ontwikkelingstheorieën', icon: '🧠' })
-    }
-    if (selectedModule.specialViewers?.includes('sel-methodieken')) {
-      tabs.push({ id: 'sel-methodieken', label: '🤝 SEL-Methodieken', icon: '🤝' })
-    }
-    if (selectedModule.specialViewers?.includes('cito-monitoring')) {
-      tabs.push({ id: 'cito-monitoring', label: '📊 Cito & Monitoring', icon: '📊' })
-    }
-    if (selectedModule.specialViewers?.includes('klikbare-theorie')) {
-      tabs.push({ id: 'klikbare-theorie', label: '🔗 Klikbare Theorie', icon: '🔗' })
-    }
-
-    // Add visual tab if module has visual components
-    if (selectedModule.visualComponents && selectedModule.visualComponents.length > 0) {
-      tabs.push({ id: 'visueel', label: '📊 Visueel Leren', icon: '📊' })
-    }
-
-    tabs.push({ id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' })
-
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div className="min-h-screen bg-gray-100">
+        {/* Header */}
+        <div className={`${selectedModule.color} text-white p-6`}>
+          <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setSelectedModule(null)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="p-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors"
                 >
-                  ← Terug naar overzicht
+                  ← Terug
                 </button>
-                <div className="flex items-center space-x-3">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${selectedModule.gradient} rounded-full flex items-center justify-center text-white text-xl`}>
-                    {selectedModule.icon}
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-800">
-                      Module {selectedModule.id}: {selectedModule.title}
-                    </h1>
-                    <p className="text-gray-600 mt-1">{selectedModule.description}</p>
-                  </div>
+                <div className="text-4xl">{selectedModule.icon}</div>
+                <div>
+                  <h1 className="text-2xl font-bold">{selectedModule.title}</h1>
+                  <p className="opacity-90">{selectedModule.description}</p>
                 </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => toggleModuleCompletion(selectedModule.id)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    completedModules.includes(selectedModule.id)
-                      ? 'bg-green-100 text-green-800 border border-green-200'
-                      : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-green-50'
-                  }`}
-                >
-                  {completedModules.includes(selectedModule.id) ? '✅ Voltooid' : '⭕ Markeer als voltooid'}
-                </button>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Tab Navigation */}
-          <div className="bg-white rounded-xl shadow-lg mb-6">
-            <div className="flex border-b border-gray-200 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-shrink-0 px-6 py-4 text-center font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+        {/* Navigation Tabs */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex space-x-8 overflow-x-auto">
+              <button
+                onClick={() => setActiveView('overzicht')}
+                className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeView === 'overzicht'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                📋 Overzicht
+              </button>
+              <button
+                onClick={() => setActiveView('ai-begeleiding')}
+                className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeView === 'ai-begeleiding'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                🤖 AI Begeleiding
+              </button>
+              {selectedModule.specialViewers.map((viewer) => {
+                const viewerLabels: { [key: string]: string } = {
+                  'kerndoelen': '📚 Alle Kerndoelen',
+                  'curriculum-mapping': '🗺️ Curriculum Mapping',
+                  'kerndoel-progressie': '📈 Kerndoel Progressie',
+                  'ontwikkelingstheorieen': '🧠 Ontwikkelingstheorieën',
+                  'ontwikkelingsstadia-timeline': '🌱 Ontwikkelingsstadia',
+                  'sel-development': '❤️ SEL Ontwikkeling',
+                  'sel-methodieken': '🤝 SEL Methodieken',
+                  'sel-competentie-radar': '🎯 SEL Competenties',
+                  'klassenklimaat': '🏫 Klassenklimaat',
+                  'differentiatie-matrix': '🎯 Differentiatie Matrix',
+                  'inclusief-onderwijs': '🤝 Inclusief Onderwijs',
+                  'cito-scores': '📊 Cito Scores',
+                  'lvs-trends': '📈 LVS Trends',
+                  'data-analyse-dashboard': '📊 Data Dashboard',
+                  'skills-radar': '🌟 21e-eeuwse Vaardigheden',
+                  'innovation-cycle': '🔄 Design Thinking',
+                  'leadership-dashboard': '👑 Leadership Dashboard',
+                  'verandermanagement': '🔄 Verandermanagement',
+                  'citizenship-competency': '🏛️ Burgerschap Matrix',
+                  'diversiteit': '🌍 Diversiteit',
+                  'cito-monitoring': '📊 Complete Cito Gids',
+                  'coordinatorrollen': '👥 Coördinator Rollen',
+                  'klikbare-theorie': '🔗 Klikbare Theorie'
+                }
+                
+                return (
+                  <button
+                    key={viewer}
+                    onClick={() => setActiveView(viewer)}
+                    className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeView === viewer
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {viewerLabels[viewer] || viewer}
+                  </button>
+                )
+              })}
             </div>
+          </div>
+        </div>
 
-            {/* Tab Content */}
-            <div className="p-6">
-              {activeTab === 'overzicht' && (
-                <div className="space-y-6">
-                  {/* Leerdoelen */}
+        {/* Content */}
+        <div className="max-w-7xl mx-auto p-6">
+          {activeView === 'overzicht' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  {selectedModule.icon} {selectedModule.title}
+                </h2>
+                <p className="text-gray-600 mb-6">{selectedModule.description}</p>
+                
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">🎯 Leerdoelen</h3>
-                    <div className="grid gap-3">
-                      {selectedModule.leerdoelen.map((doel, index) => (
-                        <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-                          <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                            {index + 1}
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">🎯 Wat ga je leren?</h3>
+                    <ul className="space-y-2">
+                      {selectedModule.specialViewers.slice(0, 4).map((viewer, index) => (
+                        <li key={index} className="flex items-center space-x-2 text-gray-600">
+                          <span className="text-green-500">✓</span>
+                          <span>
+                            {viewer === 'kerndoelen' && 'Alle 58 kerndoelen begrijpen en toepassen'}
+                            {viewer === 'curriculum-mapping' && 'Curriculum samenhang analyseren'}
+                            {viewer === 'kerndoel-progressie' && 'Progressie volgen van groep 1-8'}
+                            {viewer === 'ontwikkelingstheorieen' && 'Belangrijkste ontwikkelingstheorieën'}
+                            {viewer === 'ontwikkelingsstadia-timeline' && 'Ontwikkelingsstadia per leeftijd'}
+                            {viewer === 'sel-development' && 'Sociaal-emotionele ontwikkeling'}
+                            {viewer === 'sel-methodieken' && 'SEL-programma\'s vergelijken en kiezen'}
+                            {viewer === 'sel-competentie-radar' && 'SEL-competenties per leeftijd'}
+                            {viewer === 'klassenklimaat' && 'Positief klassenklimaat creëren'}
+                            {viewer === 'differentiatie-matrix' && 'Effectief differentiëren'}
+                            {viewer === 'inclusief-onderwijs' && 'Inclusieve praktijken implementeren'}
+                            {viewer === 'cito-scores' && 'Cito-resultaten analyseren'}
+                            {viewer === 'lvs-trends' && 'Leerlingvolgsysteem optimaliseren'}
+                            {viewer === 'data-analyse-dashboard' && 'Data-gedreven beslissingen nemen'}
+                            {viewer === 'skills-radar' && '21e-eeuwse vaardigheden ontwikkelen'}
+                            {viewer === 'innovation-cycle' && 'Design thinking toepassen'}
+                            {viewer === 'leadership-dashboard' && 'Pedagogisch leiderschap tonen'}
+                            {viewer === 'verandermanagement' && 'Verandering succesvol leiden'}
+                            {viewer === 'citizenship-competency' && 'Burgerschapscompetenties ontwikkelen'}
+                            {viewer === 'diversiteit' && 'Diversiteit als kracht benutten'}
+                            {viewer === 'cito-monitoring' && 'Complete Cito-monitoring beheersen'}
+                            {viewer === 'coordinatorrollen' && 'Coördinatorrol effectief invullen'}
+                            {viewer === 'klikbare-theorie' && 'Theorie verdiepen met klikbare concepten'}
                           </span>
-                          <p className="text-gray-700">{doel}</p>
-                        </div>
+                        </li>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Interactieve Opdrachten Preview */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">🛠️ Interactieve Opdrachten</h3>
-                    <div className="grid gap-4">
-                      {selectedModule.interactieveOpdrachten.map((opdracht, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-gray-800">{opdracht.titel}</h4>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              opdracht.type === 'reflectie' ? 'bg-purple-100 text-purple-800' :
-                              opdracht.type === 'analyse' ? 'bg-blue-100 text-blue-800' :
-                              opdracht.type === 'ontwerp' ? 'bg-green-100 text-green-800' :
-                              'bg-orange-100 text-orange-800'
-                            }`}>
-                              {opdracht.type}
-                            </span>
-                          </div>
-                          <p className="text-gray-600 text-sm mb-3">{opdracht.beschrijving}</p>
-                          <button
-                            onClick={() => setActiveTab('chat')}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                          >
-                            Start opdracht met AI-begeleiding →
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Bronnen */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">📖 Bronnen</h3>
-                    <div className="space-y-2">
-                      {selectedModule.bronnen.map((bron, index) => (
-                        <div key={index} className="flex items-center space-x-2 text-blue-600">
-                          <span>🔗</span>
-                          <span>{bron}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'theorie' && (
-                <div className="space-y-8">
-                  {/* Kernconcepten */}
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">🧠 Kernconcepten</h3>
-                    <div className="space-y-6">
-                      {selectedModule.theorie.concepten.map((concept, index) => (
-                        <div key={index} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-lg font-semibold text-blue-800">{concept.naam}</h4>
-                            {concept.clickable && (
-                              <button
-                                onClick={() => setActiveTab('klikbare-theorie')}
-                                className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                              >
-                                🔗 Verdiep
-                              </button>
-                            )}
-                          </div>
-                          <p className="text-gray-700 mb-4 leading-relaxed">{concept.uitleg}</p>
-                          {concept.voorbeeld && (
-                            <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
-                              <p className="text-sm font-medium text-blue-700 mb-1">💡 Praktijkvoorbeeld:</p>
-                              <p className="text-gray-600 italic">{concept.voorbeeld}</p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Praktijktips */}
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">💡 Praktijktips</h3>
-                    <div className="grid gap-4">
-                      {selectedModule.theorie.praktijktips.map((tip, index) => (
-                        <div key={index} className="flex items-start space-x-3 p-4 bg-green-50 rounded-lg border border-green-200">
-                          <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
-                            {index + 1}
-                          </span>
-                          <p className="text-gray-700">{tip}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'kerndoelen' && (
-                <div>
-                  <KerndoelenViewer />
-                </div>
-              )}
-
-              {activeTab === 'ontwikkelingstheorieen' && (
-                <div>
-                  <DevelopmentTheoryViewer />
-                </div>
-              )}
-
-              {activeTab === 'sel-methodieken' && (
-                <div>
-                  <SELMethodsViewer />
-                </div>
-              )}
-
-              {activeTab === 'cito-monitoring' && (
-                <div>
-                  <CitoMonitoringViewer />
-                </div>
-              )}
-
-              {activeTab === 'klikbare-theorie' && (
-                <div>
-                  <ClickableTheoryViewer />
-                </div>
-              )}
-
-              {activeTab === 'visueel' && selectedModule.visualComponents && (
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 text-white">
-                    <h3 className="text-xl font-bold mb-2">📊 Visuele Leercomponenten</h3>
-                    <p className="text-purple-100">
-                      Leer herkennen en interpreteren van praktische voorbeelden uit het onderwijs
-                    </p>
+                    </ul>
                   </div>
                   
-                  {selectedModule.visualComponents.map((component, index) => {
-                    const Component = {
-                      CitoScoreChart,
-                      LVSTrendChart,
-                      EDIObservationCard,
-                      LearningLineVisual,
-                      SELDevelopmentChart,
-                      DifferentiationMatrix,
-                      SkillsRadarChart,
-                      LeadershipDashboard,
-                      CurriculumMappingChart,
-                      DevelopmentProgressionTracker,
-                      InnovationCycleVisualizer,
-                      CitizenshipCompetencyMatrix,
-                      DataAnalysisDashboard
-                    }[component.type]
-                    
-                    return Component ? (
-                      <div key={index}>
-                        <Component {...component.props} />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">🛠️ Beschikbare Tools</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <span className="text-blue-500">🤖</span>
+                        <span>AI-begeleiding met socratische methode</span>
                       </div>
-                    ) : null
-                  })}
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <span className="text-purple-500">📊</span>
+                        <span>Interactieve visualisaties en tools</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <span className="text-green-500">📚</span>
+                        <span>Koppeling met je schooldocumenten</span>
+                      </div>
+                      {selectedModule.clickable && (
+                        <div className="flex items-center space-x-2 text-gray-600">
+                          <span className="text-teal-500">🔗</span>
+                          <span>Klikbare theorie voor verdieping</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
 
-              {activeTab === 'chat' && (
-                <div>
-                  <SocraticChatBot 
-                    module={selectedModule.title}
-                    opdrachten={selectedModule.interactieveOpdrachten}
-                  />
+              {/* Quick Actions */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-3">🚀 Start met AI-begeleiding</h3>
+                  <p className="text-blue-700 mb-4">
+                    Krijg persoonlijke begeleiding bij het leren van deze module
+                  </p>
+                  <button
+                    onClick={() => setActiveView('ai-begeleiding')}
+                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Start AI-begeleiding
+                  </button>
                 </div>
-              )}
+
+                <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                  <h3 className="text-lg font-semibold text-purple-800 mb-3">📊 Verken Tools</h3>
+                  <p className="text-purple-700 mb-4">
+                    Ontdek de interactieve tools en visualisaties
+                  </p>
+                  <button
+                    onClick={() => setActiveView(selectedModule.specialViewers[0])}
+                    className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    Verken Tools
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {activeView === 'ai-begeleiding' && (
+            <SocraticChatBot module={selectedModule.title} opdrachten={selectedModule.opdrachten} />
+          )}
+
+          {selectedModule.specialViewers.includes(activeView) && (
+            renderSpecialViewer(activeView, selectedModule.id)
+          )}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <span className="text-2xl">🎓</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">PABO Leerapp</h1>
-          <p className="text-xl text-blue-700 mb-4">
-            Interactieve leermodules voor aanstaande leerkrachten
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-4">🎓 PABO Leerapp</h1>
+          <p className="text-xl text-blue-100 mb-6">
+            Interactieve leerapp voor PABO-studenten met AI-begeleiding
           </p>
-          
-          {/* Progress Bar */}
-          <div className="max-w-md mx-auto">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Voortgang</span>
-              <span>{completedModules.length}/{modules.length} modules</span>
+          <div className="flex justify-center space-x-6 text-sm">
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">🤖</span>
+              <span>AI-begeleiding</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${getProgressPercentage()}%` }}
-              ></div>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">📊</span>
+              <span>Visueel leren</span>
             </div>
-            <p className="text-sm text-gray-600 mt-1">{getProgressPercentage()}% voltooid</p>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">🔗</span>
+              <span>Klikbare theorie</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">📚</span>
+              <span>Document-integratie</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Document Management */}
-        <div className="mb-8">
-          <DocumentManager />
+      {/* Navigation */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex space-x-8 overflow-x-auto">
+            <button
+              onClick={() => setActiveView('modules')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeView === 'modules'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📚 Modules
+            </button>
+            <button
+              onClick={() => setActiveView('documenten')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeView === 'documenten'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📄 Mijn Documenten
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Modules Grid */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">📚 Leermodules</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {modules.map((module) => (
-              <div
-                key={module.id}
-                className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
-                  completedModules.includes(module.id) ? 'ring-2 ring-green-500' : ''
-                }`}
-                onClick={() => setSelectedModule(module)}
-              >
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-12 bg-gradient-to-r ${module.gradient} rounded-full flex items-center justify-center text-white text-xl`}>
-                        {module.icon}
-                      </div>
-                      <div className="text-sm text-gray-500">Module {module.id}</div>
+      {/* Content */}
+      <div className="max-w-7xl mx-auto p-6">
+        {activeView === 'modules' && (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Kies een module om te starten</h2>
+              <p className="text-gray-600">Elke module bevat AI-begeleiding, visuele tools en klikbare theorie</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {modules.map((module) => (
+                <div
+                  key={module.id}
+                  onClick={() => handleModuleSelect(module)}
+                  className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all cursor-pointer group"
+                >
+                  <div className={`${module.color} p-6 text-white`}>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-3xl">{module.icon}</span>
+                      <h3 className="text-xl font-bold">{module.title}</h3>
                     </div>
-                    {completedModules.includes(module.id) && (
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm">✓</span>
-                      </div>
-                    )}
+                    <p className="text-sm opacity-90">{module.description}</p>
                   </div>
                   
-                  <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
-                    {module.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                    {module.description}
-                  </p>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span className="mr-2">🎯</span>
-                      <span>{module.leerdoelen.length} leerdoelen</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span className="mr-2">🛠️</span>
-                      <span>{module.interactieveOpdrachten.length} interactieve opdrachten</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span className="mr-2">🤖</span>
-                      <span>AI-begeleiding beschikbaar</span>
-                    </div>
-                    {module.visualComponents && module.visualComponents.length > 0 && (
-                      <div className="flex items-center text-sm text-purple-600">
-                        <span className="mr-2">📊</span>
-                        <span>Visuele leercomponenten</span>
+                  <div className="p-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <span className="text-blue-500">🤖</span>
+                        <span>AI-begeleiding beschikbaar</span>
                       </div>
-                    )}
-                    {module.specialViewers && module.specialViewers.length > 0 && (
-                      <div className="flex items-center text-sm text-teal-600">
-                        <span className="mr-2">🔗</span>
-                        <span>Speciale viewers beschikbaar</span>
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <span className="text-purple-500">📊</span>
+                        <span>{module.specialViewers.length} interactieve tools</span>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <button className={`w-full py-2 px-4 rounded-lg font-medium transition-colors bg-gradient-to-r ${module.gradient} text-white hover:opacity-90`}>
-                      Start Module →
-                    </button>
+                      {module.clickable && (
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <span className="text-teal-500">🔗</span>
+                          <span>Klikbare theorie verdieping</span>
+                        </div>
+                      )}
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <span className="text-green-500">📝</span>
+                        <span>{module.opdrachten.length} praktijkopdrachten</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        Start Module →
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">🚀 Start je PABO-reis</h3>
-            <p className="text-gray-600 mb-4">
-              Upload je schooldocumenten, kies een module en begin met leren!
-            </p>
-            <div className="flex justify-center space-x-4 text-sm text-gray-500">
-              <span>💜 Gemaakt voor PABO studenten</span>
-              <span>•</span>
-              <span>🤖 AI-begeleiding</span>
-              <span>•</span>
-              <span>📚 Schoolspecifiek leren</span>
+              ))}
             </div>
           </div>
-        </div>
+        )}
+
+        {activeView === 'documenten' && <DocumentManager />}
       </div>
     </div>
   )
