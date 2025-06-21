@@ -53,12 +53,43 @@ export default function ContextAwareChat({
       const welcomeMessage: ChatMessage = {
         id: 'welcome-' + Date.now(),
         role: 'assistant',
-        content: `🎉 Geweldig! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:\n\n${selectedDocs.map(doc => `📄 ${doc.fileName} (${doc.detectedType})`).join('\n')}\n\nIk kan nu gepersonaliseerde begeleiding geven op basis van jouw specifieke schoolsituatie. Stel gerust vragen over hoe je theorie kunt koppelen aan jouw schoolpraktijk!\n\n💡 **Voorbeeldvragen:**\n• "Wat staat er in ons schoolplan over burgerschap?"\n• "Hoe kan ik de visie van onze school toepassen in mijn lessen?"\n• "Vergelijk onze aanpak met de theorie die ik geleerd heb"`,
+        content: `🎉 Perfect! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:
+
+${selectedDocs.map(doc => `📄 **${doc.fileName}** (${doc.detectedType})`).join('\n')}
+
+Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke schoolsituatie! Stel gerust vragen over hoe je theorie kunt koppelen aan jouw schoolpraktijk.
+
+💡 **Voorbeeldvragen:**
+• "Wat staat er in ons schoolplan over burgerschap?"
+• "Hoe kan ik de visie van onze school toepassen in mijn lessen?"
+• "Vergelijk onze aanpak met de theorie die ik geleerd heb"
+• "Geef concrete voorbeelden uit onze schoolcontext"
+
+🚀 **Tip:** Gebruik spraakherkenning door op de microfoon te klikken voor hands-free interactie!`,
+        timestamp: new Date()
+      }
+      setMessages([welcomeMessage])
+    } else if (selectedDocuments.length === 0 && messages.length === 0) {
+      // Welcome message without documents
+      const welcomeMessage: ChatMessage = {
+        id: 'welcome-no-docs-' + Date.now(),
+        role: 'assistant',
+        content: `👋 Welkom bij je AI-mentor! Ik ben hier om je te helpen met je PABO-studie.
+
+🤔 **Hoe kan ik je helpen?**
+• Stel vragen over onderwijstheorie
+• Vraag om praktijkvoorbeelden
+• Bespreek uitdagingen in de klas
+• Reflecteer op je leerervaringen
+
+💡 **Tip:** Voor nog betere begeleiding kun je je schooldocumenten uploaden via "Mijn Documenten" in de hoofdmenu. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
+
+🎙️ **Gebruik spraak:** Klik op de microfoon voor hands-free chatten!`,
         timestamp: new Date()
       }
       setMessages([welcomeMessage])
     }
-  }, [selectedDocuments, availableDocuments])
+  }, [selectedDocuments, availableDocuments, messages.length])
 
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputMessage
@@ -92,15 +123,15 @@ export default function ContextAwareChat({
       if (selectedDocuments.length > 0) {
         const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
         enhancedContext += `\n\n=== SCHOOLDOCUMENTEN CONTEXT ===\n`
-        enhancedContext += `De student heeft ${selectedDocs.length} schooldocument(en) geüpload:\n\n`
+        enhancedContext += `De student heeft ${selectedDocs.length} schooldocument(en) geüpload die ZEER BELANGRIJK zijn voor gepersonaliseerde antwoorden:\n\n`
         
         selectedDocs.forEach(doc => {
           enhancedContext += `DOCUMENT: ${doc.fileName} (${doc.detectedType})\n`
-          enhancedContext += `INHOUD (eerste 3000 karakters):\n${doc.text.substring(0, 3000)}\n\n`
+          enhancedContext += `VOLLEDIGE INHOUD:\n${doc.text}\n\n`
         })
         
         enhancedContext += `=== EINDE SCHOOLDOCUMENTEN ===\n\n`
-        enhancedContext += `INSTRUCTIE: Gebruik deze schooldocumenten om specifieke, gepersonaliseerde antwoorden te geven. Verwijs naar concrete passages uit de documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
+        enhancedContext += `KRITIEKE INSTRUCTIE: Gebruik deze schooldocumenten ALTIJD om specifieke, gepersonaliseerde antwoorden te geven. Verwijs naar concrete passages uit de documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie. Citeer letterlijk uit de documenten waar relevant.`
       }
 
       if (conversationHistory) {
@@ -267,19 +298,6 @@ export default function ContextAwareChat({
 
       {/* Chat Messages */}
       <div className="bg-white rounded-lg border border-gray-200 h-96 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && selectedDocuments.length === 0 && (
-          <div className="text-center text-gray-500 py-8">
-            <div className="text-4xl mb-2">🤖</div>
-            <p>Start een gesprek met je AI-mentor!</p>
-            <p className="text-sm mt-1">Gebruik spraak, typ of kies een snelle actie hieronder.</p>
-            <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <p className="text-sm text-yellow-700">
-                💡 <strong>Tip:</strong> Activeer eerst "document-integratie" hieronder om je schooldocumenten te gebruiken!
-              </p>
-            </div>
-          </div>
-        )}
-        
         {messages.map((message) => (
           <div
             key={message.id}
@@ -346,7 +364,7 @@ export default function ContextAwareChat({
             onKeyPress={handleKeyPress}
             placeholder={selectedDocuments.length > 0 ? 
               "Stel een vraag over je schooldocumenten..." : 
-              "Typ je vraag, gebruik spraak, of activeer eerst document-integratie..."
+              "Typ je vraag over PABO-onderwerpen..."
             }
             className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={3}
