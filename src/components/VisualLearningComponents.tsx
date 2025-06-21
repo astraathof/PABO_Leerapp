@@ -430,3 +430,343 @@ export function LeadershipDashboard({ metrics }: {
     </div>
   )
 }
+
+// NEW: Curriculum Mapping Visual
+export function CurriculumMappingChart({ subjects }: {
+  subjects: { name: string; coverage: number; alignment: number; gaps: string[] }[]
+}) {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h4 className="font-semibold text-gray-800 mb-4">🗺️ Curriculum Mapping & Alignment</h4>
+      
+      <div className="space-y-4">
+        {subjects.map((subject, index) => (
+          <div key={index} className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h5 className="font-medium text-gray-800">{subject.name}</h5>
+              <div className="flex items-center space-x-4 text-sm">
+                <span className="text-blue-600">Dekking: {subject.coverage}%</span>
+                <span className="text-green-600">Afstemming: {subject.alignment}%</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-3">
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Curriculum Dekking</p>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-blue-500 h-3 rounded-full"
+                    style={{ width: `${subject.coverage}%` }}
+                  ></div>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Kerndoel Afstemming</p>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-green-500 h-3 rounded-full"
+                    style={{ width: `${subject.alignment}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+            
+            {subject.gaps.length > 0 && (
+              <div className="bg-orange-50 rounded p-3 border border-orange-200">
+                <p className="text-xs font-medium text-orange-700 mb-1">⚠️ Aandachtspunten:</p>
+                <ul className="space-y-1">
+                  {subject.gaps.map((gap, gapIndex) => (
+                    <li key={gapIndex} className="text-xs text-orange-600 flex items-start space-x-1">
+                      <span>•</span>
+                      <span>{gap}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// NEW: Development Progression Tracker
+export function DevelopmentProgressionTracker({ domains }: {
+  domains: { 
+    name: string; 
+    stages: { 
+      age: string; 
+      milestones: string[]; 
+      redFlags: string[]; 
+      support: string[] 
+    }[] 
+  }[]
+}) {
+  const [selectedDomain, setSelectedDomain] = useState(0)
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h4 className="font-semibold text-gray-800 mb-4">📈 Ontwikkelingsdomeinen Tracker</h4>
+      
+      {/* Domain selector */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {domains.map((domain, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedDomain(index)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedDomain === index
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {domain.name}
+          </button>
+        ))}
+      </div>
+      
+      {/* Selected domain progression */}
+      <div className="space-y-4">
+        {domains[selectedDomain].stages.map((stage, index) => (
+          <div key={index} className="border border-gray-200 rounded-lg p-4">
+            <h5 className="font-medium text-gray-800 mb-3">{stage.age}</h5>
+            
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <h6 className="text-sm font-medium text-green-700 mb-2">✅ Mijlpalen</h6>
+                <ul className="space-y-1">
+                  {stage.milestones.map((milestone, mIndex) => (
+                    <li key={mIndex} className="text-xs text-green-600 flex items-start space-x-1">
+                      <span className="text-green-500 mt-0.5">•</span>
+                      <span>{milestone}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h6 className="text-sm font-medium text-red-700 mb-2">🚩 Signalen</h6>
+                <ul className="space-y-1">
+                  {stage.redFlags.map((flag, fIndex) => (
+                    <li key={fIndex} className="text-xs text-red-600 flex items-start space-x-1">
+                      <span className="text-red-500 mt-0.5">⚠</span>
+                      <span>{flag}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h6 className="text-sm font-medium text-blue-700 mb-2">🛠️ Ondersteuning</h6>
+                <ul className="space-y-1">
+                  {stage.support.map((support, sIndex) => (
+                    <li key={sIndex} className="text-xs text-blue-600 flex items-start space-x-1">
+                      <span className="text-blue-500 mt-0.5">→</span>
+                      <span>{support}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// NEW: Innovation Cycle Visualizer
+export function InnovationCycleVisualizer({ phases }: {
+  phases: { name: string; description: string; activities: string[]; tools: string[] }[]
+}) {
+  const [activePhase, setActivePhase] = useState(0)
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h4 className="font-semibold text-gray-800 mb-4">🔄 Design Thinking Cyclus</h4>
+      
+      {/* Cycle visualization */}
+      <div className="relative mb-6">
+        <div className="flex items-center justify-center">
+          <div className="relative w-64 h-64">
+            {/* Circle */}
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            
+            {/* Phase points */}
+            {phases.map((phase, index) => {
+              const angle = (index / phases.length) * 2 * Math.PI - Math.PI / 2
+              const radius = 120
+              const x = 128 + radius * Math.cos(angle)
+              const y = 128 + radius * Math.sin(angle)
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => setActivePhase(index)}
+                  className={`absolute w-12 h-12 rounded-full transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center text-sm font-bold transition-all ${
+                    activePhase === index
+                      ? 'bg-pink-600 text-white scale-110'
+                      : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  }`}
+                  style={{ left: x, top: y }}
+                >
+                  {index + 1}
+                </button>
+              )
+            })}
+            
+            {/* Center label */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-2xl mb-1">🎨</div>
+                <div className="text-xs font-medium text-gray-600">Design</div>
+                <div className="text-xs font-medium text-gray-600">Thinking</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Active phase details */}
+      <div className="bg-pink-50 rounded-lg p-4 border border-pink-200">
+        <h5 className="font-semibold text-pink-800 mb-2">
+          Fase {activePhase + 1}: {phases[activePhase].name}
+        </h5>
+        <p className="text-pink-700 mb-3">{phases[activePhase].description}</p>
+        
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <h6 className="font-medium text-pink-700 mb-2">🎯 Activiteiten:</h6>
+            <ul className="space-y-1">
+              {phases[activePhase].activities.map((activity, aIndex) => (
+                <li key={aIndex} className="text-sm text-pink-600 flex items-start space-x-2">
+                  <span className="text-pink-500 mt-0.5">•</span>
+                  <span>{activity}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div>
+            <h6 className="font-medium text-pink-700 mb-2">🛠️ Tools:</h6>
+            <ul className="space-y-1">
+              {phases[activePhase].tools.map((tool, tIndex) => (
+                <li key={tIndex} className="text-sm text-pink-600 flex items-start space-x-2">
+                  <span className="text-pink-500 mt-0.5">→</span>
+                  <span>{tool}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// NEW: Citizenship Competency Matrix
+export function CitizenshipCompetencyMatrix({ competencies }: {
+  competencies: { 
+    domain: string; 
+    skills: { name: string; level: number; examples: string[] }[] 
+  }[]
+}) {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h4 className="font-semibold text-gray-800 mb-4">🏛️ Burgerschapscompetenties Matrix</h4>
+      
+      <div className="space-y-6">
+        {competencies.map((domain, index) => (
+          <div key={index} className="border border-gray-200 rounded-lg p-4">
+            <h5 className="font-semibold text-gray-800 mb-3">{domain.domain}</h5>
+            
+            <div className="space-y-3">
+              {domain.skills.map((skill, skillIndex) => (
+                <div key={skillIndex} className="bg-gray-50 rounded p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h6 className="font-medium text-gray-700">{skill.name}</h6>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">Niveau:</span>
+                      <div className="flex space-x-1">
+                        {[1, 2, 3, 4, 5].map(level => (
+                          <div
+                            key={level}
+                            className={`w-3 h-3 rounded-full ${
+                              level <= skill.level ? 'bg-cyan-500' : 'bg-gray-300'
+                            }`}
+                          ></div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Voorbeelden: </span>
+                    {skill.examples.join(', ')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// NEW: Data Analysis Dashboard
+export function DataAnalysisDashboard({ datasets }: {
+  datasets: { 
+    name: string; 
+    type: 'trend' | 'comparison' | 'distribution'; 
+    data: any; 
+    insights: string[] 
+  }[]
+}) {
+  const [selectedDataset, setSelectedDataset] = useState(0)
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h4 className="font-semibold text-gray-800 mb-4">📊 Data-analyse Dashboard</h4>
+      
+      {/* Dataset selector */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {datasets.map((dataset, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedDataset(index)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedDataset === index
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {dataset.name}
+          </button>
+        ))}
+      </div>
+      
+      {/* Selected dataset visualization */}
+      <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200 mb-4">
+        <h5 className="font-medium text-indigo-800 mb-2">{datasets[selectedDataset].name}</h5>
+        <div className="text-sm text-indigo-700">
+          Type: {datasets[selectedDataset].type} | Data punten: {Object.keys(datasets[selectedDataset].data).length}
+        </div>
+      </div>
+      
+      {/* Insights */}
+      <div>
+        <h6 className="font-medium text-gray-700 mb-2">🔍 Belangrijkste inzichten:</h6>
+        <ul className="space-y-2">
+          {datasets[selectedDataset].insights.map((insight, index) => (
+            <li key={index} className="text-sm text-gray-600 flex items-start space-x-2">
+              <span className="text-indigo-500 mt-0.5">💡</span>
+              <span>{insight}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}

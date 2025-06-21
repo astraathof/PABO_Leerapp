@@ -14,7 +14,12 @@ import {
   SELDevelopmentChart,
   DifferentiationMatrix,
   SkillsRadarChart,
-  LeadershipDashboard
+  LeadershipDashboard,
+  CurriculumMappingChart,
+  DevelopmentProgressionTracker,
+  InnovationCycleVisualizer,
+  CitizenshipCompetencyMatrix,
+  DataAnalysisDashboard
 } from './VisualLearningComponents'
 
 interface Module {
@@ -71,13 +76,19 @@ const modules: Module[] = [
           naam: "Referentieniveaus",
           uitleg: "1F (functioneel), 1S (streefniveau) en 2F bepalen wat leerlingen minimaal moeten beheersen voor vervolgonderwijs.",
           voorbeeld: "1F Rekenen: basisvaardigheden voor dagelijks leven. 2F Rekenen: voorbereiding op HAVO/VWO"
+        },
+        {
+          naam: "Jaarplanning",
+          uitleg: "Systematische verdeling van leerstof over het schooljaar in 8 blokken van 4-5 weken, met ruimte voor herhaling en toetsing.",
+          voorbeeld: "Blok 1 (aug-sep): Herhaling vorig jaar. Blok 2 (sep-okt): Nieuwe leerstof deel 1. Etc."
         }
       ],
       praktijktips: [
         "Gebruik de SLO Leerlijnenviewer voor concrete uitwerking per groep",
         "Koppel kerndoelen aan je methode door doelenbomen te maken",
         "Plan 8 blokken per jaar met 4-5 weken per blok voor overzicht",
-        "Reserveer tijd voor herhaling en verdieping tussen blokken"
+        "Reserveer tijd voor herhaling en verdieping tussen blokken",
+        "Maak verbindingen tussen vakgebieden zichtbaar"
       ]
     },
     interactieveOpdrachten: [
@@ -103,7 +114,7 @@ const modules: Module[] = [
         context: "Je maakt een concrete jaarplanning voor een specifieke groep"
       }
     ],
-    bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
+    bronnen: ["https://tule.slo.nl", "https://curriculum.nu", "Kerndoelendocument 2006"],
     completed: false,
     hasDocumentUpload: true,
     theorieViewer: "kerndoelen",
@@ -135,6 +146,31 @@ const modules: Module[] = [
             }
           ]
         }
+      },
+      {
+        type: 'CurriculumMappingChart',
+        props: {
+          subjects: [
+            {
+              name: 'Nederlandse Taal',
+              coverage: 85,
+              alignment: 92,
+              gaps: ['Meer aandacht voor digitale geletterdheid', 'Schrijfvaardigheid groep 3-4']
+            },
+            {
+              name: 'Rekenen & Wiskunde',
+              coverage: 78,
+              alignment: 88,
+              gaps: ['Wiskundig redeneren onderbouwd', 'Meer tijd voor automatiseren']
+            },
+            {
+              name: 'Oriëntatie op jezelf en de wereld',
+              coverage: 65,
+              alignment: 75,
+              gaps: ['ICT-vaardigheden systematischer', 'Meer projectmatig werken']
+            }
+          ]
+        }
       }
     ]
   },
@@ -147,7 +183,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Leg fasen van cognitieve en sociaal-emotionele ontwikkeling uit",
       "Ontwerp een les met EDI + scaffolding principes",
-      "Toon hoe je een veilige leeromgeving creëert"
+      "Toon hoe je een veilige leeromgeving creëert",
+      "Pas ontwikkelingstheorieën toe in concrete klassensituaties"
     ],
     theorie: {
       concepten: [
@@ -165,13 +202,19 @@ const modules: Module[] = [
           naam: "Scaffolding",
           uitleg: "Tijdelijke ondersteuning die geleidelijk wordt weggenomen naarmate het kind zelfstandiger wordt.",
           voorbeeld: "Rekenen: eerst samen doen → met hulpkaart → zelfstandig → automatiseren"
+        },
+        {
+          naam: "Erikson's Psychosociale Ontwikkeling",
+          uitleg: "Elke levensfase heeft een ontwikkelingstaak. Voor basisschoolkinderen: initiatief vs. schuld (3-6 jaar) en vlijt vs. minderwaardigheid (6-12 jaar).",
+          voorbeeld: "Groep 3: kinderen willen zelf dingen proberen. Groep 6: vergelijken zich met klasgenoten."
         }
       ],
       praktijktips: [
         "Observeer kinderen tijdens spel om ontwikkelingsniveau in te schatten",
         "Gebruik concrete materialen voor abstracte begrippen (groep 3-6)",
         "Geef kinderen tijd om te denken voordat je antwoord verwacht",
-        "Varieer in ondersteuning: visueel, auditief, tactiel"
+        "Varieer in ondersteuning: visueel, auditief, tactiel",
+        "Vier kleine successen om zelfvertrouwen op te bouwen"
       ]
     },
     interactieveOpdrachten: [
@@ -181,9 +224,16 @@ const modules: Module[] = [
         type: "analyse",
         startVraag: "Beschrijf een situatie waarin een kind iets niet begreep. Hoe reageerde je toen? Wat zou je nu anders doen?",
         context: "Je analyseert kindgedrag vanuit ontwikkelingstheorie"
+      },
+      {
+        titel: "Scaffolding Designer",
+        beschrijving: "Ontwerp een scaffolding-strategie voor een moeilijke leertaak",
+        type: "ontwerp",
+        startVraag: "Denk aan iets dat kinderen in jouw groep moeilijk vinden. Hoe zou je ze stap voor stap kunnen helpen?",
+        context: "Je maakt een concrete scaffolding-plan"
       }
     ],
-    bronnen: ["G. Marzano, Classroom Management"],
+    bronnen: ["G. Marzano, Classroom Management", "Piaget & Vygotsky, Ontwikkelingspsychologie"],
     completed: false,
     hasDocumentUpload: true,
     theorieViewer: "ontwikkeling",
@@ -198,12 +248,14 @@ const modules: Module[] = [
               characteristics: [
                 'Leren gevoelens benoemen',
                 'Eenvoudige zelfcontrole',
-                'Spelen met anderen'
+                'Spelen met anderen',
+                'Regels begrijpen'
               ],
               interventions: [
                 'Gevoelensthermometer gebruiken',
                 'Ademhalingsoefeningen',
-                'Duidelijke structuur bieden'
+                'Duidelijke structuur bieden',
+                'Positieve bekrachtiging'
               ]
             },
             {
@@ -211,13 +263,82 @@ const modules: Module[] = [
               stage: 'Sociale vaardigheden',
               characteristics: [
                 'Vriendschappen vormen',
-                'Regels begrijpen',
-                'Empathie ontwikkelen'
+                'Regels begrijpen en volgen',
+                'Empathie ontwikkelen',
+                'Conflicten herkennen'
               ],
               interventions: [
                 'Rollenspellen doen',
                 'Conflictoplossing oefenen',
-                'Complimenten geven'
+                'Complimenten geven',
+                'Klassenregels samen maken'
+              ]
+            },
+            {
+              age: '8-10 jaar (groep 5-6)',
+              stage: 'Competentie ontwikkeling',
+              characteristics: [
+                'Prestaties vergelijken',
+                'Zelfbeeld vormen',
+                'Groepsdruk ervaren',
+                'Verantwoordelijkheid nemen'
+              ],
+              interventions: [
+                'Sterke punten benadrukken',
+                'Realistische doelen stellen',
+                'Peer feedback organiseren',
+                'Zelfstandigheid stimuleren'
+              ]
+            },
+            {
+              age: '10-12 jaar (groep 7-8)',
+              stage: 'Identiteit en autonomie',
+              characteristics: [
+                'Eigen mening vormen',
+                'Kritisch denken',
+                'Toekomstgericht denken',
+                'Morele ontwikkeling'
+              ],
+              interventions: [
+                'Discussies faciliteren',
+                'Keuzemogelijkheden bieden',
+                'Reflectie stimuleren',
+                'Leiderschapsrollen geven'
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'DevelopmentProgressionTracker',
+        props: {
+          domains: [
+            {
+              name: 'Cognitieve Ontwikkeling',
+              stages: [
+                {
+                  age: 'Groep 1-2',
+                  milestones: ['Symbolisch spel', 'Taal explosie', 'Eerste logica'],
+                  redFlags: ['Geen symbolisch spel', 'Beperkte woordenschat', 'Geen interesse in verhalen'],
+                  support: ['Veel voorlezen', 'Fantasiespel stimuleren', 'Concrete ervaringen']
+                },
+                {
+                  age: 'Groep 3-4',
+                  milestones: ['Lezen en schrijven', 'Rekenen tot 100', 'Logisch denken'],
+                  redFlags: ['Geen letter-klank koppeling', 'Geen getalbegrip', 'Zeer korte aandachtsspanne'],
+                  support: ['Multisensorisch leren', 'Kleine stapjes', 'Veel herhaling']
+                }
+              ]
+            },
+            {
+              name: 'Sociaal-Emotioneel',
+              stages: [
+                {
+                  age: 'Groep 1-2',
+                  milestones: ['Parallel spel', 'Emoties benoemen', 'Eenvoudige regels'],
+                  redFlags: ['Geen contact met anderen', 'Extreme emoties', 'Geen regels volgen'],
+                  support: ['Gestructureerde speeltijd', 'Emotiecoaching', 'Duidelijke grenzen']
+                }
               ]
             }
           ]
@@ -234,7 +355,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Onderscheid drie SEL-methodieken en benoem kernprincipes",
       "Kies en motiveer SEL-programma passend bij schoolcontext", 
-      "Formuleer meetbare doelen rond welbevinden en veiligheid"
+      "Formuleer meetbare doelen rond welbevinden en veiligheid",
+      "Implementeer SEL-activiteiten in dagelijkse lespraktijk"
     ],
     theorie: {
       concepten: [
@@ -242,11 +364,24 @@ const modules: Module[] = [
           naam: "SEL (Social Emotional Learning)",
           uitleg: "Vijf kerncompetenties: zelfbewustzijn, zelfregulatie, sociale bewustzijn, relatievaardigheden, verantwoordelijke besluitvorming.",
           voorbeeld: "Zelfregulatie: kind leert ademhalingsoefening bij boosheid in plaats van slaan"
+        },
+        {
+          naam: "Klassenklimaat",
+          uitleg: "De sociale en emotionele sfeer in de klas die leren en welzijn beïnvloedt. Bestaat uit veiligheid, verbondenheid en uitdaging.",
+          voorbeeld: "Positief klimaat: kinderen durven fouten te maken, helpen elkaar en voelen zich gewaardeerd"
+        },
+        {
+          naam: "Sociale Veiligheid",
+          uitleg: "Kinderen voelen zich veilig om zichzelf te zijn, fouten te maken en hulp te vragen zonder angst voor afwijzing of pesten.",
+          voorbeeld: "Klassenregels: 'We lachen niet om fouten' en 'Iedereen mag meedoen'"
         }
       ],
       praktijktips: [
         "Start elke dag met een positieve begroeting van elk kind",
-        "Gebruik 'time-in' in plaats van 'time-out' voor verbinding"
+        "Gebruik 'time-in' in plaats van 'time-out' voor verbinding",
+        "Leer kinderen gevoelens benoemen met een gevoelensthermometer",
+        "Creëer rituelen voor verbinding (kring, complimenten)",
+        "Model zelf sociaal-emotionele vaardigheden"
       ]
     },
     interactieveOpdrachten: [
@@ -256,12 +391,76 @@ const modules: Module[] = [
         type: "analyse",
         startVraag: "Denk aan een klas die je kent. Welke sociale uitdagingen zie je daar?",
         context: "Je verkent welke SEL-aanpak past bij specifieke klassenbehoeften"
+      },
+      {
+        titel: "Klassenklimaat Designer",
+        beschrijving: "Ontwerp een plan om het klassenklimaat te verbeteren",
+        type: "ontwerp",
+        startVraag: "Hoe zou jouw ideale klas eruitzien? Wat zouden kinderen zeggen en doen?",
+        context: "Je maakt een concreet plan voor positief klassenklimaat"
       }
     ],
-    bronnen: ["Kanjertraining.nl"],
+    bronnen: ["Kanjertraining.nl", "Lions Quest Nederland", "SEL-competenties CASEL"],
     completed: false,
     hasDocumentUpload: true,
-    theorieViewer: "sel-methoden"
+    theorieViewer: "sel-methoden",
+    visualComponents: [
+      {
+        type: 'SELDevelopmentChart',
+        props: {
+          stages: [
+            {
+              age: '4-6 jaar (groep 1-2)',
+              stage: 'Basis emotieregulatie',
+              characteristics: [
+                'Leren gevoelens benoemen',
+                'Eenvoudige zelfcontrole',
+                'Spelen met anderen',
+                'Regels begrijpen'
+              ],
+              interventions: [
+                'Gevoelensthermometer gebruiken',
+                'Ademhalingsoefeningen',
+                'Duidelijke structuur bieden',
+                'Positieve bekrachtiging'
+              ]
+            },
+            {
+              age: '6-8 jaar (groep 3-4)',
+              stage: 'Sociale vaardigheden',
+              characteristics: [
+                'Vriendschappen vormen',
+                'Regels begrijpen en volgen',
+                'Empathie ontwikkelen',
+                'Conflicten herkennen'
+              ],
+              interventions: [
+                'Rollenspellen doen',
+                'Conflictoplossing oefenen',
+                'Complimenten geven',
+                'Klassenregels samen maken'
+              ]
+            },
+            {
+              age: '8-12 jaar (groep 5-8)',
+              stage: 'Complexe sociale situaties',
+              characteristics: [
+                'Groepsdynamiek begrijpen',
+                'Morele dilemma\'s herkennen',
+                'Leiderschap tonen',
+                'Empathie voor verschillende perspectieven'
+              ],
+              interventions: [
+                'Democratische besluitvorming',
+                'Peer mediation training',
+                'Dilemma discussies',
+                'Community service projecten'
+              ]
+            }
+          ]
+        }
+      }
+    ]
   },
   {
     id: 4,
@@ -272,7 +471,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Pas convergente én divergente differentiatie toe in lesontwerp",
       "Gebruik taxonomie van Bloom voor leerdoelen",
-      "Ontwerp formatieve checkpoints per lesfase"
+      "Ontwerp formatieve checkpoints per lesfase",
+      "Creëer een gedifferentieerd leeraanbod voor alle niveaus"
     ],
     theorie: {
       concepten: [
@@ -280,10 +480,29 @@ const modules: Module[] = [
           naam: "Convergente Differentiatie",
           uitleg: "Alle leerlingen werken naar hetzelfde doel, maar via verschillende wegen of met verschillende ondersteuning.",
           voorbeeld: "Iedereen leert breuken: groep A met materiaal, groep B met plaatjes, groep C abstract"
+        },
+        {
+          naam: "Divergente Differentiatie",
+          uitleg: "Leerlingen werken aan verschillende doelen op basis van hun niveau en interesse.",
+          voorbeeld: "Groep A: breuken herkennen, Groep B: breuken vergelijken, Groep C: breuken optellen"
+        },
+        {
+          naam: "Taxonomie van Bloom",
+          uitleg: "Zes niveaus van leren: onthouden, begrijpen, toepassen, analyseren, evalueren, creëren.",
+          voorbeeld: "Verhaal: onthouden (hoofdpersoon), begrijpen (thema), toepassen (eigen verhaal schrijven)"
+        },
+        {
+          naam: "Formatieve Evaluatie",
+          uitleg: "Tussentijdse controle van begrip om onderwijs bij te stellen tijdens de les.",
+          voorbeeld: "Exit ticket: 'Schrijf één ding dat je geleerd hebt en één vraag die je nog hebt'"
         }
       ],
       praktijktips: [
-        "Start met kerngroep (60%), dan uitbreiding naar zwakke en sterke leerlingen"
+        "Start met kerngroep (60%), dan uitbreiding naar zwakke en sterke leerlingen",
+        "Gebruik 'must, should, could' structuur voor opdrachten",
+        "Bied keuze in werkvormen: alleen, samen, met hulp",
+        "Maak leerdoelen expliciet en controleer begrip",
+        "Gebruik flexibele groepering op basis van behoefte"
       ]
     },
     interactieveOpdrachten: [
@@ -293,9 +512,16 @@ const modules: Module[] = [
         type: "ontwerp",
         startVraag: "Kies een onderwerp dat je wilt gaan onderwijzen. Welke verschillen verwacht je?",
         context: "Je ontwerpt een gedifferentieerde les stap voor stap"
+      },
+      {
+        titel: "Bloom's Taxonomie Toepasser",
+        beschrijving: "Maak leerdoelen op verschillende Bloom-niveaus voor één onderwerp",
+        type: "toepassing",
+        startVraag: "Neem een lesonderwerp. Hoe zou je dit op 6 verschillende niveaus kunnen aanbieden?",
+        context: "Je past Bloom's taxonomie praktisch toe"
       }
     ],
-    bronnen: ["SLO Differentiatiegids"],
+    bronnen: ["SLO Differentiatiegids", "Bloom's Taxonomy Handbook", "Tomlinson - Differentiatie"],
     completed: false,
     hasDocumentUpload: true,
     visualComponents: [
@@ -314,6 +540,46 @@ const modules: Module[] = [
               must: 'Werkwoorden herkennen',
               should: 'Werkwoorden vervoegen (ik/jij/hij)',
               could: 'Onregelmatige werkwoorden en tijden'
+            },
+            {
+              level: 'Groep 7 Begrijpend Lezen',
+              must: 'Hoofdgedachte vinden',
+              should: 'Conclusies trekken uit tekst',
+              could: 'Kritisch beoordelen van argumenten'
+            },
+            {
+              level: 'Groep 8 Geschiedenis',
+              must: 'Tijdvakken benoemen',
+              should: 'Oorzaak-gevolg relaties leggen',
+              could: 'Historische bronnen vergelijken'
+            }
+          ]
+        }
+      },
+      {
+        type: 'LearningLineVisual',
+        props: {
+          subject: 'Differentiatie Strategieën',
+          progression: [
+            {
+              grade: '1-2',
+              skills: ['Observeren van verschillen', 'Flexibele groepering', 'Visuele ondersteuning'],
+              example: 'Sommige kinderen gebruiken blokjes bij rekenen, anderen rekenen al abstract'
+            },
+            {
+              grade: '3-4',
+              skills: ['Must/Should/Could opdrachten', 'Keuze in werkvormen', 'Peer tutoring'],
+              example: 'Bij spelling: iedereen oefent woorden, maar verschillende lijsten per niveau'
+            },
+            {
+              grade: '5-6',
+              skills: ['Zelfstandig werken', 'Projecten op maat', 'Verrijking en remediëring'],
+              example: 'Onderzoeksproject: basis-, uitbreidings- en verdiepingsopdrachten'
+            },
+            {
+              grade: '7-8',
+              skills: ['Zelfregulatie', 'Keuze in eindproducten', 'Mentorschap'],
+              example: 'Eindwerkstuk: presentatie, poster, video of geschreven verslag naar keuze'
             }
           ]
         }
@@ -329,7 +595,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Interpreteer LVS-data op leerling-, groeps- en schoolniveau",
       "Hanteer PDCA-cyclus binnen kwaliteitszorg",
-      "Koppel data aan concrete interventies en SMART-doelen"
+      "Koppel data aan concrete interventies en SMART-doelen",
+      "Evalueer effectiviteit van onderwijsinterventies"
     ],
     theorie: {
       concepten: [
@@ -337,10 +604,29 @@ const modules: Module[] = [
           naam: "LVS (Leerling Volg Systeem)",
           uitleg: "Systematisch verzamelen en analyseren van leerlinggegevens om ontwikkeling te volgen en onderwijs aan te passen.",
           voorbeeld: "Cito-toetsen 3x per jaar: september (start), januari (midden), juni (eind) voor trendanalyse"
+        },
+        {
+          naam: "PDCA-cyclus",
+          uitleg: "Plan-Do-Check-Act cyclus voor continue verbetering van onderwijskwaliteit.",
+          voorbeeld: "Plan: doel verhogen rekenprestaties. Do: nieuwe methode. Check: toetsresultaten. Act: bijstellen aanpak"
+        },
+        {
+          naam: "SMART-doelen",
+          uitleg: "Specifiek, Meetbaar, Acceptabel, Realistisch, Tijdgebonden doelen voor onderwijsverbetering.",
+          voorbeeld: "80% van groep 6 behaalt niveau D of E op Cito rekenen in juni 2024"
+        },
+        {
+          naam: "Interventieladder",
+          uitleg: "Systematische aanpak van lichte naar zware interventies op basis van leerlingbehoeften.",
+          voorbeeld: "Niveau 1: klassikale aanpak → Niveau 2: kleine groep → Niveau 3: individueel → Niveau 4: externe hulp"
         }
       ],
       praktijktips: [
-        "Bekijk data altijd in context: wat speelde er in de klas/school?"
+        "Bekijk data altijd in context: wat speelde er in de klas/school?",
+        "Gebruik meerdere databronnen voor betrouwbaar beeld",
+        "Betrek team bij data-analyse voor draagvlak",
+        "Maak data visueel met grafieken en dashboards",
+        "Koppel data direct aan concrete acties"
       ]
     },
     interactieveOpdrachten: [
@@ -350,9 +636,16 @@ const modules: Module[] = [
         type: "analyse",
         startVraag: "Je ziet dat de rekenprestaties in groep 4 zijn gedaald. Wat zou je willen weten?",
         context: "Je leert data kritisch interpreteren en vragen stellen"
+      },
+      {
+        titel: "PDCA Planner",
+        beschrijving: "Maak een verbeterplan met de PDCA-cyclus",
+        type: "toepassing",
+        startVraag: "Kies een onderwijsprobleem in jouw school. Hoe zou je dit systematisch aanpakken?",
+        context: "Je past de PDCA-cyclus toe op een concreet probleem"
       }
     ],
-    bronnen: ["PO-Raad 'Werken met Data' toolkit"],
+    bronnen: ["PO-Raad 'Werken met Data' toolkit", "Cito Terugkoppeling Handleiding", "PDCA in het onderwijs"],
     completed: false,
     hasDocumentUpload: true,
     visualComponents: [
@@ -380,6 +673,33 @@ const modules: Module[] = [
             { month: 'Jun', percentage: 58, target: 70 }
           ]
         }
+      },
+      {
+        type: 'DataAnalysisDashboard',
+        props: {
+          datasets: [
+            {
+              name: 'Leerlingprestaties Trend',
+              type: 'trend',
+              data: { sep: 65, jan: 68, jun: 72 },
+              insights: [
+                'Positieve trend zichtbaar gedurende schooljaar',
+                'Grootste groei tussen januari en juni',
+                'Interventies in februari hebben effect gehad'
+              ]
+            },
+            {
+              name: 'Groepsvergelijking',
+              type: 'comparison', 
+              data: { groep4: 78, groep5: 65, groep6: 82 },
+              insights: [
+                'Groep 5 scoort onder verwachting',
+                'Groep 6 presteert bovengemiddeld',
+                'Mogelijk methodewisseling effect in groep 5'
+              ]
+            }
+          ]
+        }
       }
     ]
   },
@@ -392,7 +712,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Benoem 12 vaardigheden (SLO-model) en integreer 3 in lesconcept",
       "Beschrijf innovatiecyclus (design thinking) voor schoolontwikkeling",
-      "Ontwerp een project dat 21e-eeuwse vaardigheden integreert"
+      "Ontwerp een project dat 21e-eeuwse vaardigheden integreert",
+      "Evalueer innovaties op effectiviteit en haalbaarheid"
     ],
     theorie: {
       concepten: [
@@ -410,13 +731,19 @@ const modules: Module[] = [
           naam: "Computational Thinking",
           uitleg: "Probleemoplossing door decompositie, patroonherkenning, abstractie en algoritmes.",
           voorbeeld: "Recept maken: stappen opsplitsen (decompositie), herhalende handelingen herkennen (patronen), algemene principes (abstractie), volgorde bepalen (algoritme)"
+        },
+        {
+          naam: "Innovatiecyclus",
+          uitleg: "Systematische aanpak voor vernieuwing: probleem identificeren → ideeën genereren → testen → implementeren → evalueren.",
+          voorbeeld: "School introduceert tablets: probleem (digitale vaardigheden), idee (tablets), pilot (één groep), implementatie (hele school), evaluatie (effect meten)"
         }
       ],
       praktijktips: [
         "Start klein: integreer 1 21e-eeuwse vaardigheid per les",
         "Gebruik authentieke, betekenisvolle projecten",
         "Laat leerlingen reflecteren op hun leerproces",
-        "Creëer ruimte voor experimenteren en falen"
+        "Creëer ruimte voor experimenteren en falen",
+        "Verbind met actuele maatschappelijke uitdagingen"
       ]
     },
     interactieveOpdrachten: [
@@ -435,7 +762,7 @@ const modules: Module[] = [
         context: "Je past design thinking toe in onderwijscontext"
       }
     ],
-    bronnen: ["SLO 21-eeuwse vaardigheden", "Design Thinking for Educators"],
+    bronnen: ["SLO 21-eeuwse vaardigheden", "Design Thinking for Educators", "Computational Thinking Guide"],
     completed: false,
     hasDocumentUpload: true,
     visualComponents: [
@@ -448,7 +775,46 @@ const modules: Module[] = [
             { name: 'Samenwerking', level: 5, description: 'Effectief in teams werken' },
             { name: 'Communicatie', level: 3, description: 'Duidelijk ideeën overbrengen' },
             { name: 'ICT-geletterdheid', level: 2, description: 'Technologie effectief gebruiken' },
-            { name: 'Probleemoplossen', level: 4, description: 'Complexe uitdagingen aanpakken' }
+            { name: 'Probleemoplossen', level: 4, description: 'Complexe uitdagingen aanpakken' },
+            { name: 'Metacognitie', level: 2, description: 'Bewust van eigen leerproces' },
+            { name: 'Flexibiliteit', level: 3, description: 'Aanpassen aan veranderingen' }
+          ]
+        }
+      },
+      {
+        type: 'InnovationCycleVisualizer',
+        props: {
+          phases: [
+            {
+              name: 'Empathize',
+              description: 'Begrijp de gebruiker en hun behoeften',
+              activities: ['Interviews houden', 'Observeren', 'Empathy maps maken'],
+              tools: ['Vragenlijsten', 'Observatieformulieren', 'Persona\'s']
+            },
+            {
+              name: 'Define',
+              description: 'Definieer het probleem helder',
+              activities: ['Probleem formuleren', 'Point of view bepalen', 'How might we vragen'],
+              tools: ['Problem statement', 'POV template', 'HMW brainstorm']
+            },
+            {
+              name: 'Ideate',
+              description: 'Genereer veel creatieve ideeën',
+              activities: ['Brainstormen', 'Schetsen', 'Ideeën combineren'],
+              tools: ['Brainstorm regels', 'Crazy 8s', 'Mindmapping']
+            },
+            {
+              name: 'Prototype',
+              description: 'Maak snelle, testbare versies',
+              activities: ['Bouwen', 'Schetsen', 'Rollenspel'],
+              tools: ['Karton en tape', 'Digitale tools', 'Storyboards']
+            },
+            {
+              name: 'Test',
+              description: 'Test met echte gebruikers',
+              activities: ['Feedback verzamelen', 'Observeren', 'Itereren'],
+              tools: ['Testprotocol', 'Feedback formulieren', 'Video opnames']
+            }
           ]
         }
       }
@@ -463,7 +829,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Beschrijf Beroepsstandaard Schoolleider PO en koppel eigen competenties",
       "Analyseer schoolplan en begrijp cyclus van visie naar evaluatie",
-      "Ontwikkel een persoonlijk leiderschapsplan"
+      "Ontwikkel een persoonlijk leiderschapsplan",
+      "Pas verschillende leiderschapsstijlen toe in situaties"
     ],
     theorie: {
       concepten: [
@@ -481,13 +848,19 @@ const modules: Module[] = [
           naam: "Transformationeel Leiderschap",
           uitleg: "Leiderschapsstijl gericht op inspireren, motiveren en ontwikkelen van medewerkers door visie, individuele aandacht, intellectuele stimulatie en charisma.",
           voorbeeld: "Schoolleider inspireert team met visie op inclusief onderwijs, coacht individuele leerkrachten, stimuleert innovatie en toont enthousiasme"
+        },
+        {
+          naam: "Distributed Leadership",
+          uitleg: "Leiderschap verspreid over meerdere personen in de organisatie, niet alleen de formele leider.",
+          voorbeeld: "Vakcoördinatoren leiden hun vakgebied, teamleiders coördineren hun team, ervaren leerkrachten mentoren nieuwelingen"
         }
       ],
       praktijktips: [
         "Begin met luisteren voordat je veranderingen voorstelt",
         "Maak je visie concreet met voorbeelden en verhalen",
         "Investeer in relaties met alle stakeholders",
-        "Gebruik data om beslissingen te onderbouwen"
+        "Gebruik data om beslissingen te onderbouwen",
+        "Geef mensen eigenaarschap over hun werk"
       ]
     },
     interactieveOpdrachten: [
@@ -506,7 +879,7 @@ const modules: Module[] = [
         context: "Je leert schoolplannen kritisch te beoordelen"
       }
     ],
-    bronnen: ["Schoolleidersregister", "AVS Leiderschapsprofiel"],
+    bronnen: ["Schoolleidersregister", "AVS Leiderschapsprofiel", "Transformationeel Leiderschap Handboek"],
     completed: false,
     hasDocumentUpload: true,
     visualComponents: [
@@ -517,7 +890,9 @@ const modules: Module[] = [
             { title: 'Leerlingresultaten', value: '85%', trend: 'up', color: 'bg-green-500' },
             { title: 'Tevredenheid Team', value: '7.8', trend: 'stable', color: 'bg-blue-500' },
             { title: 'Oudertevredenheid', value: '8.2', trend: 'up', color: 'bg-purple-500' },
-            { title: 'Financiële Gezondheid', value: '92%', trend: 'down', color: 'bg-orange-500' }
+            { title: 'Financiële Gezondheid', value: '92%', trend: 'down', color: 'bg-orange-500' },
+            { title: 'Innovatie Index', value: '76%', trend: 'up', color: 'bg-pink-500' },
+            { title: 'Personeelsverloop', value: '12%', trend: 'stable', color: 'bg-teal-500' }
           ]
         }
       }
@@ -532,7 +907,8 @@ const modules: Module[] = [
     leerdoelen: [
       "Benoem wettelijke burgerschapsdoelen PO en inspectienormen 2025-2026",
       "Integreer mediawijsheid en AI-geletterdheid in les of project",
-      "Ontwerp burgerschapsactiviteit die democratische vaardigheden ontwikkelt"
+      "Ontwerp burgerschapsactiviteit die democratische vaardigheden ontwikkelt",
+      "Evalueer digitale tools op geschiktheid voor kinderen"
     ],
     theorie: {
       concepten: [
@@ -550,13 +926,19 @@ const modules: Module[] = [
           naam: "Mediawijsheid",
           uitleg: "Vaardigheden om media kritisch te gebruiken: informatie zoeken, beoordelen, creëren en delen op verantwoordelijke wijze.",
           voorbeeld: "Nepnieuws herkennen: bronnen checken, meerdere bronnen vergelijken, emotionele reacties herkennen, feitencheckers gebruiken"
+        },
+        {
+          naam: "Digitaal Burgerschap",
+          uitleg: "Verantwoordelijk gedrag in digitale omgevingen: privacy, veiligheid, respect, kritisch denken.",
+          voorbeeld: "Online pesten herkennen en aanpakken, sterke wachtwoorden maken, respectvol communiceren in digitale omgevingen"
         }
       ],
       praktijktips: [
         "Verbind burgerschap aan actuele gebeurtenissen en kinderervaringen",
         "Gebruik democratische besluitvorming in de klas",
         "Laat kinderen zelf AI-tools uitproberen onder begeleiding",
-        "Bespreek online ervaringen van kinderen"
+        "Bespreek online ervaringen van kinderen",
+        "Maak abstracte concepten concreet met voorbeelden"
       ]
     },
     interactieveOpdrachten: [
@@ -575,9 +957,63 @@ const modules: Module[] = [
         context: "Je maakt AI-ethiek begrijpelijk voor kinderen"
       }
     ],
-    bronnen: ["SLO Burgerschapscurriculum", "Mediawijzer.net"],
+    bronnen: ["SLO Burgerschapscurriculum", "Mediawijzer.net", "AI voor Kinderen Gids"],
     completed: false,
-    hasDocumentUpload: true
+    hasDocumentUpload: true,
+    visualComponents: [
+      {
+        type: 'CitizenshipCompetencyMatrix',
+        props: {
+          competencies: [
+            {
+              domain: 'Democratie & Rechtsstaat',
+              skills: [
+                { 
+                  name: 'Democratische besluitvorming', 
+                  level: 3, 
+                  examples: ['Klassenregels samen maken', 'Stemmen over uitje', 'Klassenraad organiseren'] 
+                },
+                { 
+                  name: 'Rechten en plichten kennen', 
+                  level: 2, 
+                  examples: ['Kinderrechten benoemen', 'Schoolregels begrijpen', 'Hulp zoeken bij problemen'] 
+                }
+              ]
+            },
+            {
+              domain: 'Gelijkwaardigheid & Diversiteit',
+              skills: [
+                { 
+                  name: 'Diversiteit waarderen', 
+                  level: 4, 
+                  examples: ['Verschillende culturen vieren', 'Vooroordelen bespreken', 'Inclusief gedrag tonen'] 
+                },
+                { 
+                  name: 'Discriminatie herkennen', 
+                  level: 2, 
+                  examples: ['Pesten herkennen', 'Uitsluiting signaleren', 'Hulp bieden aan anderen'] 
+                }
+              ]
+            },
+            {
+              domain: 'Digitaal Burgerschap',
+              skills: [
+                { 
+                  name: 'Online veiligheid', 
+                  level: 3, 
+                  examples: ['Privacy instellingen', 'Veilig wachtwoord', 'Verdachte berichten melden'] 
+                },
+                { 
+                  name: 'AI-geletterdheid', 
+                  level: 2, 
+                  examples: ['AI herkennen', 'Beperkingen begrijpen', 'Ethische vragen stellen'] 
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
   },
   {
     id: 9,
@@ -607,13 +1043,19 @@ const modules: Module[] = [
           naam: "Feedbackgesprek Structuur",
           uitleg: "GROW-model: Goal (doel), Reality (huidige situatie), Options (mogelijkheden), Way forward (vervolgstappen). Focus op gedrag, niet persoon.",
           voorbeeld: "Doel: betere klassenorganisatie. Realiteit: chaos bij overgangen. Opties: signalen, procedures, materiaal. Vervolgstap: 3 signalen afspreken en oefenen"
+        },
+        {
+          naam: "Instructional Leadership",
+          uitleg: "Leiderschapsstijl gericht op verbetering van onderwijs door focus op curriculum, instructie en assessment.",
+          voorbeeld: "Schoolleider observeert lessen, bespreekt data met teams, organiseert professionalisering op basis van schoolbehoeften"
         }
       ],
       praktijktips: [
         "Gebruik data als startpunt voor gesprek, niet als eindoordeel",
         "Observeer meerdere lessen voor betrouwbaar beeld",
         "Geef eerst positieve feedback, dan verbeterpunten",
-        "Maak concrete afspraken met tijdslijn"
+        "Maak concrete afspraken met tijdslijn",
+        "Volg afspraken op en evalueer voortgang"
       ]
     },
     interactieveOpdrachten: [
@@ -632,7 +1074,7 @@ const modules: Module[] = [
         context: "Je oefent systematisch observeren en feedback geven"
       }
     ],
-    bronnen: ["Cito Terugkoppeling Handleiding", "EDI Kijkwijzer"],
+    bronnen: ["Cito Terugkoppeling Handleiding", "EDI Kijkwijzer", "GROW Coaching Model"],
     completed: false,
     hasDocumentUpload: true,
     visualComponents: [
@@ -649,6 +1091,20 @@ const modules: Module[] = [
             'Succes criteria duidelijk'
           ],
           feedback: 'Goed: duidelijk lesdoel. Verbeterpunt: meer tijd voor voorkennis activeren.'
+        }
+      },
+      {
+        type: 'CitoScoreChart',
+        props: {
+          title: 'Schoolprestaties Analyse - Alle Groepen',
+          data: [
+            { level: 'A', percentage: 12, national: 8, color: 'bg-red-500' },
+            { level: 'B', percentage: 23, national: 18, color: 'bg-orange-500' },
+            { level: 'C', percentage: 35, national: 42, color: 'bg-yellow-500' },
+            { level: 'D', percentage: 25, national: 27, color: 'bg-green-500' },
+            { level: 'E', percentage: 5, national: 5, color: 'bg-blue-500' }
+          ],
+          explanation: 'Positief: minder A-niveau leerlingen dan landelijk. Aandachtspunt: C-niveau leerlingen naar D-niveau tillen.'
         }
       }
     ]
@@ -889,7 +1345,12 @@ export default function PABOLeerApp() {
                       SELDevelopmentChart,
                       DifferentiationMatrix,
                       SkillsRadarChart,
-                      LeadershipDashboard
+                      LeadershipDashboard,
+                      CurriculumMappingChart,
+                      DevelopmentProgressionTracker,
+                      InnovationCycleVisualizer,
+                      CitizenshipCompetencyMatrix,
+                      DataAnalysisDashboard
                     }[component.type]
                     
                     return Component ? (
