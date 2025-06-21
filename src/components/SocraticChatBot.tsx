@@ -46,32 +46,72 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [useMultiModal, setUseMultiModal] = useState(true) // STANDAARD AAN
   const [showDirectChat, setShowDirectChat] = useState(false)
   const [autoStartChat, setAutoStartChat] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Load documents from localStorage
+  // Load documents from localStorage with better error handling
   useEffect(() => {
-    const savedDocs = localStorage.getItem('pabo-documents')
-    if (savedDocs) {
+    const loadDocuments = () => {
       try {
-        const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
-          ...doc,
-          uploadDate: new Date(doc.uploadDate)
-        }))
-        setAvailableDocuments(parsedDocs)
-        // Auto-select all documents
-        setSelectedDocuments(parsedDocs.map((doc: any) => doc.id))
+        const savedDocs = localStorage.getItem('pabo-documents')
+        console.log('Loading documents from localStorage:', savedDocs)
         
-        // AUTO-START CHAT if documents are available
-        if (parsedDocs.length > 0) {
-          setAutoStartChat(true)
-          setTimeout(() => {
-            startDirectChat()
-          }, 500) // Small delay for smooth transition
+        if (savedDocs) {
+          const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
+            ...doc,
+            uploadDate: new Date(doc.uploadDate)
+          }))
+          
+          console.log('Parsed documents:', parsedDocs)
+          setAvailableDocuments(parsedDocs)
+          
+          // Auto-select all documents
+          const docIds = parsedDocs.map((doc: any) => doc.id)
+          setSelectedDocuments(docIds)
+          console.log('Auto-selected document IDs:', docIds)
+          
+          // AUTO-START CHAT if documents are available
+          if (parsedDocs.length > 0) {
+            console.log('Documents found, auto-starting chat...')
+            setAutoStartChat(true)
+            // Start chat immediately
+            setTimeout(() => {
+              startDirectChat(parsedDocs)
+            }, 100)
+          }
+        } else {
+          console.log('No documents found in localStorage')
         }
-        
-        console.log('Auto-selected documents and starting chat:', parsedDocs)
       } catch (error) {
         console.error('Error loading documents:', error)
+        localStorage.removeItem('pabo-documents')
+      } finally {
+        setIsLoading(false)
       }
+    }
+
+    loadDocuments()
+
+    // Listen for storage changes (when documents are uploaded)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'pabo-documents') {
+        console.log('Storage changed, reloading documents...')
+        loadDocuments()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom events from document upload
+    const handleDocumentUpload = () => {
+      console.log('Document upload event detected, reloading...')
+      setTimeout(loadDocuments, 500) // Small delay to ensure localStorage is updated
+    }
+
+    window.addEventListener('documentUploaded', handleDocumentUpload)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('documentUploaded', handleDocumentUpload)
     }
   }, [])
 
@@ -79,14 +119,17 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     setSelectedOpdracht(opdracht)
   }
 
-  const startDirectChat = () => {
+  const startDirectChat = (docs?: UploadedDocument[]) => {
+    const documents = docs || availableDocuments
+    console.log('Starting direct chat with documents:', documents)
+    
     setShowDirectChat(true)
     setSelectedOpdracht({
       titel: "Chat met je Schooldocumenten",
       beschrijving: "Chat direct met de AI over je geüploade schooldocumenten en PABO-onderwerpen",
       type: "reflectie",
       startVraag: "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
-      context: `Je bent een ervaren PABO-docent die studenten helpt met vragen over hun studie en schoolpraktijk. De student heeft ${availableDocuments.length} schooldocument(en) geüpload. Gebruik de socratische methode om studenten zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
+      context: `Je bent een ervaren PABO-docent die studenten helpt met vragen over hun studie en schoolpraktijk. De student heeft ${documents.length} schooldocument(en) geüpload: ${documents.map(d => d.fileName).join(', ')}. Gebruik de socratische methode om studenten zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
     })
   }
 
@@ -101,6 +144,18 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
       prev.includes(docId) 
         ? prev.filter(id => id !== docId)
         : [...prev, docId]
+    )
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Documenten laden...</p>
+        </div>
+      </div>
     )
   }
 
@@ -229,7 +284,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
                 </div>
               </div>
               <button
-                onClick={startDirectChat}
+                onClick={() => startDirectChat()}
                 className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg"
               >
                 💬 Start Chat

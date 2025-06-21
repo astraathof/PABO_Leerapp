@@ -32,7 +32,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         }))
         setDocuments(parsedDocs)
         onDocumentsChange?.(parsedDocs)
-        console.log('Loaded documents:', parsedDocs)
+        console.log('DocumentManager: Loaded documents:', parsedDocs)
       } catch (error) {
         console.error('Error loading documents:', error)
         localStorage.removeItem('pabo-documents')
@@ -45,7 +45,10 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     if (documents.length > 0) {
       localStorage.setItem('pabo-documents', JSON.stringify(documents))
       onDocumentsChange?.(documents)
-      console.log('Saved documents:', documents)
+      console.log('DocumentManager: Saved documents:', documents)
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('documentUploaded', { detail: documents }))
     }
   }, [documents, onDocumentsChange])
 
@@ -59,6 +62,8 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       const formData = new FormData()
       formData.append('file', file)
 
+      console.log('Uploading file:', file.name)
+
       const response = await fetch('/api/upload-document', {
         method: 'POST',
         body: formData
@@ -70,6 +75,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       }
 
       const result = await response.json()
+      console.log('Upload result:', result)
       
       const newDocument: UploadedDocument = {
         id: Date.now().toString(),
@@ -81,15 +87,24 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         uploadDate: new Date()
       }
 
+      console.log('Adding new document:', newDocument)
+
       setDocuments(prev => {
         const updated = [...prev, newDocument]
+        console.log('Updated documents array:', updated)
         return updated
       })
       
       // Reset file input
       event.target.value = ''
       
-      alert(`✅ Document "${result.fileName}" succesvol geüpload!\n\nType: ${result.detectedType}\nWoorden: ${result.wordCount.toLocaleString()}`)
+      alert(`✅ Document "${result.fileName}" succesvol geüpload!\n\nType: ${result.detectedType}\nWoorden: ${result.wordCount.toLocaleString()}\n\n🤖 Je kunt nu direct chatten met de AI over dit document!`)
+      
+      // Force a page refresh to ensure the chat component picks up the new document
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+      
     } catch (error) {
       console.error('Upload error:', error)
       alert(`❌ Fout bij uploaden: ${error instanceof Error ? error.message : 'Onbekende fout'}`)
@@ -274,15 +289,15 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">4️⃣</span>
-              <span className="text-green-700">Activeer "document-integratie" in de AI-chat</span>
+              <span className="text-green-700">De chatbot start automatisch met je documenten!</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">5️⃣</span>
-              <span className="text-green-700">Selecteer je geüploade documenten</span>
+              <span className="text-green-700">Stel vragen over je schoolplan en krijg gepersonaliseerde antwoorden</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">6️⃣</span>
-              <span className="text-green-700">Stel vragen over je schoolplan en krijg gepersonaliseerde antwoorden!</span>
+              <span className="text-green-700">Gebruik spraakherkenning voor hands-free chatten!</span>
             </div>
           </div>
         </div>
