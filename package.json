@@ -2,12 +2,14 @@
   "name": "pabo-leerapp",
   "version": "0.1.0",
   "private": true,
-  "description": "Een simpele leerapp voor PABO studenten om leerdoelen eigen te maken",
+  "description": "Een interactieve leerapp voor PABO studenten met AI-begeleiding",
   "keywords": [
     "nextjs",
     "pabo",
     "onderwijs",
     "leerapp",
+    "ai",
+    "socratisch",
     "typescript"
   ],
   "author": "Tom Naberink",
@@ -21,6 +23,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "next": "15.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
