@@ -119,7 +119,7 @@ const modules: Module[] = [
     bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
     completed: false,
     hasDocumentUpload: true,
-    specialViewers: ['kerndoelen'],
+    specialViewers: ['kerndoelen', 'klikbare-theorie'],
     visualComponents: [
       {
         type: 'LearningLineVisual',
@@ -187,12 +187,14 @@ const modules: Module[] = [
         {
           naam: "Piaget's Ontwikkelingsstadia",
           uitleg: "Kinderen doorlopen vier stadia: sensomotorisch (0-2), preoperationeel (2-7), concreet operationeel (7-11), formeel operationeel (11+). Elk stadium heeft eigen denkkenmerken.",
-          voorbeeld: "Groep 3-4 (preoperationeel): kinderen denken nog niet logisch, hebben moeite met behoud (water in hoog/breed glas)"
+          voorbeeld: "Groep 3-4 (preoperationeel): kinderen denken nog niet logisch, hebben moeite met behoud (water in hoog/breed glas)",
+          clickable: true
         },
         {
           naam: "Vygotsky's Zone van Naaste Ontwikkeling",
           uitleg: "Het verschil tussen wat een kind alleen kan en wat het met hulp kan. Hier vindt optimaal leren plaats.",
-          voorbeeld: "Kind kan zelfstandig tot 10 tellen, met hulp tot 20. De ZNO ligt tussen 10-20."
+          voorbeeld: "Kind kan zelfstandig tot 10 tellen, met hulp tot 20. De ZNO ligt tussen 10-20.",
+          clickable: true
         },
         {
           naam: "Scaffolding",
@@ -203,7 +205,8 @@ const modules: Module[] = [
         {
           naam: "Erikson's Psychosociale Ontwikkeling",
           uitleg: "Acht levensfasen met elk een crisis die opgelost moet worden voor gezonde ontwikkeling.",
-          voorbeeld: "Groep 3-8: Vlijt vs. Minderwaardigheid - kinderen willen competent zijn en prestaties leveren"
+          voorbeeld: "Groep 3-8: Vlijt vs. Minderwaardigheid - kinderen willen competent zijn en prestaties leveren",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -232,7 +235,7 @@ const modules: Module[] = [
     bronnen: ["G. Marzano, Classroom Management", "Piaget, J. - Cognitive Development"],
     completed: false,
     hasDocumentUpload: true,
-    specialViewers: ['ontwikkelingstheorieen'],
+    specialViewers: ['ontwikkelingstheorieen', 'klikbare-theorie'],
     visualComponents: [
       {
         type: 'SELDevelopmentChart',
@@ -340,7 +343,8 @@ const modules: Module[] = [
         {
           naam: "SEL (Social Emotional Learning)",
           uitleg: "Vijf kerncompetenties: zelfbewustzijn, zelfregulatie, sociale bewustzijn, relatievaardigheden, verantwoordelijke besluitvorming.",
-          voorbeeld: "Zelfregulatie: kind leert ademhalingsoefening bij boosheid in plaats van slaan"
+          voorbeeld: "Zelfregulatie: kind leert ademhalingsoefening bij boosheid in plaats van slaan",
+          clickable: true
         },
         {
           naam: "Klassenklimaat",
@@ -351,12 +355,14 @@ const modules: Module[] = [
         {
           naam: "Sociale Veiligheid",
           uitleg: "De mate waarin leerlingen zich veilig voelen om zichzelf te zijn zonder angst voor pesten of uitsluiting.",
-          voorbeeld: "Veilige klas: alle kinderen doen mee, niemand wordt gepest of buitengesloten"
+          voorbeeld: "Veilige klas: alle kinderen doen mee, niemand wordt gepest of buitengesloten",
+          clickable: true
         },
         {
           naam: "Weerbaarheid",
           uitleg: "Het vermogen om voor jezelf op te komen en grenzen te stellen op een respectvolle manier.",
-          voorbeeld: "Kind zegt 'nee' tegen ongewenst gedrag en zoekt hulp bij volwassenen"
+          voorbeeld: "Kind zegt 'nee' tegen ongewenst gedrag en zoekt hulp bij volwassenen",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -385,7 +391,7 @@ const modules: Module[] = [
     bronnen: ["Kanjertraining.nl", "Lions Quest Nederland", "Rots en Water"],
     completed: false,
     hasDocumentUpload: true,
-    specialViewers: ['sel-methodieken'],
+    specialViewers: ['sel-methodieken', 'klikbare-theorie'],
     visualComponents: [
       {
         type: 'SELDevelopmentChart',
@@ -441,12 +447,14 @@ const modules: Module[] = [
         {
           naam: "Convergente Differentiatie",
           uitleg: "Alle leerlingen werken naar hetzelfde doel, maar via verschillende wegen of met verschillende ondersteuning.",
-          voorbeeld: "Iedereen leert breuken: groep A met materiaal, groep B met plaatjes, groep C abstract"
+          voorbeeld: "Iedereen leert breuken: groep A met materiaal, groep B met plaatjes, groep C abstract",
+          clickable: true
         },
         {
           naam: "Divergente Differentiatie",
           uitleg: "Leerlingen werken aan verschillende doelen op basis van hun niveau en interesse.",
-          voorbeeld: "Groep A: basis breuken, Groep B: breuken vergelijken, Groep C: breuken bewerkingen"
+          voorbeeld: "Groep A: basis breuken, Groep B: breuken vergelijken, Groep C: breuken bewerkingen",
+          clickable: true
         },
         {
           naam: "Scaffolding Strategieën",
@@ -457,7 +465,8 @@ const modules: Module[] = [
         {
           naam: "Bloom's Taxonomie",
           uitleg: "Zes niveaus van denken: onthouden, begrijpen, toepassen, analyseren, evalueren, creëren.",
-          voorbeeld: "Rekenen: onthouden (tafels) → begrijpen (concept) → toepassen (woordsommen)"
+          voorbeeld: "Rekenen: onthouden (tafels) → begrijpen (concept) → toepassen (woordsommen)",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -486,6 +495,7 @@ const modules: Module[] = [
     bronnen: ["SLO Differentiatiegids", "Tomlinson - Differentiating Instruction"],
     completed: false,
     hasDocumentUpload: true,
+    specialViewers: ['klikbare-theorie'],
     visualComponents: [
       {
         type: 'DifferentiationMatrix',
@@ -531,7 +541,8 @@ const modules: Module[] = [
         {
           naam: "LVS (Leerling Volg Systeem)",
           uitleg: "Systematisch verzamelen en analyseren van leerlinggegevens om ontwikkeling te volgen en onderwijs aan te passen.",
-          voorbeeld: "Cito-toetsen 3x per jaar: september (start), januari (midden), juni (eind) voor trendanalyse"
+          voorbeeld: "Cito-toetsen 3x per jaar: september (start), januari (midden), juni (eind) voor trendanalyse",
+          clickable: true
         },
         {
           naam: "PDCA-cyclus",
@@ -548,7 +559,8 @@ const modules: Module[] = [
         {
           naam: "Benchmarking",
           uitleg: "Vergelijken van eigen resultaten met andere scholen of landelijke gemiddelden.",
-          voorbeeld: "School scoort 15% onder landelijk gemiddeld rekenen → analyse en actieplan"
+          voorbeeld: "School scoort 15% onder landelijk gemiddeld rekenen → analyse en actieplan",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -577,6 +589,7 @@ const modules: Module[] = [
     bronnen: ["PO-Raad 'Werken met Data' toolkit", "Schildkamp - Data-based Decision Making"],
     completed: false,
     hasDocumentUpload: true,
+    specialViewers: ['klikbare-theorie'],
     visualComponents: [
       {
         type: 'CitoScoreChart',
@@ -649,7 +662,8 @@ const modules: Module[] = [
         {
           naam: "21e-eeuwse Vaardigheden (SLO)",
           uitleg: "12 vaardigheden in 4 categorieën: Denken (kritisch, creatief, probleemoplossend), Samenwerken, Tools (ICT, media), Leven (flexibiliteit, initiatief, sociale vaardigheden).",
-          voorbeeld: "Project 'Duurzame school': kritisch denken, samenwerken, ICT, initiatief"
+          voorbeeld: "Project 'Duurzame school': kritisch denken, samenwerken, ICT, initiatief",
+          clickable: true
         },
         {
           naam: "Design Thinking",
@@ -660,12 +674,14 @@ const modules: Module[] = [
         {
           naam: "Computational Thinking",
           uitleg: "Denkvaardigheden voor probleemoplossing: decompositie, patroonherkenning, abstractie, algoritmes.",
-          voorbeeld: "Opruimen klas: opdelen in stappen, patroon herkennen, algemene regel maken"
+          voorbeeld: "Opruimen klas: opdelen in stappen, patroon herkennen, algemene regel maken",
+          clickable: true
         },
         {
           naam: "Mediawijsheid",
           uitleg: "Kritisch omgaan met media en informatie: zoeken, beoordelen, gebruiken, creëren.",
-          voorbeeld: "Nieuwsartikel checken: bron controleren, feiten verifiëren, bias herkennen"
+          voorbeeld: "Nieuwsartikel checken: bron controleren, feiten verifiëren, bias herkennen",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -694,6 +710,7 @@ const modules: Module[] = [
     bronnen: ["SLO 21-eeuwse vaardigheden", "Design Thinking for Educators"],
     completed: false,
     hasDocumentUpload: true,
+    specialViewers: ['klikbare-theorie'],
     visualComponents: [
       {
         type: 'SkillsRadarChart',
@@ -764,22 +781,26 @@ const modules: Module[] = [
         {
           naam: "Beroepsstandaard Schoolleider PO",
           uitleg: "Zes competentiegebieden: visie en strategie, onderwijskundig leiderschap, organisatie en personeel, financieel management, externe oriëntatie, verantwoording.",
-          voorbeeld: "Onderwijskundig leiderschap: schoolleider stimuleert teamontwikkeling en monitort onderwijskwaliteit"
+          voorbeeld: "Onderwijskundig leiderschap: schoolleider stimuleert teamontwikkeling en monitort onderwijskwaliteit",
+          clickable: true
         },
         {
           naam: "Transformationeel Leiderschap",
           uitleg: "Leiderschapsstijl gericht op inspireren, motiveren en ontwikkelen van medewerkers.",
-          voorbeeld: "Schoolleider inspireert team met gezamenlijke visie en ondersteunt individuele groei"
+          voorbeeld: "Schoolleider inspireert team met gezamenlijke visie en ondersteunt individuele groei",
+          clickable: true
         },
         {
           naam: "Distributed Leadership",
           uitleg: "Leiderschap verspreid over meerdere personen in de organisatie.",
-          voorbeeld: "Vakcoördinatoren, bouwcoördinatoren en IB-er delen leiderschapstaken"
+          voorbeeld: "Vakcoördinatoren, bouwcoördinatoren en IB-er delen leiderschapstaken",
+          clickable: true
         },
         {
           naam: "Schoolcultuur",
           uitleg: "De gedeelde waarden, normen en gewoonten binnen een school.",
-          voorbeeld: "Cultuur van leren: fouten maken mag, feedback wordt gewaardeerd, iedereen groeit"
+          voorbeeld: "Cultuur van leren: fouten maken mag, feedback wordt gewaardeerd, iedereen groeit",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -808,6 +829,7 @@ const modules: Module[] = [
     bronnen: ["Schoolleidersregister", "Beroepsstandaard Schoolleider PO"],
     completed: false,
     hasDocumentUpload: true,
+    specialViewers: ['klikbare-theorie'],
     visualComponents: [
       {
         type: 'LeadershipDashboard',
@@ -839,22 +861,26 @@ const modules: Module[] = [
         {
           naam: "Wet Burgerschapsonderwijs 2024",
           uitleg: "Wettelijke verplichting voor scholen om burgerschap te onderwijzen met focus op democratie, rechtsstaat en grondrechten.",
-          voorbeeld: "Kinderen leren over verkiezingen door klassenverkiezingen en gemeenteraadsbezoek"
+          voorbeeld: "Kinderen leren over verkiezingen door klassenverkiezingen en gemeenteraadsbezoek",
+          clickable: true
         },
         {
           naam: "AI-geletterdheid voor Kinderen",
           uitleg: "Basiskennis over kunstmatige intelligentie: wat is AI, hoe werkt het, wat zijn kansen en risico's.",
-          voorbeeld: "Kinderen ontdekken AI in hun leven: Siri, spelletjes, aanbevelingen YouTube"
+          voorbeeld: "Kinderen ontdekken AI in hun leven: Siri, spelletjes, aanbevelingen YouTube",
+          clickable: true
         },
         {
           naam: "Digitaal Burgerschap",
           uitleg: "Verantwoordelijk gedrag in digitale omgevingen: privacy, veiligheid, respect, kritisch denken.",
-          voorbeeld: "Kinderen leren hoe ze veilig online communiceren en nepnieuws herkennen"
+          voorbeeld: "Kinderen leren hoe ze veilig online communiceren en nepnieuws herkennen",
+          clickable: true
         },
         {
           naam: "Democratische Competenties",
           uitleg: "Vaardigheden voor participatie in democratie: luisteren, discussiëren, compromissen sluiten, stemmen.",
-          voorbeeld: "Klassenraad waarin kinderen democratisch beslissingen nemen over klassenregels"
+          voorbeeld: "Klassenraad waarin kinderen democratisch beslissingen nemen over klassenregels",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -883,6 +909,7 @@ const modules: Module[] = [
     bronnen: ["SLO Burgerschapscurriculum", "AI voor Nederland - Onderwijs"],
     completed: false,
     hasDocumentUpload: true,
+    specialViewers: ['klikbare-theorie'],
     visualComponents: [
       {
         type: 'CitizenshipCompetencyMatrix',
@@ -932,17 +959,20 @@ const modules: Module[] = [
         {
           naam: "B8 Toets en Doorstroomtoets",
           uitleg: "B8 toets in april bepaalt VO-advies. Doorstroomtoets in mei/juni kan advies bevestigen of bijstellen.",
-          voorbeeld: "B8 toets wijst op HAVO, doorstroomtoets bevestigt dit → definitief HAVO-advies"
+          voorbeeld: "B8 toets wijst op HAVO, doorstroomtoets bevestigt dit → definitief HAVO-advies",
+          clickable: true
         },
         {
           naam: "Monitoring Doorlopende Lijn",
           uitleg: "Systematische monitoring van groep 1 (Mijn Kleutergroep) tot groep 8 (B8 toets) voor continue ontwikkeling.",
-          voorbeeld: "Groep 1-2: ontwikkelingsrapport → Groep 3-8: Cito-data → VO: terugkoppeling resultaten"
+          voorbeeld: "Groep 1-2: ontwikkelingsrapport → Groep 3-8: Cito-data → VO: terugkoppeling resultaten",
+          clickable: true
         },
         {
           naam: "Coördinatorrollen Data",
           uitleg: "Elke coördinator heeft specifieke taken rond data-analyse en interventies binnen hun domein.",
-          voorbeeld: "Rekencoördinator analyseert Cito Rekenen, stelt interventies voor, werkt samen met IB-er"
+          voorbeeld: "Rekencoördinator analyseert Cito Rekenen, stelt interventies voor, werkt samen met IB-er",
+          clickable: true
         }
       ],
       praktijktips: [
@@ -1206,7 +1236,6 @@ export default function PABOLeerApp() {
                               <button
                                 onClick={() => setActiveTab('klikbare-theorie')}
                                 className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                              
                               >
                                 🔗 Verdiep
                               </button>
