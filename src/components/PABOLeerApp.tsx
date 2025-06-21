@@ -4,6 +4,8 @@ import { useState } from 'react'
 import SocraticChatBot from './SocraticChatBot'
 import DocumentManager from './DocumentManager'
 import KerndoelenViewer from './KerndoelenViewer'
+import DevelopmentTheoryViewer from './DevelopmentTheoryViewer'
+import SELMethodsViewer from './SELMethodsViewer'
 import {
   CitoScoreChart,
   LVSTrendChart,
@@ -37,6 +39,8 @@ interface Module {
   completed: boolean
   hasDocumentUpload?: boolean
   visualComponents?: any[]
+  hasRichContent?: boolean
+  richContentType?: 'kerndoelen' | 'theories' | 'sel-methods' | 'data-examples' | 'skills-assessment' | 'leadership-tools'
 }
 
 const modules: Module[] = [
@@ -103,6 +107,8 @@ const modules: Module[] = [
     bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
     completed: false,
     hasDocumentUpload: true,
+    hasRichContent: true,
+    richContentType: 'kerndoelen',
     visualComponents: [
       {
         type: 'LearningLineVisual',
@@ -182,6 +188,8 @@ const modules: Module[] = [
     bronnen: ["G. Marzano, Classroom Management"],
     completed: false,
     hasDocumentUpload: true,
+    hasRichContent: true,
+    richContentType: 'theories',
     visualComponents: [
       {
         type: 'SELDevelopmentChart',
@@ -255,7 +263,9 @@ const modules: Module[] = [
     ],
     bronnen: ["Kanjertraining.nl"],
     completed: false,
-    hasDocumentUpload: true
+    hasDocumentUpload: true,
+    hasRichContent: true,
+    richContentType: 'sel-methods'
   },
   {
     id: 4,
@@ -349,6 +359,8 @@ const modules: Module[] = [
     bronnen: ["PO-Raad 'Werken met Data' toolkit"],
     completed: false,
     hasDocumentUpload: true,
+    hasRichContent: true,
+    richContentType: 'data-examples',
     visualComponents: [
       {
         type: 'CitoScoreChart',
@@ -411,6 +423,8 @@ const modules: Module[] = [
     bronnen: ["SLO 21-eeuwse vaardigheden"],
     completed: false,
     hasDocumentUpload: true,
+    hasRichContent: true,
+    richContentType: 'skills-assessment',
     visualComponents: [
       {
         type: 'SkillsRadarChart',
@@ -461,6 +475,8 @@ const modules: Module[] = [
     bronnen: ["Schoolleidersregister"],
     completed: false,
     hasDocumentUpload: true,
+    hasRichContent: true,
+    richContentType: 'leadership-tools',
     visualComponents: [
       {
         type: 'LeadershipDashboard',
@@ -567,7 +583,7 @@ const modules: Module[] = [
 
 export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
-  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'kerndoelen' | 'visueel' | 'chat'>('overzicht')
+  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'kerndoelen' | 'visueel' | 'chat' | 'verrijkt'>('overzicht')
   const [completedModules, setCompletedModules] = useState<number[]>([])
 
   const toggleModuleCompletion = (moduleId: number) => {
@@ -585,15 +601,32 @@ export default function PABOLeerApp() {
   if (selectedModule) {
     const tabs = [
       { id: 'overzicht', label: '📋 Overzicht', icon: '📋' },
-      { id: 'theorie', label: '📚 Theorie', icon: '📚' },
-      { id: 'kerndoelen', label: '🎯 Kerndoelen', icon: '🎯' },
-      { id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' }
+      { id: 'theorie', label: '📚 Theorie', icon: '📚' }
     ]
+
+    // Add rich content tab if module has it
+    if (selectedModule.hasRichContent) {
+      const richContentLabels = {
+        'kerndoelen': '🎯 Alle 58 Kerndoelen',
+        'theories': '🧠 Ontwikkelingstheorieën',
+        'sel-methods': '🤝 SEL-Methodieken',
+        'data-examples': '📊 Data Voorbeelden',
+        'skills-assessment': '🌟 Vaardigheden Assessment',
+        'leadership-tools': '👑 Leiderschapstools'
+      }
+      tabs.push({ 
+        id: 'verrijkt', 
+        label: richContentLabels[selectedModule.richContentType!] || '📖 Verrijkte Inhoud',
+        icon: '📖' 
+      })
+    }
 
     // Add visual tab if module has visual components
     if (selectedModule.visualComponents && selectedModule.visualComponents.length > 0) {
-      tabs.splice(3, 0, { id: 'visueel', label: '📊 Visueel Leren', icon: '📊' })
+      tabs.push({ id: 'visueel', label: '📊 Visueel Leren', icon: '📊' })
     }
+
+    tabs.push({ id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' })
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -754,9 +787,95 @@ export default function PABOLeerApp() {
                 </div>
               )}
 
-              {activeTab === 'kerndoelen' && (
+              {activeTab === 'verrijkt' && selectedModule.hasRichContent && (
                 <div>
-                  <KerndoelenViewer />
+                  {selectedModule.richContentType === 'kerndoelen' && <KerndoelenViewer />}
+                  {selectedModule.richContentType === 'theories' && <DevelopmentTheoryViewer />}
+                  {selectedModule.richContentType === 'sel-methods' && <SELMethodsViewer />}
+                  {selectedModule.richContentType === 'data-examples' && (
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+                        <h3 className="text-xl font-bold mb-2">📊 Data Interpretatie Voorbeelden</h3>
+                        <p className="text-indigo-100">
+                          Leer herkennen en interpreteren van echte data uit het onderwijs
+                        </p>
+                      </div>
+                      {selectedModule.visualComponents?.map((component, index) => {
+                        const Component = {
+                          CitoScoreChart,
+                          LVSTrendChart,
+                          EDIObservationCard,
+                          LearningLineVisual,
+                          SELDevelopmentChart,
+                          DifferentiationMatrix,
+                          SkillsRadarChart,
+                          LeadershipDashboard
+                        }[component.type]
+                        
+                        return Component ? (
+                          <div key={index}>
+                            <Component {...component.props} />
+                          </div>
+                        ) : null
+                      })}
+                    </div>
+                  )}
+                  {selectedModule.richContentType === 'skills-assessment' && (
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl p-6 text-white">
+                        <h3 className="text-xl font-bold mb-2">🌟 21e-eeuwse Vaardigheden Assessment</h3>
+                        <p className="text-pink-100">
+                          Beoordeel en ontwikkel moderne vaardigheden voor het onderwijs
+                        </p>
+                      </div>
+                      {selectedModule.visualComponents?.map((component, index) => {
+                        const Component = {
+                          CitoScoreChart,
+                          LVSTrendChart,
+                          EDIObservationCard,
+                          LearningLineVisual,
+                          SELDevelopmentChart,
+                          DifferentiationMatrix,
+                          SkillsRadarChart,
+                          LeadershipDashboard
+                        }[component.type]
+                        
+                        return Component ? (
+                          <div key={index}>
+                            <Component {...component.props} />
+                          </div>
+                        ) : null
+                      })}
+                    </div>
+                  )}
+                  {selectedModule.richContentType === 'leadership-tools' && (
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl p-6 text-white">
+                        <h3 className="text-xl font-bold mb-2">👑 Schoolleiderschap Dashboard</h3>
+                        <p className="text-teal-100">
+                          Praktische tools en metrics voor effectief schoolleiderschap
+                        </p>
+                      </div>
+                      {selectedModule.visualComponents?.map((component, index) => {
+                        const Component = {
+                          CitoScoreChart,
+                          LVSTrendChart,
+                          EDIObservationCard,
+                          LearningLineVisual,
+                          SELDevelopmentChart,
+                          DifferentiationMatrix,
+                          SkillsRadarChart,
+                          LeadershipDashboard
+                        }[component.type]
+                        
+                        return Component ? (
+                          <div key={index}>
+                            <Component {...component.props} />
+                          </div>
+                        ) : null
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -887,8 +1006,14 @@ export default function PABOLeerApp() {
                       <span className="mr-2">🤖</span>
                       <span>AI-begeleiding beschikbaar</span>
                     </div>
-                    {module.visualComponents && module.visualComponents.length > 0 && (
+                    {module.hasRichContent && (
                       <div className="flex items-center text-sm text-purple-600">
+                        <span className="mr-2">📖</span>
+                        <span>Verrijkte inhoud beschikbaar</span>
+                      </div>
+                    )}
+                    {module.visualComponents && module.visualComponents.length > 0 && (
+                      <div className="flex items-center text-sm text-indigo-600">
                         <span className="mr-2">📊</span>
                         <span>Visuele leercomponenten</span>
                       </div>

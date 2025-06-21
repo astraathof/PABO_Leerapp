@@ -13,7 +13,7 @@ interface Kerndoel {
 }
 
 const kerndoelen: Kerndoel[] = [
-  // Nederlandse taal
+  // Nederlandse taal (1-5)
   {
     nummer: 1,
     vakgebied: "Nederlandse taal",
@@ -79,7 +79,7 @@ const kerndoelen: Kerndoel[] = [
     ],
     leerjaren: "Groep 1-8"
   },
-  // Rekenen en wiskunde
+  // Rekenen en wiskunde (6-15)
   {
     nummer: 6,
     vakgebied: "Rekenen en wiskunde",
@@ -132,9 +132,87 @@ const kerndoelen: Kerndoel[] = [
     ],
     leerjaren: "Groep 3-8"
   },
-  // Engelse taal
   {
     nummer: 10,
+    vakgebied: "Rekenen en wiskunde",
+    titel: "Ruimte en vorm",
+    beschrijving: "De leerlingen leren ruimtelijke oriëntatie en meetkundige vormen.",
+    voorbeelden: [
+      "Vlakke figuren herkennen",
+      "Ruimtelijke figuren bouwen",
+      "Symmetrie ontdekken",
+      "Plattegronden lezen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 11,
+    vakgebied: "Rekenen en wiskunde",
+    titel: "Gegevensverwerking",
+    beschrijving: "De leerlingen leren gegevens verzamelen, ordenen en interpreteren.",
+    voorbeelden: [
+      "Tabellen maken",
+      "Diagrammen lezen",
+      "Enquêtes houden",
+      "Conclusies trekken"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 12,
+    vakgebied: "Rekenen en wiskunde",
+    titel: "Verbanden",
+    beschrijving: "De leerlingen leren verbanden en patronen herkennen en beschrijven.",
+    voorbeelden: [
+      "Rekenpatronen ontdekken",
+      "Formules gebruiken",
+      "Grafieken interpreteren",
+      "Voorspellingen doen"
+    ],
+    leerjaren: "Groep 6-8"
+  },
+  {
+    nummer: 13,
+    vakgebied: "Rekenen en wiskunde",
+    titel: "Rekenen in context",
+    beschrijving: "De leerlingen leren rekenen toepassen in realistische situaties.",
+    voorbeelden: [
+      "Boodschappen doen",
+      "Tijd plannen",
+      "Afstanden berekenen",
+      "Budgetteren"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 14,
+    vakgebied: "Rekenen en wiskunde",
+    titel: "Wiskundig redeneren",
+    beschrijving: "De leerlingen leren wiskundig denken en redeneren.",
+    voorbeelden: [
+      "Problemen oplossen",
+      "Strategieën bedenken",
+      "Uitkomsten controleren",
+      "Redeneringen uitleggen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 15,
+    vakgebied: "Rekenen en wiskunde",
+    titel: "Communiceren",
+    beschrijving: "De leerlingen leren wiskundige taal gebruiken en over wiskunde communiceren.",
+    voorbeelden: [
+      "Rekenwerk uitleggen",
+      "Wiskundige termen gebruiken",
+      "Oplossingen presenteren",
+      "Discussiëren over strategieën"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  // Engelse taal (16-19)
+  {
+    nummer: 16,
     vakgebied: "Engelse taal",
     titel: "Luisteren",
     beschrijving: "De leerlingen leren eenvoudige gesproken Engelse teksten begrijpen.",
@@ -147,7 +225,7 @@ const kerndoelen: Kerndoel[] = [
     leerjaren: "Groep 7-8"
   },
   {
-    nummer: 11,
+    nummer: 17,
     vakgebied: "Engelse taal",
     titel: "Spreken",
     beschrijving: "De leerlingen leren zich mondeling uiten in eenvoudige bewoordingen.",
@@ -160,7 +238,7 @@ const kerndoelen: Kerndoel[] = [
     leerjaren: "Groep 7-8"
   },
   {
-    nummer: 12,
+    nummer: 18,
     vakgebied: "Engelse taal",
     titel: "Lezen",
     beschrijving: "De leerlingen leren eenvoudige Engelse teksten lezen en begrijpen.",
@@ -173,7 +251,7 @@ const kerndoelen: Kerndoel[] = [
     leerjaren: "Groep 7-8"
   },
   {
-    nummer: 13,
+    nummer: 19,
     vakgebied: "Engelse taal",
     titel: "Schrijven",
     beschrijving: "De leerlingen leren eenvoudige Engelse teksten schrijven.",
@@ -185,103 +263,376 @@ const kerndoelen: Kerndoel[] = [
     ],
     leerjaren: "Groep 7-8"
   },
-  // Oriëntatie op jezelf en de wereld
-  {
-    nummer: 14,
-    vakgebied: "Oriëntatie op jezelf en de wereld",
-    titel: "Mens en samenleving",
-    beschrijving: "De leerlingen leren over het functioneren van de mens in de samenleving.",
-    voorbeelden: [
-      "Familie en vriendschap",
-      "Regels en afspraken",
-      "Verschillende culturen",
-      "Democratie en verkiezingen"
-    ],
-    leerjaren: "Groep 1-8"
-  },
-  {
-    nummer: 15,
-    vakgebied: "Oriëntatie op jezelf en de wereld",
-    titel: "Geschiedenis",
-    beschrijving: "De leerlingen leren over het verleden en de ontwikkeling van de samenleving.",
-    voorbeelden: [
-      "Prehistorie",
-      "Middeleeuwen",
-      "Gouden Eeuw",
-      "Tweede Wereldoorlog"
-    ],
-    leerjaren: "Groep 5-8"
-  },
-  {
-    nummer: 16,
-    vakgebied: "Oriëntatie op jezelf en de wereld",
-    titel: "Aardrijkskunde",
-    beschrijving: "De leerlingen leren over de aarde, landschappen en verschillende landen.",
-    voorbeelden: [
-      "Nederland en provincies",
-      "Werelddelen",
-      "Klimaat en weer",
-      "Steden en dorpen"
-    ],
-    leerjaren: "Groep 5-8"
-  },
-  {
-    nummer: 17,
-    vakgebied: "Oriëntatie op jezelf en de wereld",
-    titel: "Natuur en techniek",
-    beschrijving: "De leerlingen leren over natuurverschijnselen en technische toepassingen.",
-    voorbeelden: [
-      "Planten en dieren",
-      "Weer en seizoenen",
-      "Machines en werktuigen",
-      "Milieu en duurzaamheid"
-    ],
-    leerjaren: "Groep 1-8"
-  },
-  {
-    nummer: 18,
-    vakgebied: "Oriëntatie op jezelf en de wereld",
-    titel: "Gezondheid en welzijn",
-    beschrijving: "De leerlingen leren over gezond leven en welzijn.",
-    voorbeelden: [
-      "Gezonde voeding",
-      "Beweging en sport",
-      "Hygiëne",
-      "Veiligheid"
-    ],
-    leerjaren: "Groep 1-8"
-  },
-  // Kunstzinnige oriëntatie
-  {
-    nummer: 19,
-    vakgebied: "Kunstzinnige oriëntatie",
-    titel: "Beeldende vorming",
-    beschrijving: "De leerlingen leren beelden maken, bekijken en bespreken.",
-    voorbeelden: [
-      "Tekenen en schilderen",
-      "Boetseren en bouwen",
-      "Kunstwerken bekijken",
-      "Eigen werk presenteren"
-    ],
-    leerjaren: "Groep 1-8"
-  },
+  // Oriëntatie op jezelf en de wereld (20-43)
   {
     nummer: 20,
-    vakgebied: "Kunstzinnige oriëntatie",
-    titel: "Muzikale vorming",
-    beschrijving: "De leerlingen leren muziek maken, beluisteren en waarderen.",
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Mens en samenleving - Identiteit",
+    beschrijving: "De leerlingen leren over hun eigen identiteit en die van anderen.",
     voorbeelden: [
-      "Liedjes zingen",
-      "Instrumenten bespelen",
-      "Naar muziek luisteren",
-      "Ritme en melodie"
+      "Familiegeschiedenis",
+      "Culturele achtergrond",
+      "Persoonlijke eigenschappen",
+      "Verschillende tradities"
     ],
     leerjaren: "Groep 1-8"
   },
   {
     nummer: 21,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Mens en samenleving - Samenleven",
+    beschrijving: "De leerlingen leren over samenleven in groepen en gemeenschappen.",
+    voorbeelden: [
+      "Klassenregels maken",
+      "Conflicten oplossen",
+      "Samenwerken",
+      "Respect tonen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 22,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Mens en samenleving - Sociale rollen",
+    beschrijving: "De leerlingen leren over verschillende rollen in de samenleving.",
+    voorbeelden: [
+      "Beroepen ontdekken",
+      "Familie rollen",
+      "Verantwoordelijkheden",
+      "Hulpverlening"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 23,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Mens en samenleving - Regels en afspraken",
+    beschrijving: "De leerlingen leren over regels, wetten en democratie.",
+    voorbeelden: [
+      "Verkeersregels",
+      "Schoolregels",
+      "Verkiezingen",
+      "Rechten en plichten"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 24,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Mens en samenleving - Diversiteit",
+    beschrijving: "De leerlingen leren over culturele en sociale diversiteit.",
+    voorbeelden: [
+      "Verschillende culturen",
+      "Religies en tradities",
+      "Talen in Nederland",
+      "Inclusie en acceptatie"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 25,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Geschiedenis - Chronologisch besef",
+    beschrijving: "De leerlingen leren tijdsbesef en chronologie ontwikkelen.",
+    voorbeelden: [
+      "Tijdlijn maken",
+      "Voor en na begrijpen",
+      "Generaties vergelijken",
+      "Historische volgorde"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 26,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Geschiedenis - Kenmerkende aspecten",
+    beschrijving: "De leerlingen leren kenmerkende aspecten van tijdvakken herkennen.",
+    voorbeelden: [
+      "Prehistorie kenmerken",
+      "Middeleeuwen herkennen",
+      "Gouden Eeuw aspecten",
+      "Moderne tijd vergelijken"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 27,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Geschiedenis - Historisch besef",
+    beschrijving: "De leerlingen leren historisch denken en redeneren.",
+    voorbeelden: [
+      "Oorzaak en gevolg",
+      "Bronnen onderzoeken",
+      "Verhalen vergelijken",
+      "Verandering begrijpen"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 28,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Aardrijkskunde - Ruimtelijke oriëntatie",
+    beschrijving: "De leerlingen leren zich oriënteren in de ruimte.",
+    voorbeelden: [
+      "Kaarten lezen",
+      "Kompas gebruiken",
+      "Routes plannen",
+      "Locaties beschrijven"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 29,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Aardrijkskunde - Kenmerken van Nederland",
+    beschrijving: "De leerlingen leren over de kenmerken van Nederland.",
+    voorbeelden: [
+      "Provincies kennen",
+      "Landschappen herkennen",
+      "Steden en dorpen",
+      "Waterwegen"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 30,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Aardrijkskunde - Kenmerken van Europa",
+    beschrijving: "De leerlingen leren over Europa en de Europese Unie.",
+    voorbeelden: [
+      "Europese landen",
+      "Hoofdsteden",
+      "EU samenwerking",
+      "Europese culturen"
+    ],
+    leerjaren: "Groep 7-8"
+  },
+  {
+    nummer: 31,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Aardrijkskunde - Kenmerken van de wereld",
+    beschrijving: "De leerlingen leren over werelddelen en landen.",
+    voorbeelden: [
+      "Continenten",
+      "Klimaatzones",
+      "Wereldsteden",
+      "Cultuurverschillen"
+    ],
+    leerjaren: "Groep 6-8"
+  },
+  {
+    nummer: 32,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Aardrijkskunde - Wisselwerking mens-omgeving",
+    beschrijving: "De leerlingen leren over de relatie tussen mens en omgeving.",
+    voorbeelden: [
+      "Landgebruik",
+      "Milieuproblemen",
+      "Duurzaamheid",
+      "Klimaatverandering"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 33,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Natuur - Planten en dieren",
+    beschrijving: "De leerlingen leren over de diversiteit van planten en dieren.",
+    voorbeelden: [
+      "Dieren classificeren",
+      "Plantengroei",
+      "Ecosystemen",
+      "Voedselketens"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 34,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Natuur - Materialen en voorwerpen",
+    beschrijving: "De leerlingen leren over eigenschappen van materialen.",
+    voorbeelden: [
+      "Materialen testen",
+      "Eigenschappen vergelijken",
+      "Geschiktheid beoordelen",
+      "Recycling"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 35,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Natuur - Verschijnselen en processen",
+    beschrijving: "De leerlingen leren over natuurverschijnselen en processen.",
+    voorbeelden: [
+      "Weer en seizoenen",
+      "Dag en nacht",
+      "Waterkringloop",
+      "Groei en ontwikkeling"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 36,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Natuur - Onderzoek doen",
+    beschrijving: "De leerlingen leren onderzoek doen naar natuurverschijnselen.",
+    voorbeelden: [
+      "Hypotheses opstellen",
+      "Experimenten uitvoeren",
+      "Waarnemingen doen",
+      "Conclusies trekken"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 37,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Techniek - Ontwerpen en maken",
+    beschrijving: "De leerlingen leren technische problemen oplossen door ontwerpen.",
+    voorbeelden: [
+      "Constructies bouwen",
+      "Problemen analyseren",
+      "Oplossingen bedenken",
+      "Prototypes maken"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 38,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Techniek - Systemen",
+    beschrijving: "De leerlingen leren over technische systemen en hun werking.",
+    voorbeelden: [
+      "Machines begrijpen",
+      "Energie gebruiken",
+      "Automatisering",
+      "ICT-systemen"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 39,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "ICT - Basisvaardigheden",
+    beschrijving: "De leerlingen leren basisvaardigheden voor ICT-gebruik.",
+    voorbeelden: [
+      "Computer bedienen",
+      "Programma's gebruiken",
+      "Bestanden beheren",
+      "Internet navigeren"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 40,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "ICT - Informatievaardigheden",
+    beschrijving: "De leerlingen leren informatie zoeken, beoordelen en gebruiken.",
+    voorbeelden: [
+      "Zoeken op internet",
+      "Bronnen beoordelen",
+      "Informatie verwerken",
+      "Presentaties maken"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 41,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "ICT - Computational thinking",
+    beschrijving: "De leerlingen leren computationeel denken en programmeren.",
+    voorbeelden: [
+      "Algoritmes maken",
+      "Patronen herkennen",
+      "Problemen opdelen",
+      "Eenvoudig programmeren"
+    ],
+    leerjaren: "Groep 5-8"
+  },
+  {
+    nummer: 42,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Gezondheid - Lichaam en gezondheid",
+    beschrijving: "De leerlingen leren over het menselijk lichaam en gezondheid.",
+    voorbeelden: [
+      "Lichaamsdelen kennen",
+      "Gezonde voeding",
+      "Beweging en rust",
+      "Hygiëne"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 43,
+    vakgebied: "Oriëntatie op jezelf en de wereld",
+    titel: "Gezondheid - Veiligheid",
+    beschrijving: "De leerlingen leren over veiligheid en risico's.",
+    voorbeelden: [
+      "Verkeersdeelname",
+      "Eerste hulp",
+      "Gevaarherkenning",
+      "Sociale veiligheid"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  // Kunstzinnige oriëntatie (44-51)
+  {
+    nummer: 44,
     vakgebied: "Kunstzinnige oriëntatie",
-    titel: "Drama",
+    titel: "Beeldende vorming - Maken",
+    beschrijving: "De leerlingen leren beelden maken met verschillende materialen en technieken.",
+    voorbeelden: [
+      "Tekenen en schilderen",
+      "Boetseren en bouwen",
+      "Collages maken",
+      "Digitaal ontwerpen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 45,
+    vakgebied: "Kunstzinnige oriëntatie",
+    titel: "Beeldende vorming - Kijken",
+    beschrijving: "De leerlingen leren beelden bekijken en bespreken.",
+    voorbeelden: [
+      "Kunstwerken analyseren",
+      "Stijlen herkennen",
+      "Betekenis bespreken",
+      "Eigen mening vormen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 46,
+    vakgebied: "Kunstzinnige oriëntatie",
+    titel: "Muzikale vorming - Luisteren",
+    beschrijving: "De leerlingen leren muziek beluisteren en waarderen.",
+    voorbeelden: [
+      "Muziekstijlen herkennen",
+      "Instrumenten benoemen",
+      "Ritme en melodie",
+      "Emoties in muziek"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 47,
+    vakgebied: "Kunstzinnige oriëntatie",
+    titel: "Muzikale vorming - Maken",
+    beschrijving: "De leerlingen leren muziek maken en uitvoeren.",
+    voorbeelden: [
+      "Liedjes zingen",
+      "Instrumenten bespelen",
+      "Ritmes maken",
+      "Muziek componeren"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 48,
+    vakgebied: "Kunstzinnige oriëntatie",
+    titel: "Drama - Spelen",
     beschrijving: "De leerlingen leren spelen, toneelspelen en verhalen uitbeelden.",
     voorbeelden: [
       "Rollenspel",
@@ -292,9 +643,22 @@ const kerndoelen: Kerndoel[] = [
     leerjaren: "Groep 1-8"
   },
   {
-    nummer: 22,
+    nummer: 49,
     vakgebied: "Kunstzinnige oriëntatie",
-    titel: "Dans en beweging",
+    titel: "Drama - Reflecteren",
+    beschrijving: "De leerlingen leren reflecteren op drama-activiteiten.",
+    voorbeelden: [
+      "Eigen spel bespreken",
+      "Feedback geven",
+      "Emoties herkennen",
+      "Verbeteringen bedenken"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 50,
+    vakgebied: "Kunstzinnige oriëntatie",
+    titel: "Dans en beweging - Bewegen",
     beschrijving: "De leerlingen leren bewegen op muziek en dansen.",
     voorbeelden: [
       "Volksdansen",
@@ -304,12 +668,25 @@ const kerndoelen: Kerndoel[] = [
     ],
     leerjaren: "Groep 1-8"
   },
-  // Bewegingsonderwijs
   {
-    nummer: 23,
+    nummer: 51,
+    vakgebied: "Kunstzinnige oriëntatie",
+    titel: "Dans en beweging - Waarderen",
+    beschrijving: "De leerlingen leren dans en beweging waarderen.",
+    voorbeelden: [
+      "Dansvoorstellingen bekijken",
+      "Bewegingskwaliteit beoordelen",
+      "Culturele dansen ontdekken",
+      "Eigen voorkeur ontwikkelen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  // Bewegingsonderwijs (52-58)
+  {
+    nummer: 52,
     vakgebied: "Bewegingsonderwijs",
-    titel: "Lichamelijke oefening",
-    beschrijving: "De leerlingen leren bewegen, sporten en spelen.",
+    titel: "Bewegen en spel",
+    beschrijving: "De leerlingen leren bewegen en sporten in verschillende situaties.",
     voorbeelden: [
       "Hardlopen en springen",
       "Balspelen",
@@ -317,8 +694,85 @@ const kerndoelen: Kerndoel[] = [
       "Zwemmen"
     ],
     leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 53,
+    vakgebied: "Bewegingsonderwijs",
+    titel: "Motorische vaardigheden",
+    beschrijving: "De leerlingen leren grove en fijne motorische vaardigheden ontwikkelen.",
+    voorbeelden: [
+      "Coördinatie oefenen",
+      "Balans houden",
+      "Kracht ontwikkelen",
+      "Lenigheid verbeteren"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 54,
+    vakgebied: "Bewegingsonderwijs",
+    titel: "Samenwerken en competitie",
+    beschrijving: "De leerlingen leren samenwerken en omgaan met competitie.",
+    voorbeelden: [
+      "Teamsporten",
+      "Eerlijk spelen",
+      "Winnen en verliezen",
+      "Regels respecteren"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 55,
+    vakgebied: "Bewegingsonderwijs",
+    titel: "Conditie en gezondheid",
+    beschrijving: "De leerlingen leren over conditie en de relatie tussen bewegen en gezondheid.",
+    voorbeelden: [
+      "Uithoudingsvermogen",
+      "Hartslag meten",
+      "Warming-up en cooling-down",
+      "Gezonde leefstijl"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 56,
+    vakgebied: "Bewegingsonderwijs",
+    titel: "Veiligheid",
+    beschrijving: "De leerlingen leren veilig bewegen en sporten.",
+    voorbeelden: [
+      "Veilige speelruimte",
+      "Beschermende kleding",
+      "Risico's inschatten",
+      "Hulp vragen"
+    ],
+    leerjaren: "Groep 1-8"
+  },
+  {
+    nummer: 57,
+    vakgebied: "Bewegingsonderwijs",
+    titel: "Zelfstandigheid",
+    beschrijving: "De leerlingen leren zelfstandig bewegen en sporten.",
+    voorbeelden: [
+      "Eigen grenzen kennen",
+      "Keuzes maken",
+      "Initiatief nemen",
+      "Verantwoordelijkheid"
+    ],
+    leerjaren: "Groep 3-8"
+  },
+  {
+    nummer: 58,
+    vakgebied: "Bewegingsonderwijs",
+    titel: "Waardering",
+    beschrijving: "De leerlingen leren bewegen en sport waarderen.",
+    voorbeelden: [
+      "Plezier in bewegen",
+      "Verschillende sporten proberen",
+      "Prestaties waarderen",
+      "Levenslang bewegen"
+    ],
+    leerjaren: "Groep 1-8"
   }
-  // Note: In werkelijkheid zijn er 58 kerndoelen, hier toon ik de eerste 23 als voorbeeld
 ]
 
 export default function KerndoelenViewer() {
