@@ -3,8 +3,8 @@ import mammoth from 'mammoth'
 import * as pdfjsLib from 'pdfjs-dist'
 import path from 'path'
 
-// Set worker source to local file
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+// Set worker source to the actual file path in node_modules
+pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(process.cwd(), 'node_modules/pdfjs-dist/build/pdf.worker.min.js')
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
