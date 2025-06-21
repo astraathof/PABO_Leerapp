@@ -20,6 +20,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<UploadedDocument | null>(null)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -98,12 +99,15 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       // Reset file input
       event.target.value = ''
       
-      alert(`✅ Document "${result.fileName}" succesvol geüpload!\n\nType: ${result.detectedType}\nWoorden: ${result.wordCount.toLocaleString()}\n\n🤖 Je kunt nu direct chatten met de AI over dit document!`)
+      // Show success message
+      setShowSuccessMessage(true)
       
-      // Force a page refresh to ensure the chat component picks up the new document
+      // Auto-navigate to chat after 2 seconds
       setTimeout(() => {
-        window.location.reload()
-      }, 1000)
+        // Navigate to a module with AI chat
+        const moduleUrl = '/module/burgerschap-diversiteit' // Default to burgerschap module
+        window.location.href = moduleUrl
+      }, 2000)
       
     } catch (error) {
       console.error('Upload error:', error)
@@ -138,8 +142,31 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     return '📄'
   }
 
+  const navigateToChat = () => {
+    // Navigate to burgerschap module with AI chat
+    window.location.href = '#burgerschap-chat'
+  }
+
   return (
     <div className="space-y-6">
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="bg-green-500 text-white rounded-xl p-6 shadow-lg">
+          <div className="flex items-center space-x-3 mb-3">
+            <span className="text-3xl">🎉</span>
+            <div>
+              <h3 className="text-xl font-bold">Perfect! Document succesvol geüpload!</h3>
+              <p className="text-green-100">Je wordt automatisch doorgestuurd naar de AI-chat...</p>
+            </div>
+          </div>
+          <div className="bg-white bg-opacity-20 rounded-lg p-3">
+            <p className="text-sm">
+              💬 <strong>Wat kun je nu doen?</strong> Stel vragen over je schooldocument aan de AI-mentor!
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Upload Section */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">📚 Mijn Schooldocumenten</h2>
@@ -203,8 +230,16 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold text-gray-800">📂 Geüploade Documenten ({documents.length})</h3>
-            <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-              ✅ Beschikbaar voor AI-begeleiding
+            <div className="flex items-center space-x-3">
+              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                ✅ Beschikbaar voor AI-begeleiding
+              </div>
+              <button
+                onClick={navigateToChat}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                💬 Start AI Chat
+              </button>
             </div>
           </div>
           
@@ -268,6 +303,30 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         </div>
       )}
 
+      {/* Quick Start with Documents */}
+      {documents.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
+          <h3 className="text-xl font-bold mb-3">🚀 Klaar om te Chatten met je Documenten!</h3>
+          <p className="text-purple-100 mb-4">
+            Je hebt {documents.length} document(en) geüpload. Start nu direct een gesprek met de AI over je schoolpraktijk!
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={navigateToChat}
+              className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
+            >
+              💬 Start AI Chat Nu
+            </button>
+            <button
+              onClick={() => window.location.href = '#modules'}
+              className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
+            >
+              📚 Bekijk Alle Modules
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Usage Instructions */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200">
         <h3 className="text-lg font-bold text-green-800 mb-3">💡 Hoe gebruik je je documenten met AI?</h3>
@@ -279,25 +338,25 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">2️⃣</span>
-              <span className="text-green-700">Ga naar een module (bijv. Burgerschap & Diversiteit)</span>
+              <span className="text-green-700">Klik op "Start AI Chat" of ga naar een module</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">3️⃣</span>
-              <span className="text-green-700">Klik op "AI Begeleiding" in de module</span>
+              <span className="text-green-700">De chatbot start automatisch met je documenten!</span>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">4️⃣</span>
-              <span className="text-green-700">De chatbot start automatisch met je documenten!</span>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600 mt-0.5">5️⃣</span>
               <span className="text-green-700">Stel vragen over je schoolplan en krijg gepersonaliseerde antwoorden</span>
             </div>
             <div className="flex items-start space-x-2">
-              <span className="text-green-600 mt-0.5">6️⃣</span>
+              <span className="text-green-600 mt-0.5">5️⃣</span>
               <span className="text-green-700">Gebruik spraakherkenning voor hands-free chatten!</span>
+            </div>
+            <div className="flex items-start space-x-2">
+              <span className="text-green-600 mt-0.5">6️⃣</span>
+              <span className="text-green-700">Koppel theorie aan jouw specifieke schoolsituatie</span>
             </div>
           </div>
         </div>

@@ -183,6 +183,13 @@ const modules: Module[] = [
 
 const opdrachten = [
   {
+    titel: "Burgerschap Activiteit",
+    beschrijving: "Ontwerp een activiteit voor burgerschapsonderwijs",
+    type: "ontwerp" as const,
+    startVraag: "Welke burgerschapsactiviteit ga je organiseren en wat zijn je doelen?",
+    context: "Je wilt burgerschapsonderwijs concreet vormgeven in je klas of school."
+  },
+  {
     titel: "Kerndoel Implementatie Plan",
     beschrijving: "Maak een concreet plan om een kerndoel te implementeren in je groep",
     type: "ontwerp" as const,
@@ -232,13 +239,6 @@ const opdrachten = [
     context: "Je bent bezig met je professionele ontwikkeling als (aanstaand) schoolleider."
   },
   {
-    titel: "Burgerschap Activiteit",
-    beschrijving: "Ontwerp een activiteit voor burgerschapsonderwijs",
-    type: "ontwerp" as const,
-    startVraag: "Welke burgerschapsactiviteit ga je organiseren en wat zijn je doelen?",
-    context: "Je wilt burgerschapsonderwijs concreet vormgeven in je klas of school."
-  },
-  {
     titel: "Cito Analyse & Actieplan",
     beschrijving: "Analyseer Cito-trends en maak een verbeterplan",
     type: "analyse" as const,
@@ -252,6 +252,19 @@ export default function PABOLeerApp() {
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
   const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null)
   const [showDocumentManager, setShowDocumentManager] = useState(false)
+
+  // Check URL hash for direct navigation
+  useState(() => {
+    const hash = window.location.hash
+    if (hash === '#burgerschap-chat') {
+      setActiveModule('module8')
+      setActiveComponent('AI Begeleiding')
+    } else if (hash === '#modules') {
+      // Stay on homepage
+    } else if (hash === '#documents') {
+      setShowDocumentManager(true)
+    }
+  })
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -388,6 +401,8 @@ export default function PABOLeerApp() {
                   onClick={() => {
                     setActiveComponent(null)
                     setActiveModule(null)
+                    // Clear hash
+                    window.location.hash = ''
                   }}
                   className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
