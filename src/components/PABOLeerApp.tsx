@@ -35,6 +35,8 @@ interface Module {
   color: string
   specialViewers: string[]
   clickable: boolean
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced'
+  duration: string
   opdrachten: {
     titel: string
     beschrijving: string
@@ -51,6 +53,8 @@ const modules: Module[] = [
     description: 'Leer de 58 kerndoelen kennen en hoe je deze implementeert in je lespraktijk',
     icon: '📚',
     color: 'bg-blue-600',
+    difficulty: 'Beginner',
+    duration: '2-3 weken',
     specialViewers: ['kerndoelen', 'curriculum-mapping', 'kerndoel-progressie', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -76,6 +80,8 @@ const modules: Module[] = [
     description: 'Begrijp hoe kinderen zich ontwikkelen en pas je onderwijs hierop aan',
     icon: '🧠',
     color: 'bg-purple-600',
+    difficulty: 'Intermediate',
+    duration: '3-4 weken',
     specialViewers: ['ontwikkelingstheorieen', 'ontwikkelingsstadia-timeline', 'sel-development', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -101,6 +107,8 @@ const modules: Module[] = [
     description: 'Creëer een positief klassenklimaat en ontwikkel sociale vaardigheden',
     icon: '❤️',
     color: 'bg-red-600',
+    difficulty: 'Intermediate',
+    duration: '2-3 weken',
     specialViewers: ['sel-methodieken', 'sel-competentie-radar', 'klassenklimaat', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -126,6 +134,8 @@ const modules: Module[] = [
     description: 'Leer onderwijs aan te passen aan verschillende leerbehoeften',
     icon: '🎯',
     color: 'bg-green-600',
+    difficulty: 'Advanced',
+    duration: '3-4 weken',
     specialViewers: ['differentiatie-matrix', 'inclusief-onderwijs', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -151,6 +161,8 @@ const modules: Module[] = [
     description: 'Gebruik data om je onderwijs te verbeteren en leerlingen te volgen',
     icon: '📊',
     color: 'bg-indigo-600',
+    difficulty: 'Advanced',
+    duration: '2-3 weken',
     specialViewers: ['cito-scores', 'lvs-trends', 'data-analyse-dashboard', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -176,6 +188,8 @@ const modules: Module[] = [
     description: 'Ontwikkel vaardigheden die leerlingen nodig hebben voor de toekomst',
     icon: '💡',
     color: 'bg-yellow-600',
+    difficulty: 'Intermediate',
+    duration: '3-4 weken',
     specialViewers: ['skills-radar', 'innovation-cycle', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -201,6 +215,8 @@ const modules: Module[] = [
     description: 'Ontwikkel leiderschapsvaardigheden voor onderwijsvernieuwing',
     icon: '👑',
     color: 'bg-orange-600',
+    difficulty: 'Advanced',
+    duration: '4-5 weken',
     specialViewers: ['leadership-dashboard', 'verandermanagement', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -226,6 +242,8 @@ const modules: Module[] = [
     description: 'Vorm actieve burgers en vier diversiteit in je onderwijs',
     icon: '🏛️',
     color: 'bg-teal-600',
+    difficulty: 'Intermediate',
+    duration: '2-3 weken',
     specialViewers: ['citizenship-competency', 'diversiteit', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -251,6 +269,8 @@ const modules: Module[] = [
     description: 'Leer over schoolleiderschap, Cito-monitoring en kwaliteitszorg',
     icon: '🎓',
     color: 'bg-gray-600',
+    difficulty: 'Advanced',
+    duration: '3-4 weken',
     specialViewers: ['cito-monitoring', 'coordinatorrollen', 'klikbare-theorie'],
     clickable: true,
     opdrachten: [
@@ -274,11 +294,20 @@ const modules: Module[] = [
 
 export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
-  const [activeView, setActiveView] = useState<string>('overzicht')
+  const [activeView, setActiveView] = useState<string>('modules')
 
   const handleModuleSelect = (module: Module) => {
     setSelectedModule(module)
     setActiveView('overzicht')
+  }
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner': return 'bg-green-100 text-green-800'
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800'
+      case 'Advanced': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
   }
 
   const renderSpecialViewer = (viewerType: string, moduleId?: string) => {
@@ -935,29 +964,67 @@ export default function PABOLeerApp() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">🎓 PABO Leerapp</h1>
-          <p className="text-xl text-blue-100 mb-6">
-            Interactieve leerapp voor PABO-studenten met AI-begeleiding
-          </p>
-          <div className="flex justify-center space-x-6 text-sm">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🤖</span>
-              <span>AI-begeleiding</span>
+      {/* Hero Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-4">🎓 PABO Leerapp</h1>
+            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+              Interactieve leerapp voor PABO-studenten met AI-begeleiding, visuele tools en klikbare theorie
+            </p>
+            
+            {/* Feature highlights */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+              <div className="text-center">
+                <div className="text-3xl mb-2">🤖</div>
+                <div className="font-medium">AI-begeleiding</div>
+                <div className="text-sm text-blue-200">Socratische methode</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl mb-2">📊</div>
+                <div className="font-medium">Visueel leren</div>
+                <div className="text-sm text-blue-200">Interactieve tools</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl mb-2">🔗</div>
+                <div className="font-medium">Klikbare theorie</div>
+                <div className="text-sm text-blue-200">Verdiepende uitleg</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl mb-2">📚</div>
+                <div className="font-medium">Document-integratie</div>
+                <div className="text-sm text-blue-200">Jouw schooldocumenten</div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">📊</span>
-              <span>Visueel leren</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🔗</span>
-              <span>Klikbare theorie</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">📚</span>
-              <span>Document-integratie</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Start Guide */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200 mb-8">
+          <h2 className="text-xl font-bold text-green-800 mb-4">🚀 Waar wil je beginnen?</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <button
+              onClick={() => setActiveView('modules')}
+              className="bg-white p-4 rounded-lg border border-green-200 hover:shadow-md transition-all text-left"
+            >
+              <div className="text-2xl mb-2">📚</div>
+              <div className="font-medium text-green-800">Verken Modules</div>
+              <div className="text-sm text-green-600">9 complete leermodules</div>
+            </button>
+            <button
+              onClick={() => setActiveView('documenten')}
+              className="bg-white p-4 rounded-lg border border-green-200 hover:shadow-md transition-all text-left"
+            >
+              <div className="text-2xl mb-2">📄</div>
+              <div className="font-medium text-green-800">Upload Documenten</div>
+              <div className="text-sm text-green-600">Jouw schooldocumenten</div>
+            </button>
+            <div className="bg-white p-4 rounded-lg border border-green-200">
+              <div className="text-2xl mb-2">💡</div>
+              <div className="font-medium text-green-800">Tip voor Beginners</div>
+              <div className="text-sm text-green-600">Start met Module 1: Curriculum</div>
             </div>
           </div>
         </div>
@@ -994,10 +1061,30 @@ export default function PABOLeerApp() {
       {/* Content */}
       <div className="max-w-7xl mx-auto p-6">
         {activeView === 'modules' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Module Categories */}
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Kies een module om te starten</h2>
-              <p className="text-gray-600">Elke module bevat AI-begeleiding, visuele tools en klikbare theorie</p>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Kies een module om te starten</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Elke module bevat AI-begeleiding, visuele tools en klikbare theorie. 
+                Begin met een module die past bij jouw niveau en interesse.
+              </p>
+            </div>
+
+            {/* Difficulty Filter */}
+            <div className="flex justify-center space-x-4 mb-8">
+              <div className="flex items-center space-x-2 px-4 py-2 bg-green-100 rounded-full">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium text-green-800">Beginner</span>
+              </div>
+              <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 rounded-full">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span className="text-sm font-medium text-yellow-800">Intermediate</span>
+              </div>
+              <div className="flex items-center space-x-2 px-4 py-2 bg-red-100 rounded-full">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-sm font-medium text-red-800">Advanced</span>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1005,18 +1092,26 @@ export default function PABOLeerApp() {
                 <div
                   key={module.id}
                   onClick={() => handleModuleSelect(module)}
-                  className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all cursor-pointer group"
+                  className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all cursor-pointer group transform hover:-translate-y-1"
                 >
-                  <div className={`${module.color} p-6 text-white`}>
-                    <div className="flex items-center space-x-3 mb-3">
-                      <span className="text-3xl">{module.icon}</span>
-                      <h3 className="text-xl font-bold">{module.title}</h3>
+                  <div className={`${module.color} p-6 text-white relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 p-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(module.difficulty)}`}>
+                        {module.difficulty}
+                      </span>
                     </div>
-                    <p className="text-sm opacity-90">{module.description}</p>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-4xl">{module.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold">{module.title}</h3>
+                        <p className="text-sm opacity-90">{module.duration}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm opacity-90 line-clamp-2">{module.description}</p>
                   </div>
                   
                   <div className="p-6">
-                    <div className="space-y-3">
+                    <div className="space-y-3 mb-4">
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <span className="text-blue-500">🤖</span>
                         <span>AI-begeleiding beschikbaar</span>
@@ -1037,14 +1132,47 @@ export default function PABOLeerApp() {
                       </div>
                     </div>
                     
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        Start Module →
-                      </button>
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-500">
+                          Geschatte tijd: {module.duration}
+                        </div>
+                        <div className="text-2xl group-hover:scale-110 transition-transform">
+                          →
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Learning Path Suggestion */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200 mt-8">
+              <h3 className="text-xl font-bold text-purple-800 mb-4">💡 Aanbevolen Leerpad</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-purple-200">
+                  <div className="text-2xl mb-2">🌱</div>
+                  <div className="font-medium text-purple-800">Beginners</div>
+                  <div className="text-sm text-purple-600 mt-2">
+                    Start met Module 1 (Curriculum) → Module 2 (Ontwikkeling) → Module 3 (SEL)
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-purple-200">
+                  <div className="text-2xl mb-2">🌿</div>
+                  <div className="font-medium text-purple-800">Gevorderden</div>
+                  <div className="text-sm text-purple-600 mt-2">
+                    Focus op Module 4 (Differentiatie) → Module 5 (Data) → Module 6 (21e eeuw)
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-purple-200">
+                  <div className="text-2xl mb-2">🌳</div>
+                  <div className="font-medium text-purple-800">Experts</div>
+                  <div className="text-sm text-purple-600 mt-2">
+                    Verdiep je in Module 7 (Leiderschap) → Module 8 (Burgerschap) → Module 9 (Cito)
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

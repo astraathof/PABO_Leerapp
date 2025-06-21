@@ -445,6 +445,98 @@ const selMethoden: SELMethod[] = [
         "Schoolpraktijk evaluaties"
       ]
     }
+  },
+  {
+    id: 'vreedzame-school',
+    naam: "De Vreedzame School",
+    organisatie: "Stichting Vreedzame School",
+    doelgroep: "Groep 1-8, hele school",
+    kerncompetenties: [
+      "Conflictoplossing",
+      "Communicatie",
+      "Empathie",
+      "Samenwerking",
+      "Geweldloze communicatie"
+    ],
+    methodiek: {
+      aanpak: "Systematische aanpak voor vreedzame conflictoplossing en communicatie",
+      materialen: [
+        "Lesmaterialen per groep",
+        "Conflictoplossingskaarten",
+        "Vredeshoek materiaal",
+        "Trainingshandleidingen"
+      ],
+      tijdsduur: "30-45 minuten per les",
+      frequentie: "Wekelijks gedurende het schooljaar"
+    },
+    voordelen: [
+      "Minder conflicten en agressie",
+      "Betere communicatievaardigheden",
+      "Veiliger schoolklimaat",
+      "Zelfstandige conflictoplossing",
+      "Positieve schoolcultuur"
+    ],
+    uitdagingen: [
+      "Intensieve training vereist",
+      "Hele school moet meedoen",
+      "Tijd voor implementatie",
+      "Cultuurverandering nodig",
+      "Volhouden op lange termijn"
+    ],
+    praktijkvoorbeelden: [
+      {
+        activiteit: "Vredeshoek",
+        beschrijving: "Speciale plek in de klas waar kinderen conflicten zelfstandig oplossen met vaste stappen",
+        leeftijd: "Groep 1-8"
+      },
+      {
+        activiteit: "Ik-boodschappen",
+        beschrijving: "Kinderen leren hun gevoelens uiten zonder anderen te beschuldigen",
+        leeftijd: "Groep 3-8"
+      },
+      {
+        activiteit: "Actief luisteren",
+        beschrijving: "Technieken om echt naar elkaar te luisteren en begrip te tonen",
+        leeftijd: "Groep 4-8"
+      },
+      {
+        activiteit: "Bemiddeling",
+        beschrijving: "Oudere leerlingen leren anderen te helpen bij conflictoplossing",
+        leeftijd: "Groep 6-8"
+      }
+    ],
+    implementatie: {
+      stappen: [
+        "Schoolteam training (3 dagen)",
+        "Ouderinformatie en betrokkenheid",
+        "Geleidelijke invoering per groep",
+        "Vredeshoeken inrichten",
+        "Evaluatie en bijstelling",
+        "Jaarlijkse opfriscursus"
+      ],
+      succesfactoren: [
+        "Commitment van hele team",
+        "Ondersteuning schoolleiding",
+        "Structurele inbedding",
+        "Ouderbetrokkenheid",
+        "Consequente toepassing"
+      ],
+      valkuilen: [
+        "Onvolledige implementatie",
+        "Geen follow-up training",
+        "Weerstand van collega's",
+        "Te snel opgeven",
+        "Geen tijd voor oefening"
+      ]
+    },
+    onderzoek: {
+      effectiviteit: "Significante afname van conflicten en verbetering van schoolklimaat",
+      bronnen: [
+        "Evaluatieonderzoek Universiteit van Amsterdam",
+        "Praktijkonderzoek 200+ scholen",
+        "Longitudinale studies effectiviteit"
+      ]
+    }
   }
 ]
 
@@ -534,7 +626,10 @@ export default function SELMethodsViewer() {
             
             {compareMode && selectedForComparison.length > 1 && (
               <button
-                onClick={() => {/* Scroll to comparison */}}
+                onClick={() => {
+                  const comparisonElement = document.getElementById('comparison-section')
+                  comparisonElement?.scrollIntoView({ behavior: 'smooth' })
+                }}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
               >
                 Vergelijk ({selectedForComparison.length})
@@ -549,7 +644,7 @@ export default function SELMethodsViewer() {
         {filteredMethods.map((method) => (
           <div
             key={method.id}
-            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden hover:shadow-xl transition-all ${
+            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all ${
               selectedForComparison.includes(method.id) ? 'border-green-500 bg-green-50' : 'border-gray-200'
             }`}
           >
@@ -763,7 +858,7 @@ export default function SELMethodsViewer() {
 
       {/* Comparison Section */}
       {compareMode && selectedForComparison.length > 1 && (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div id="comparison-section" className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
           <h3 className="text-xl font-bold text-gray-800 mb-4">🔍 Methodiek Vergelijking</h3>
           
           <div className="overflow-x-auto">
@@ -827,8 +922,40 @@ export default function SELMethodsViewer() {
                     )
                   })}
                 </tr>
+                <tr>
+                  <td className="border border-gray-200 p-3 font-medium">Belangrijkste Voordeel</td>
+                  {selectedForComparison.map(methodId => {
+                    const method = selMethoden.find(m => m.id === methodId)
+                    return (
+                      <td key={methodId} className="border border-gray-200 p-3 text-sm">
+                        {method?.voordelen[0]}
+                      </td>
+                    )
+                  })}
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="border border-gray-200 p-3 font-medium">Grootste Uitdaging</td>
+                  {selectedForComparison.map(methodId => {
+                    const method = selMethoden.find(m => m.id === methodId)
+                    return (
+                      <td key={methodId} className="border border-gray-200 p-3 text-sm">
+                        {method?.uitdagingen[0]}
+                      </td>
+                    )
+                  })}
+                </tr>
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-800 mb-2">💡 Vergelijkings Tips:</h4>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• Overweeg de tijd die je beschikbaar hebt voor implementatie</li>
+              <li>• Denk aan de behoeften van jouw specifieke leerlingen</li>
+              <li>• Kijk naar de ondersteuning die je team nodig heeft</li>
+              <li>• Evalueer de kosten en beschikbare middelen</li>
+            </ul>
           </div>
         </div>
       )}

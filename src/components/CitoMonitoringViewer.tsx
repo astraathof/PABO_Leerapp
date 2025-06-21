@@ -9,6 +9,8 @@ interface CitoLevel {
   percentage: number
   skills: string[]
   interventions: string[]
+  voScore?: number
+  voLevel?: string
 }
 
 interface MonitoringTool {
@@ -34,16 +36,20 @@ const citoLevels: CitoLevel[] = [
     roman: 'I',
     description: 'Zeer zwak - Ernstige leerachterstand',
     percentage: 5,
+    voScore: 501,
+    voLevel: 'Praktijkonderwijs/VMBO-B',
     skills: [
       'Basisvaardigheden onvoldoende',
       'Grote moeite met eenvoudige taken',
-      'Intensieve ondersteuning nodig'
+      'Intensieve ondersteuning nodig',
+      'Referentieniveau 1F niet behaald'
     ],
     interventions: [
       'Individueel handelingsplan',
-      'Externe ondersteuning',
+      'Externe ondersteuning (IB-er)',
       'Aangepast curriculum',
-      'Extra tijd en begeleiding'
+      'Extra tijd en begeleiding',
+      'Overweeg praktijkonderwijs'
     ]
   },
   {
@@ -51,16 +57,20 @@ const citoLevels: CitoLevel[] = [
     roman: 'II',
     description: 'Zwak - Leerachterstand',
     percentage: 20,
+    voScore: 515,
+    voLevel: 'VMBO-B/K',
     skills: [
       'Onder verwacht niveau',
       'Moeite met standaard taken',
-      'Extra ondersteuning gewenst'
+      'Extra ondersteuning gewenst',
+      'Referentieniveau 1F op de grens'
     ],
     interventions: [
       'Gerichte bijles',
       'Kleinere groepen',
       'Extra oefenmateriaal',
-      'Regelmatige monitoring'
+      'Regelmatige monitoring',
+      'VMBO-basis/kader geschikt'
     ]
   },
   {
@@ -68,16 +78,20 @@ const citoLevels: CitoLevel[] = [
     roman: 'III',
     description: 'Gemiddeld - Voldoende niveau',
     percentage: 45,
+    voScore: 535,
+    voLevel: 'VMBO-K/T',
     skills: [
       'Voldoet aan basisverwachtingen',
       'Kan standaard taken uitvoeren',
-      'Normale voortgang'
+      'Normale voortgang',
+      'Referentieniveau 1F behaald'
     ],
     interventions: [
       'Regulier onderwijs',
       'Standaard differentiatie',
       'Monitoring van voortgang',
-      'Preventieve maatregelen'
+      'Preventieve maatregelen',
+      'VMBO-kader/theoretisch geschikt'
     ]
   },
   {
@@ -85,16 +99,20 @@ const citoLevels: CitoLevel[] = [
     roman: 'IV',
     description: 'Goed - Boven gemiddeld',
     percentage: 25,
+    voScore: 550,
+    voLevel: 'VMBO-T/HAVO',
     skills: [
       'Boven verwacht niveau',
       'Goede beheersing vaardigheden',
-      'Zelfstandig werken'
+      'Zelfstandig werken',
+      'Referentieniveau 1S behaald'
     ],
     interventions: [
       'Verrijkingsactiviteiten',
       'Uitdagende opdrachten',
       'Projectwerk',
-      'Mentorrol voor anderen'
+      'Mentorrol voor anderen',
+      'HAVO geschikt'
     ]
   },
   {
@@ -102,16 +120,20 @@ const citoLevels: CitoLevel[] = [
     roman: 'V',
     description: 'Zeer goed - Excellent niveau',
     percentage: 5,
+    voScore: 565,
+    voLevel: 'HAVO/VWO',
     skills: [
       'Uitzonderlijk niveau',
       'Complexe taken beheersen',
-      'Creatief en analytisch'
+      'Creatief en analytisch',
+      'Referentieniveau 2F behaald'
     ],
     interventions: [
       'Hoogbegaafdheidsondersteuning',
       'Versnelling overwegen',
       'Externe verrijking',
-      'Onderzoeksprojecten'
+      'Onderzoeksprojecten',
+      'VWO geschikt'
     ]
   }
 ]
@@ -379,7 +401,7 @@ export default function CitoMonitoringViewer() {
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">📊 Complete Cito & Monitoring Gids</h2>
         <p className="text-indigo-100">
-          Uitgebreide informatie over Cito-niveaus, monitoring groep 1-8 en coördinatorrollen
+          Uitgebreide informatie over Cito-niveaus, vaardigheidscores, vervolgonderwijs en monitoring groep 1-8
         </p>
       </div>
 
@@ -387,7 +409,7 @@ export default function CitoMonitoringViewer() {
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
         <div className="flex border-b border-gray-200 overflow-x-auto">
           {[
-            { id: 'levels', label: '📊 Cito A-E & I-V', icon: '📊' },
+            { id: 'levels', label: '📊 Cito A-E & I-V + VO', icon: '📊' },
             { id: 'monitoring', label: '🔍 Monitoring Tools', icon: '🔍' },
             { id: 'coordinators', label: '👥 Coördinatorrollen', icon: '👥' },
             { id: 'dataflow', label: '🔄 Data Doorstroom', icon: '🔄' }
@@ -411,10 +433,10 @@ export default function CitoMonitoringViewer() {
           {activeTab === 'levels' && (
             <div className="space-y-6">
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <h3 className="font-semibold text-blue-800 mb-2">📚 Cito Niveaus Uitgelegd</h3>
+                <h3 className="font-semibold text-blue-800 mb-2">📚 Cito Niveaus + Vervolgonderwijs</h3>
                 <p className="text-blue-700 text-sm">
                   Cito gebruikt zowel letters (A-E) als Romeinse cijfers (I-V) om prestaties aan te duiden. 
-                  Beide systemen zijn identiek: A=I (zwakst) tot E=V (sterkst).
+                  Beide systemen zijn identiek: A=I (zwakst) tot E=V (sterkst). Hieronder zie je ook de koppeling naar vervolgonderwijs.
                 </p>
               </div>
 
@@ -442,6 +464,10 @@ export default function CitoMonitoringViewer() {
                         <div>
                           <h4 className="font-semibold text-gray-800">{level.description}</h4>
                           <p className="text-gray-600 text-sm">Landelijk gemiddeld: {level.percentage}% van leerlingen</p>
+                          <div className="flex items-center space-x-4 mt-1">
+                            <span className="text-sm font-medium text-purple-600">Score: ~{level.voScore}</span>
+                            <span className="text-sm font-medium text-green-600">VO: {level.voLevel}</span>
+                          </div>
                         </div>
                       </div>
                       <div className="text-2xl">
@@ -453,7 +479,7 @@ export default function CitoMonitoringViewer() {
                       <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
                         <div className="grid md:grid-cols-2 gap-4">
                           <div>
-                            <h5 className="font-medium text-gray-700 mb-2">🎯 Kenmerken:</h5>
+                            <h5 className="font-medium text-gray-700 mb-2">🎯 Vaardigheidsniveau:</h5>
                             <ul className="space-y-1">
                               {level.skills.map((skill, skillIndex) => (
                                 <li key={skillIndex} className="text-sm text-gray-600 flex items-start space-x-2">
@@ -465,7 +491,7 @@ export default function CitoMonitoringViewer() {
                           </div>
                           
                           <div>
-                            <h5 className="font-medium text-gray-700 mb-2">🛠️ Interventies:</h5>
+                            <h5 className="font-medium text-gray-700 mb-2">🛠️ Interventies & VO-advies:</h5>
                             <ul className="space-y-1">
                               {level.interventions.map((intervention, intIndex) => (
                                 <li key={intIndex} className="text-sm text-gray-600 flex items-start space-x-2">
@@ -479,6 +505,13 @@ export default function CitoMonitoringViewer() {
 
                         <div className="bg-purple-50 rounded p-3 border border-purple-200">
                           <p className="text-sm text-purple-700">
+                            <strong>🎓 Vervolgonderwijs:</strong> Leerlingen op niveau {level.letter}/{level.roman} (score ~{level.voScore}) 
+                            krijgen meestal een {level.voLevel} advies. Dit is gebaseerd op de B8-toets en observaties van de leerkracht.
+                          </p>
+                        </div>
+
+                        <div className="bg-orange-50 rounded p-3 border border-orange-200">
+                          <p className="text-sm text-orange-700">
                             <strong>💡 Schoolleider tip:</strong> Niveau {level.letter}/{level.roman} leerlingen hebben specifieke begeleiding nodig. 
                             Monitor hun voortgang extra en stem af met de {level.letter === 'A' || level.letter === 'B' ? 'IB-er' : level.letter === 'D' || level.letter === 'E' ? 'begaafdheidscoördinator' : 'groepsleerkracht'}.
                           </p>
@@ -492,11 +525,59 @@ export default function CitoMonitoringViewer() {
               <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                 <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Belangrijke Aandachtspunten</h4>
                 <ul className="space-y-1 text-sm text-yellow-700">
-                  <li>• <strong>B8 Toets:</strong> Eindtoets groep 8 voor VO-advies (april)</li>
+                  <li>• <strong>B8 Toets:</strong> Eindtoets groep 8 voor VO-advies (april) - score 501-565</li>
                   <li>• <strong>Doorstroomtoets:</strong> Verificatie B8 resultaat (mei/juni)</li>
                   <li>• <strong>Referentieniveaus:</strong> 1F (basis), 1S (streef), 2F (HAVO/VWO)</li>
                   <li>• <strong>Trend analyse:</strong> Vergelijk september → januari → juni</li>
+                  <li>• <strong>VO-advies:</strong> Gebaseerd op B8-score + 3 jaar observaties leerkracht</li>
                 </ul>
+              </div>
+
+              {/* VO Transition Table */}
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-800">🎓 Cito Score → Vervolgonderwijs Overzicht</h4>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Cito Niveau</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Score Range</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Vervolgonderwijs</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Referentieniveau</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {citoLevels.map((level, index) => (
+                        <tr key={level.letter} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center space-x-2">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                                index === 0 ? 'bg-red-500' :
+                                index === 1 ? 'bg-orange-500' :
+                                index === 2 ? 'bg-yellow-500' :
+                                index === 3 ? 'bg-green-500' : 'bg-blue-500'
+                              }`}>
+                                {level.letter}
+                              </div>
+                              <span className="text-sm font-medium">{level.letter} / {level.roman}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">~{level.voScore}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-800">{level.voLevel}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">
+                            {level.letter === 'A' || level.letter === 'B' ? 'Onder 1F' :
+                             level.letter === 'C' ? '1F' :
+                             level.letter === 'D' ? '1S' : '2F'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{level.percentage}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -789,7 +870,7 @@ export default function CitoMonitoringViewer() {
                     <li>• <strong>Groep 2 → 3:</strong> Ontwikkelingsrapport + startpositie</li>
                     <li>• <strong>Groep 4 → 5:</strong> Eerste Cito trends + interventies</li>
                     <li>• <strong>Groep 6 → 7:</strong> VO-voorbereiding start</li>
-                    <li>• <strong>Groep 8 → VO:</strong> Definitief advies + evaluatie</li>
+                    <li>• <strong>Groep 8 →  VO:</strong> Definitief advies + evaluatie</li>
                   </ul>
                 </div>
 
@@ -801,6 +882,54 @@ export default function CitoMonitoringViewer() {
                     <li>• <strong>Juni:</strong> Eindresultaten + jaarrapportage</li>
                     <li>• <strong>Augustus:</strong> Teambespreking + nieuwe doelen</li>
                   </ul>
+                </div>
+              </div>
+
+              {/* Vaardigheidscores Tabel */}
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-800">📊 Vaardigheidscores per Groep en Niveau</h4>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Groep</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">A/I (Zeer zwak)</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">B/II (Zwak)</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">C/III (Gemiddeld)</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">D/IV (Goed)</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">E/V (Zeer goed)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {[
+                        { groep: 'Groep 3', scores: ['<15', '15-25', '25-35', '35-45', '>45'] },
+                        { groep: 'Groep 4', scores: ['<25', '25-35', '35-50', '50-65', '>65'] },
+                        { groep: 'Groep 5', scores: ['<35', '35-50', '50-70', '70-85', '>85'] },
+                        { groep: 'Groep 6', scores: ['<55', '55-70', '70-90', '90-105', '>105'] },
+                        { groep: 'Groep 7', scores: ['<75', '75-90', '90-110', '110-125', '>125'] },
+                        { groep: 'Groep 8', scores: ['<100', '100-120', '120-140', '140-160', '>160'] }
+                      ].map((row) => (
+                        <tr key={row.groep} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-800">{row.groep}</td>
+                          {row.scores.map((score, index) => (
+                            <td key={index} className={`px-4 py-3 text-sm ${
+                              index === 0 ? 'text-red-600' :
+                              index === 1 ? 'text-orange-600' :
+                              index === 2 ? 'text-yellow-600' :
+                              index === 3 ? 'text-green-600' : 'text-blue-600'
+                            }`}>
+                              {score}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-4 py-3 bg-gray-50 text-xs text-gray-500">
+                  * Vaardigheidscores zijn indicatief en kunnen per vakgebied verschillen
                 </div>
               </div>
             </div>
