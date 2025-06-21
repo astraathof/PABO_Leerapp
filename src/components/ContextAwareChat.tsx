@@ -53,19 +53,21 @@ export default function ContextAwareChat({
       const welcomeMessage: ChatMessage = {
         id: 'welcome-' + Date.now(),
         role: 'assistant',
-        content: `🎉 Perfect! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:
+        content: `🎉 **Geweldig! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:**
 
 ${selectedDocs.map(doc => `📄 **${doc.fileName}** (${doc.detectedType})`).join('\n')}
 
-Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke schoolsituatie! Stel gerust vragen over hoe je theorie kunt koppelen aan jouw schoolpraktijk.
+Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke schoolsituatie! 
 
-💡 **Voorbeeldvragen:**
-• "Wat staat er in ons schoolplan over burgerschap?"
+💡 **Wat kun je me vragen?**
+• "Wat staat er in ons schoolplan over [onderwerp]?"
 • "Hoe kan ik de visie van onze school toepassen in mijn lessen?"
 • "Vergelijk onze aanpak met de theorie die ik geleerd heb"
 • "Geef concrete voorbeelden uit onze schoolcontext"
 
-🚀 **Tip:** Gebruik spraakherkenning door op de microfoon te klikken voor hands-free interactie!`,
+🎙️ **Tip:** Gebruik spraakherkenning door op de microfoon te klikken voor hands-free chatten!
+
+🚀 **Stel gerust je eerste vraag over je schooldocumenten!**`,
         timestamp: new Date()
       }
       setMessages([welcomeMessage])
@@ -74,7 +76,7 @@ Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       const welcomeMessage: ChatMessage = {
         id: 'welcome-no-docs-' + Date.now(),
         role: 'assistant',
-        content: `👋 Welkom bij je AI-mentor! Ik ben hier om je te helpen met je PABO-studie.
+        content: `👋 **Welkom bij je AI-mentor!** Ik ben hier om je te helpen met je PABO-studie.
 
 🤔 **Hoe kan ik je helpen?**
 • Stel vragen over onderwijstheorie
@@ -82,7 +84,7 @@ Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
 • Bespreek uitdagingen in de klas
 • Reflecteer op je leerervaringen
 
-💡 **Tip:** Voor nog betere begeleiding kun je je schooldocumenten uploaden via "Mijn Documenten" in de hoofdmenu. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
+💡 **Tip:** Voor nog betere begeleiding kun je je schooldocumenten uploaden via "Mijn Documenten" in het hoofdmenu. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
 
 🎙️ **Gebruik spraak:** Klik op de microfoon voor hands-free chatten!`,
         timestamp: new Date()
@@ -90,6 +92,18 @@ Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       setMessages([welcomeMessage])
     }
   }, [selectedDocuments, availableDocuments, messages.length])
+
+  // Listen for custom sendMessage events from quick action buttons
+  useEffect(() => {
+    const handleSendMessage = (event: any) => {
+      if (event.detail) {
+        sendMessage(event.detail)
+      }
+    }
+
+    window.addEventListener('sendMessage', handleSendMessage)
+    return () => window.removeEventListener('sendMessage', handleSendMessage)
+  }, [])
 
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputMessage
@@ -310,7 +324,7 @@ Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
                   : 'bg-gray-100 text-gray-800'
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <div className="text-sm whitespace-pre-wrap">{message.content}</div>
               <div className="flex items-center justify-between mt-2">
                 <p className={`text-xs ${
                   message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
@@ -418,7 +432,7 @@ Ik kan nu **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
               key={index}
               onClick={() => sendMessage(action)}
               disabled={isLoading}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 text-left"
             >
               {action}
             </button>

@@ -45,6 +45,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [useMultiModal, setUseMultiModal] = useState(true) // STANDAARD AAN
   const [showDirectChat, setShowDirectChat] = useState(false)
+  const [autoStartChat, setAutoStartChat] = useState(false)
 
   // Load documents from localStorage
   useEffect(() => {
@@ -58,7 +59,16 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
         setAvailableDocuments(parsedDocs)
         // Auto-select all documents
         setSelectedDocuments(parsedDocs.map((doc: any) => doc.id))
-        console.log('Auto-selected documents:', parsedDocs)
+        
+        // AUTO-START CHAT if documents are available
+        if (parsedDocs.length > 0) {
+          setAutoStartChat(true)
+          setTimeout(() => {
+            startDirectChat()
+          }, 500) // Small delay for smooth transition
+        }
+        
+        console.log('Auto-selected documents and starting chat:', parsedDocs)
       } catch (error) {
         console.error('Error loading documents:', error)
       }
@@ -72,17 +82,18 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const startDirectChat = () => {
     setShowDirectChat(true)
     setSelectedOpdracht({
-      titel: "Vrije Chat met AI",
-      beschrijving: "Chat direct met de AI over je schooldocumenten en PABO-onderwerpen",
+      titel: "Chat met je Schooldocumenten",
+      beschrijving: "Chat direct met de AI over je geüploade schooldocumenten en PABO-onderwerpen",
       type: "reflectie",
-      startVraag: "Hoe kan ik je helpen met je PABO-studie?",
-      context: `Je bent een ervaren PABO-docent die studenten helpt met vragen over hun studie en schoolpraktijk. Gebruik de socratische methode om studenten zelf tot inzichten te laten komen.`
+      startVraag: "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
+      context: `Je bent een ervaren PABO-docent die studenten helpt met vragen over hun studie en schoolpraktijk. De student heeft ${availableDocuments.length} schooldocument(en) geüpload. Gebruik de socratische methode om studenten zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
     })
   }
 
   const resetChat = () => {
     setSelectedOpdracht(null)
     setShowDirectChat(false)
+    setAutoStartChat(false)
   }
 
   const toggleDocumentSelection = (docId: string) => {
@@ -93,15 +104,114 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     )
   }
 
+  // AUTO-CHAT MODE: Direct to chat if documents available
+  if (autoStartChat && availableDocuments.length > 0 && selectedOpdracht) {
+    return (
+      <div className="space-y-4">
+        {/* Chat Header with Document Info */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold mb-2">🎉 Perfect! Je documenten zijn klaar voor AI-analyse</h3>
+              <p className="text-green-100 mb-3">
+                Ik heb toegang tot {availableDocuments.length} van jouw schooldocumenten en kan nu gepersonaliseerde begeleiding geven!
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {availableDocuments.slice(0, 3).map((doc, index) => (
+                  <span key={index} className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+                    📄 {doc.fileName}
+                  </span>
+                ))}
+                {availableDocuments.length > 3 && (
+                  <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+                    +{availableDocuments.length - 3} meer
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+                🌱 {studentLevel}
+              </span>
+              <button
+                onClick={resetChat}
+                className="px-4 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                ⚙️ Instellingen
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Direct Chat Interface */}
+        <ContextAwareChat
+          module={module}
+          context={selectedOpdracht.context}
+          studentLevel={studentLevel}
+          availableDocuments={availableDocuments}
+          selectedDocuments={selectedDocuments}
+        />
+
+        {/* Quick Actions for Documents */}
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <h4 className="font-semibold text-blue-800 mb-3">💡 Probeer deze vragen over je documenten:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {[
+              "Wat staat er in ons schoolplan over burgerschap?",
+              "Hoe kan ik de visie van onze school toepassen in mijn lessen?",
+              "Vergelijk onze aanpak met de theorie die ik geleerd heb",
+              "Geef concrete voorbeelden uit onze schoolcontext",
+              "Wat zijn de kernwaarden van onze school?",
+              "Hoe monitoren we leerresultaten volgens ons beleid?"
+            ].map((vraag, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  // This would trigger sending the question - we'll implement this in ContextAwareChat
+                  const event = new CustomEvent('sendMessage', { detail: vraag })
+                  window.dispatchEvent(event)
+                }}
+                className="text-left p-3 bg-white border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-50 transition-colors"
+              >
+                💬 {vraag}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // SETUP MODE: No documents or manual access
   if (!selectedOpdracht) {
     return (
       <div className="space-y-6">
-        {/* Quick Start - Direct Chat */}
+        {/* No Documents - Upload Prompt */}
+        {availableDocuments.length === 0 && (
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white text-center">
+            <div className="text-4xl mb-3">📚</div>
+            <h3 className="text-xl font-bold mb-2">Start met je schooldocumenten uploaden!</h3>
+            <p className="text-orange-100 mb-4">
+              Upload eerst je schooldocumenten (schoolplan, beleid, etc.) voor de beste AI-begeleiding
+            </p>
+            <button
+              onClick={() => {
+                // Navigate to document manager
+                window.location.href = '#documents'
+              }}
+              className="px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
+            >
+              📤 Upload Documenten Nu
+            </button>
+          </div>
+        )}
+
+        {/* Documents Available - Manual Start */}
         {availableDocuments.length > 0 && (
           <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold mb-2">🚀 Start Direct met Chatten!</h3>
+                <h3 className="text-xl font-bold mb-2">🚀 Klaar om te Chatten!</h3>
                 <p className="text-green-100 mb-4">
                   Je hebt {availableDocuments.length} document(en) geüpload. Begin direct met chatten over je schoolpraktijk!
                 </p>
@@ -215,23 +325,6 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           </div>
         )}
 
-        {/* No Documents - Upload Prompt */}
-        {availableDocuments.length === 0 && (
-          <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200 text-center">
-            <div className="text-4xl mb-3">📚</div>
-            <h3 className="font-semibold text-yellow-800 mb-2">Geen schooldocumenten gevonden</h3>
-            <p className="text-yellow-700 text-sm mb-4">
-              Upload eerst je schooldocumenten voor gepersonaliseerde AI-begeleiding
-            </p>
-            <button
-              onClick={() => window.location.href = '#documents'}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-            >
-              📤 Upload Documenten
-            </button>
-          </div>
-        )}
-
         {/* Opdracht Selector */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">🛠️ Of kies een gestructureerde opdracht</h3>
@@ -328,7 +421,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           <div>
             <h3 className="font-semibold">🤖 Geavanceerde AI Socratische Begeleiding</h3>
             <p className="text-blue-100 text-sm">
-              {showDirectChat ? 'Vrije Chat' : `Opdracht: ${selectedOpdracht.titel}`}
+              {showDirectChat ? 'Chat met je Schooldocumenten' : `Opdracht: ${selectedOpdracht.titel}`}
             </p>
             <div className="flex items-center space-x-3 mt-1">
               {selectedDocuments.length > 0 && (
