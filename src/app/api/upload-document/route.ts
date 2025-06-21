@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import * as pdfjsLib from 'pdfjs-dist'
+import path from 'path'
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+// Set worker source to local file
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
-    const uint8Array = new Uint8Array(buffer)
-    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(buffer),
+      useSystemFonts: true
+    })
+    
+    const pdf = await loadingTask.promise
     let fullText = ''
     
     for (let i = 1; i <= pdf.numPages; i++) {
