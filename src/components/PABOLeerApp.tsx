@@ -7,7 +7,6 @@ import DevelopmentTheoryViewer from './DevelopmentTheoryViewer'
 import ClickableTheoryViewer from './ClickableTheoryViewer'
 import SELMethodsViewer from './SELMethodsViewer'
 import CitoMonitoringViewer from './CitoMonitoringViewer'
-import VisualLearningComponents from './VisualLearningComponents'
 import SocraticChatBot from './SocraticChatBot'
 import KerndoelenProgressieTracker from './KerndoelenProgressieTracker'
 import OntwikkelingsStadiaTimeline from './OntwikkelingsStadiaTimeline'
@@ -50,7 +49,7 @@ const modules: Module[] = [
     difficulty: 'Intermediate',
     duration: '3-4 uur',
     category: 'Ontwikkeling',
-    components: ['Ontwikkelingsstadia Timeline', 'Theorie Viewer', 'Visueel Leren'],
+    components: ['Ontwikkelingsstadia Timeline', 'Theorie Viewer', 'Klikbare Theorie'],
     learningGoals: [
       'Ontwikkelingsstadia herkennen',
       'Theorie koppelen aan praktijk',
@@ -450,11 +449,19 @@ export default function PABOLeerApp() {
                   <span className="text-2xl">🤖</span>
                   <h3 className="font-semibold">AI Begeleiding</h3>
                 </div>
-                <p className="text-purple-100 text-sm mb-4">
-                  Socratische AI-mentor voor gepersonaliseerde begeleiding
-                </p>
+                <div className="bg-purple-100 rounded-lg p-4 mb-4 text-purple-800">
+                  <h4 className="font-semibold mb-2">🎯 Wat kun je met AI-begeleiding?</h4>
+                  <ul className="text-sm space-y-1">
+                    <li>• 📚 Upload je eigen schooldocumenten (schoolplan, beleid, etc.)</li>
+                    <li>• 🤝 Vergelijk theorie met jouw schoolpraktijk</li>
+                    <li>• 💬 Socratische gesprekken voor dieper begrip</li>
+                    <li>• 🎙️ Spraakherkenning voor hands-free interactie</li>
+                    <li>• 📊 Real-time feedback tijdens het typen</li>
+                    <li>• 🧠 Context-bewuste responses op basis van jouw documenten</li>
+                  </ul>
+                </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-purple-100">Interactieve opdrachten</span>
+                  <span className="text-sm text-purple-100">Gepersonaliseerde begeleiding</span>
                   <span className="text-xl">🔗</span>
                 </div>
               </div>
@@ -497,6 +504,51 @@ export default function PABOLeerApp() {
             Een interactieve leerapp voor PABO-studenten om alle competenties eigen te maken 
             met AI-begeleiding, praktijkvoorbeelden en socratische methode.
           </p>
+        </div>
+
+        {/* AI Features Highlight */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 mb-12 text-white">
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            🤖 Geavanceerde AI-begeleiding met jouw eigen documenten
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="text-center p-6 bg-white bg-opacity-20 rounded-xl">
+              <div className="text-4xl mb-3">📚</div>
+              <h3 className="font-semibold mb-2">Upload Schooldocumenten</h3>
+              <p className="text-purple-100 text-sm">
+                Upload je schoolplan, beleid, observatieformulieren en andere documenten om gepersonaliseerd te leren
+              </p>
+            </div>
+
+            <div className="text-center p-6 bg-white bg-opacity-20 rounded-xl">
+              <div className="text-4xl mb-3">🤝</div>
+              <h3 className="font-semibold mb-2">Vergelijk met Praktijk</h3>
+              <p className="text-purple-100 text-sm">
+                AI helpt je theorie te koppelen aan jouw specifieke schoolsituatie en geeft praktische tips
+              </p>
+            </div>
+
+            <div className="text-center p-6 bg-white bg-opacity-20 rounded-xl">
+              <div className="text-4xl mb-3">💬</div>
+              <h3 className="font-semibold mb-2">Socratische Methode</h3>
+              <p className="text-purple-100 text-sm">
+                Door vragen te stellen helpt de AI je zelf tot inzichten te komen in plaats van directe antwoorden
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-purple-100 text-sm mb-4">
+              ✨ Spraakherkenning • 📊 Real-time feedback • 🧠 Context-bewuste responses • 🎭 Multi-modal learning
+            </p>
+            <button
+              onClick={() => setActiveComponent('Document Manager')}
+              className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
+            >
+              📤 Start met documenten uploaden
+            </button>
+          </div>
         </div>
 
         {/* Quick Start Section */}
