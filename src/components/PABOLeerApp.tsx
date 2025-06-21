@@ -3,6 +3,16 @@
 import { useState } from 'react'
 import SocraticChatBot from './SocraticChatBot'
 import DocumentManager from './DocumentManager'
+import { 
+  CitoScoreChart, 
+  LVSTrendChart, 
+  EDIObservationCard, 
+  LearningLineVisual, 
+  SELDevelopmentChart,
+  DifferentiationMatrix,
+  SkillsRadarChart,
+  LeadershipDashboard
+} from './VisualLearningComponents'
 
 interface Module {
   id: number
@@ -22,6 +32,7 @@ interface Module {
   }[]
   bronnen: string[]
   completed: boolean
+  visualComponents?: React.ReactNode[]
 }
 
 const modules: Module[] = [
@@ -84,7 +95,35 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <LearningLineVisual 
+        key="rekenen-leerlijn"
+        subject="Rekenen - Getalbegrip"
+        progression={[
+          {
+            grade: "1-2",
+            skills: ["Tellen tot 20", "Herkennen van cijfers", "Meer/minder vergelijken"],
+            example: "Kinderen tellen speelgoed en zeggen welke stapel meer heeft"
+          },
+          {
+            grade: "3-4", 
+            skills: ["Getallen tot 100", "Optellen en aftrekken", "Tiental overgangen"],
+            example: "27 + 15 = ? met behulp van materiaal en hoofdrekenen"
+          },
+          {
+            grade: "5-6",
+            skills: ["Getallen tot 10.000", "Vermenigvuldigen en delen", "Kommagetallen"],
+            example: "3,5 × 4 = ? en uitleggen waarom het antwoord 14 is"
+          },
+          {
+            grade: "7-8",
+            skills: ["Getallen tot 1.000.000", "Breuken en procenten", "Verhoudingen"],
+            example: "25% van 80 berekenen en koppelen aan ¼ van 80"
+          }
+        ]}
+      />
+    ]
   },
   {
     id: 2,
@@ -149,7 +188,46 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["G. Marzano, Classroom Management", "John Hattie, Visible Learning"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <SELDevelopmentChart 
+        key="piaget-stages"
+        stages={[
+          {
+            age: "2-7 jaar (Groep 1-4)",
+            stage: "Preoperationeel",
+            characteristics: [
+              "Symbolisch denken ontwikkelt zich",
+              "Egocentrisme: moeilijk andermans perspectief innemen",
+              "Animisme: levenloze voorwerpen hebben gevoelens",
+              "Geen begrip van behoud (conservatie)"
+            ],
+            interventions: [
+              "Gebruik concrete materialen en voorwerpen",
+              "Geef veel voorbeelden en herhaling",
+              "Laat kinderen zelf ontdekken en experimenteren",
+              "Gebruik verhalen en rollenspel voor begrip"
+            ]
+          },
+          {
+            age: "7-11 jaar (Groep 5-8)",
+            stage: "Concreet Operationeel", 
+            characteristics: [
+              "Logisch denken over concrete situaties",
+              "Begrip van behoud (conservatie)",
+              "Kunnen classificeren en ordenen",
+              "Reversibiliteit: begrijpen dat acties omgekeerd kunnen"
+            ],
+            interventions: [
+              "Gebruik concrete voorbeelden bij abstracte concepten",
+              "Laat kinderen zelf regels en patronen ontdekken",
+              "Geef stap-voor-stap instructies",
+              "Gebruik manipulatieve materialen bij wiskunde"
+            ]
+          }
+        ]}
+      />
+    ]
   },
   {
     id: 3,
@@ -214,7 +292,62 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Kanjertraining.nl", "NJi Dossier SEL"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <SELDevelopmentChart 
+        key="sel-development"
+        stages={[
+          {
+            age: "4-6 jaar",
+            stage: "Basis Emotieherkenning",
+            characteristics: [
+              "Herkennen van basisemoties (blij, boos, verdrietig)",
+              "Leren emoties benoemen",
+              "Eerste zelfregulatie strategieën",
+              "Empathie ontwikkelt zich"
+            ],
+            interventions: [
+              "Gevoelensthermometer gebruiken",
+              "Emoties benoemen in verhalen",
+              "Ademhalingsoefeningen aanleren",
+              "Modelgedrag tonen"
+            ]
+          },
+          {
+            age: "7-9 jaar",
+            stage: "Sociale Vaardigheden",
+            characteristics: [
+              "Complexere emoties herkennen",
+              "Vriendschappen worden belangrijker",
+              "Conflictoplossing vaardigheden",
+              "Groepsregels begrijpen"
+            ],
+            interventions: [
+              "Kanjertraining technieken",
+              "Klassengesprekken over vriendschap",
+              "Rollenspel voor conflictoplossing",
+              "Complimenten rituelen"
+            ]
+          },
+          {
+            age: "10-12 jaar",
+            stage: "Zelfstandigheid & Verantwoordelijkheid",
+            characteristics: [
+              "Zelfbeeld wordt belangrijker",
+              "Peer pressure neemt toe",
+              "Moreel redeneren ontwikkelt",
+              "Toekomstgericht denken"
+            ],
+            interventions: [
+              "Leerling-mentorgesprekken",
+              "Democratische klassenraad",
+              "Dilemma discussies",
+              "Doelen stellen en evalueren"
+            ]
+          }
+        ]}
+      />
+    ]
   },
   {
     id: 4,
@@ -284,7 +417,32 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["SLO Differentiatiegids", "F. Wiliam, Embedded Formative Assessment"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <DifferentiationMatrix 
+        key="differentiation-example"
+        activities={[
+          {
+            level: "Zwakke leerlingen",
+            must: "Herken breuken ½, ¼ met plaatjes",
+            should: "Vergelijk ½ en ¼ met materiaal",
+            could: "Leg uit waarom ½ > ¼"
+          },
+          {
+            level: "Gemiddelde leerlingen", 
+            must: "Reken uit: ½ + ¼ met plaatjes",
+            should: "Los op: ¾ - ¼ zelfstandig",
+            could: "Maak eigen breukensommen"
+          },
+          {
+            level: "Sterke leerlingen",
+            must: "Reken breuken op tot tienden",
+            should: "Vergelijk breuken en decimalen",
+            could: "Ontwerp breukspel voor klasgenoten"
+          }
+        ]}
+      />
+    ]
   },
   {
     id: 5,
@@ -315,7 +473,7 @@ const modules: Module[] = [
         {
           naam: "Trendanalyse",
           uitleg: "Ontwikkeling van prestaties over meerdere meetmomenten bekijken om patronen te herkennen.",
-          voorbeeld: "Rekenen groep 5: sept 45%, jan 52%, juni 58% → positieve trend, maar nog onder gemiddelde"
+          voorbeeld: "Rekenen groep 5: sept 45% → jan 52% → juni 58% → positieve trend, maar nog onder gemiddelde"
         },
         {
           naam: "Onderzoekskader Inspectie 2024",
@@ -354,7 +512,18 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["PO-Raad 'Werken met Data' toolkit", "Inspectie OK/2024"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <LVSTrendChart 
+        key="lvs-trend"
+        subject="Begrijpend Lezen Groep 6"
+        data={[
+          { month: "Sept", percentage: 45, target: 70 },
+          { month: "Jan", percentage: 52, target: 70 },
+          { month: "Juni", percentage: 58, target: 70 }
+        ]}
+      />
+    ]
   },
   {
     id: 6,
@@ -424,7 +593,24 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Kennisnet Innovatiehub", "SLO 21-eeuwse vaardigheden"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <SkillsRadarChart 
+        key="21st-century-skills"
+        skills={[
+          { name: "Kritisch denken", level: 3, description: "Informatie analyseren en evalueren" },
+          { name: "Creativiteit", level: 4, description: "Originele ideeën en oplossingen bedenken" },
+          { name: "Samenwerken", level: 5, description: "Effectief werken in teams" },
+          { name: "Communiceren", level: 4, description: "Duidelijk ideeën overbrengen" },
+          { name: "ICT-geletterdheid", level: 3, description: "Technologie effectief gebruiken" },
+          { name: "Informatievaardigheden", level: 2, description: "Informatie zoeken en beoordelen" },
+          { name: "Flexibiliteit", level: 3, description: "Aanpassen aan veranderingen" },
+          { name: "Initiatief", level: 4, description: "Zelfstandig actie ondernemen" },
+          { name: "Productiviteit", level: 3, description: "Efficiënt werken en resultaten behalen" },
+          { name: "Leiderschap", level: 2, description: "Anderen inspireren en leiden" }
+        ]}
+      />
+    ]
   },
   {
     id: 7,
@@ -494,7 +680,18 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Schoolleidersregister", "Kotter, Leading Change"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <LeadershipDashboard 
+        key="leadership-kpis"
+        metrics={[
+          { title: "Tevredenheid Team", value: "8.2/10", trend: "up", color: "bg-green-600" },
+          { title: "Leerlingresultaten", value: "78%", trend: "up", color: "bg-blue-600" },
+          { title: "Oudertevredenheid", value: "7.9/10", trend: "stable", color: "bg-yellow-600" },
+          { title: "Innovatieprojecten", value: "5 actief", trend: "up", color: "bg-purple-600" }
+        ]}
+      />
+    ]
   },
   {
     id: 8,
@@ -649,13 +846,60 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Cito Terugkoppeling Handleiding", "EDI Observatieprotocol", "GROW Coaching Model"],
-    completed: false
+    completed: false,
+    visualComponents: [
+      <CitoScoreChart 
+        key="cito-example-1"
+        title="📊 Cito Rekenen Groep 6 - Schooljaar 2023-2024"
+        data={[
+          { level: "A", percentage: 8, national: 5, color: "bg-red-500" },
+          { level: "B", percentage: 27, national: 20, color: "bg-orange-500" },
+          { level: "C", percentage: 40, national: 45, color: "bg-yellow-500" },
+          { level: "D", percentage: 20, national: 25, color: "bg-green-500" },
+          { level: "E", percentage: 5, national: 5, color: "bg-blue-500" }
+        ]}
+        explanation="⚠️ Zorgpunt: Te veel leerlingen op niveau A (8% vs 5% landelijk). Positief: Minder leerlingen op niveau B dan landelijk gemiddelde. Actie: Gerichte interventie voor niveau A leerlingen."
+      />,
+      <CitoScoreChart 
+        key="cito-example-2"
+        title="📈 Cito Begrijpend Lezen Groep 8 - Vergelijking 3 jaar"
+        data={[
+          { level: "1F-", percentage: 12, national: 15, color: "bg-red-600" },
+          { level: "1F", percentage: 25, national: 30, color: "bg-orange-500" },
+          { level: "1S", percentage: 35, national: 35, color: "bg-yellow-500" },
+          { level: "2F", percentage: 28, national: 20, color: "bg-green-500" }
+        ]}
+        explanation="✅ Positief: Minder leerlingen onder 1F dan landelijk. Meer leerlingen op 2F niveau. School presteert boven landelijk gemiddelde. Behoud huidige aanpak."
+      />,
+      <EDIObservationCard 
+        key="edi-example"
+        phase="Fase 1: Lesdoel & Voorkennis"
+        score={3}
+        maxScore={4}
+        criteria={[
+          "Lesdoel wordt helder gecommuniceerd",
+          "Lesdoel wordt gekoppeld aan voorkennis",
+          "Leerlingen begrijpen wat ze gaan leren",
+          "Succes criteria worden benoemd"
+        ]}
+        feedback="Goed: Lesdoel was helder en je koppelde aan vorige les. Verbeterpunt: Maak succes criteria explicieter zodat leerlingen weten wanneer ze het doel hebben behaald."
+      />,
+      <LVSTrendChart 
+        key="lvs-spelling"
+        subject="Spelling Groep 5"
+        data={[
+          { month: "Sept", percentage: 62, target: 75 },
+          { month: "Jan", percentage: 58, target: 75 },
+          { month: "Juni", percentage: 54, target: 75 }
+        ]}
+      />
+    ]
   }
 ]
 
 export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
-  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat' | 'documenten'>('overzicht')
+  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat'>('overzicht')
   const [completedModules, setCompletedModules] = useState<number[]>([])
   const [showDocumentManager, setShowDocumentManager] = useState(false)
 
@@ -780,6 +1024,20 @@ export default function PABOLeerApp() {
                     </div>
                   </div>
 
+                  {/* Visual Learning Components */}
+                  {selectedModule.visualComponents && selectedModule.visualComponents.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">📊 Visuele Leerondersteuning</h3>
+                      <div className="space-y-6">
+                        {selectedModule.visualComponents.map((component, index) => (
+                          <div key={index}>
+                            {component}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Interactieve Opdrachten Preview */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">🛠️ Interactieve Opdrachten</h3>
@@ -844,6 +1102,20 @@ export default function PABOLeerApp() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Visual Learning Components in Theory Tab */}
+                  {selectedModule.visualComponents && selectedModule.visualComponents.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Visuele Voorbeelden & Modellen</h3>
+                      <div className="space-y-6">
+                        {selectedModule.visualComponents.map((component, index) => (
+                          <div key={index}>
+                            {component}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Praktijktips */}
                   <div>
@@ -965,6 +1237,12 @@ export default function PABOLeerApp() {
                     <span className="mr-2">📚</span>
                     <span>Schooldocument integratie</span>
                   </div>
+                  {module.visualComponents && module.visualComponents.length > 0 && (
+                    <div className="flex items-center text-sm text-purple-600">
+                      <span className="mr-2">📊</span>
+                      <span>Visuele leerondersteuning</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-200">
@@ -980,7 +1258,7 @@ export default function PABOLeerApp() {
         {/* Footer */}
         <div className="text-center mt-12">
           <p className="text-gray-500 text-sm">
-            💜 Gemaakt voor PABO studenten • Interactief leren met AI-ondersteuning • Schoolspecifieke documenten
+            💜 Gemaakt voor PABO studenten • Interactief leren met AI-ondersteuning • Schoolspecifieke documenten • Visuele leerondersteuning
           </p>
         </div>
       </div>
