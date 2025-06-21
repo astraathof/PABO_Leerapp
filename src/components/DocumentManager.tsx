@@ -21,35 +21,50 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const [isUploading, setIsUploading] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<UploadedDocument | null>(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
 
   // Load documents from localStorage on mount
   useEffect(() => {
-    const savedDocs = localStorage.getItem('pabo-documents')
-    if (savedDocs) {
+    const loadDocuments = () => {
       try {
-        const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
-          ...doc,
-          uploadDate: new Date(doc.uploadDate)
-        }))
-        setDocuments(parsedDocs)
-        onDocumentsChange?.(parsedDocs)
-        console.log('DocumentManager: Loaded documents:', parsedDocs)
+        const savedDocs = localStorage.getItem('pabo-documents')
+        console.log('Loading documents from localStorage:', savedDocs)
+        
+        if (savedDocs) {
+          const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
+            ...doc,
+            uploadDate: new Date(doc.uploadDate)
+          }))
+          console.log('Parsed documents:', parsedDocs)
+          setDocuments(parsedDocs)
+          onDocumentsChange?.(parsedDocs)
+        }
       } catch (error) {
         console.error('Error loading documents:', error)
         localStorage.removeItem('pabo-documents')
       }
     }
-  }, [])
+
+    loadDocuments()
+  }, [onDocumentsChange])
 
   // Save documents to localStorage whenever documents change
   useEffect(() => {
     if (documents.length > 0) {
-      localStorage.setItem('pabo-documents', JSON.stringify(documents))
-      onDocumentsChange?.(documents)
-      console.log('DocumentManager: Saved documents:', documents)
-      
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('documentUploaded', { detail: documents }))
+      try {
+        localStorage.setItem('pabo-documents', JSON.stringify(documents))
+        onDocumentsChange?.(documents)
+        console.log('DocumentManager: Saved documents to localStorage:', documents)
+        
+        // Dispatch custom event to notify other components
+        const event = new CustomEvent('documentUploaded', { 
+          detail: { documents, count: documents.length } 
+        })
+        window.dispatchEvent(event)
+        console.log('DocumentManager: Dispatched documentUploaded event')
+      } catch (error) {
+        console.error('Error saving documents:', error)
+      }
     }
   }, [documents, onDocumentsChange])
 
@@ -57,26 +72,30 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     const file = event.target.files?.[0]
     if (!file) return
 
+    console.log('Starting file upload for:', file.name)
     setIsUploading(true)
+    setUploadSuccess(false)
 
     try {
       const formData = new FormData()
       formData.append('file', file)
 
-      console.log('Uploading file:', file.name)
-
+      console.log('Sending upload request...')
       const response = await fetch('/api/upload-document', {
         method: 'POST',
         body: formData
       })
 
+      console.log('Upload response status:', response.status)
+
       if (!response.ok) {
         const errorData = await response.json()
+        console.error('Upload failed with error:', errorData)
         throw new Error(errorData.error || 'Upload failed')
       }
 
       const result = await response.json()
-      console.log('Upload result:', result)
+      console.log('Upload successful, result:', result)
       
       const newDocument: UploadedDocument = {
         id: Date.now().toString(),
@@ -88,8 +107,9 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         uploadDate: new Date()
       }
 
-      console.log('Adding new document:', newDocument)
+      console.log('Creating new document object:', newDocument)
 
+      // Update documents state
       setDocuments(prev => {
         const updated = [...prev, newDocument]
         console.log('Updated documents array:', updated)
@@ -100,14 +120,10 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       event.target.value = ''
       
       // Show success message
+      setUploadSuccess(true)
       setShowSuccessMessage(true)
       
-      // Auto-navigate to chat after 2 seconds
-      setTimeout(() => {
-        // Navigate to a module with AI chat
-        const moduleUrl = '/module/burgerschap-diversiteit' // Default to burgerschap module
-        window.location.href = moduleUrl
-      }, 2000)
+      console.log('Upload process completed successfully')
       
     } catch (error) {
       console.error('Upload error:', error)
@@ -142,27 +158,49 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     return '📄'
   }
 
-  const navigateToChat = () => {
-    // Navigate to burgerschap module with AI chat
-    window.location.href = '#burgerschap-chat'
+  const startAIChat = () => {
+    console.log('Starting AI Chat with documents:', documents)
+    // Navigate to main page and trigger chat
+    window.location.href = '/#start-chat'
   }
 
   return (
     <div className="space-y-6">
-      {/* Success Message */}
-      {showSuccessMessage && (
-        <div className="bg-green-500 text-white rounded-xl p-6 shadow-lg">
-          <div className="flex items-center space-x-3 mb-3">
-            <span className="text-3xl">🎉</span>
+      {/* Success Message with Auto-Chat */}
+      {uploadSuccess && showSuccessMessage && (
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold">Perfect! Document succesvol geüpload!</h3>
-              <p className="text-green-100">Je wordt automatisch doorgestuurd naar de AI-chat...</p>
+              <h3 className="text-xl font-bold mb-2">🎉 Document succesvol geüpload!</h3>
+              <p className="text-green-100 mb-3">
+                Je document is verwerkt en klaar voor AI-analyse. Start nu direct een gesprek!
+              </p>
+              <div className="bg-white bg-opacity-20 rounded-lg p-3 mb-4">
+                <p className="text-sm">
+                  💬 <strong>Wat kun je nu doen?</strong> Stel vragen over je schooldocument aan de AI-mentor!
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => setShowSuccessMessage(false)}
+              className="text-green-100 hover:text-white text-xl"
+            >
+              ✕
+            </button>
           </div>
-          <div className="bg-white bg-opacity-20 rounded-lg p-3">
-            <p className="text-sm">
-              💬 <strong>Wat kun je nu doen?</strong> Stel vragen over je schooldocument aan de AI-mentor!
-            </p>
+          <div className="flex space-x-3">
+            <button
+              onClick={startAIChat}
+              className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
+            >
+              💬 Start AI Chat Nu
+            </button>
+            <button
+              onClick={() => setShowSuccessMessage(false)}
+              className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
+            >
+              Later
+            </button>
           </div>
         </div>
       )}
@@ -200,7 +238,14 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                     : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                 } transition-colors`}
               >
-                {isUploading ? '⏳ Uploaden...' : '📤 Selecteer Document'}
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploaden...
+                  </>
+                ) : (
+                  <>📤 Selecteer Document</>
+                )}
               </label>
             </div>
           </div>
@@ -235,7 +280,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 ✅ Beschikbaar voor AI-begeleiding
               </div>
               <button
-                onClick={navigateToChat}
+                onClick={startAIChat}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 💬 Start AI Chat
@@ -292,7 +337,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <p className="text-sm text-blue-700">
                         <strong>💡 AI Tip:</strong> Dit document is nu beschikbaar in alle modules met AI-begeleiding. 
-                        Ga naar een module en gebruik de AI-begeleiding om dit document te analyseren en te koppelen aan theorie!
+                        Klik op "Start AI Chat" om direct te beginnen met vragen over dit document!
                       </p>
                     </div>
                   </div>
@@ -312,13 +357,13 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           </p>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={navigateToChat}
+              onClick={startAIChat}
               className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
               💬 Start AI Chat Nu
             </button>
             <button
-              onClick={() => window.location.href = '#modules'}
+              onClick={() => window.location.href = '/'}
               className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
             >
               📚 Bekijk Alle Modules
@@ -338,17 +383,17 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">2️⃣</span>
-              <span className="text-green-700">Klik op "Start AI Chat" of ga naar een module</span>
+              <span className="text-green-700">Klik op "Start AI Chat" - de chatbot start automatisch!</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">3️⃣</span>
-              <span className="text-green-700">De chatbot start automatisch met je documenten!</span>
+              <span className="text-green-700">Stel direct vragen over je documenten</span>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">4️⃣</span>
-              <span className="text-green-700">Stel vragen over je schoolplan en krijg gepersonaliseerde antwoorden</span>
+              <span className="text-green-700">Krijg gepersonaliseerde antwoorden op basis van jouw school</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">5️⃣</span>

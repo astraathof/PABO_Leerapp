@@ -53,7 +53,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     const loadDocuments = () => {
       try {
         const savedDocs = localStorage.getItem('pabo-documents')
-        console.log('Loading documents from localStorage:', savedDocs)
+        console.log('SocraticChatBot: Loading documents from localStorage:', savedDocs)
         
         if (savedDocs) {
           const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
@@ -61,17 +61,17 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
             uploadDate: new Date(doc.uploadDate)
           }))
           
-          console.log('Parsed documents:', parsedDocs)
+          console.log('SocraticChatBot: Parsed documents:', parsedDocs)
           setAvailableDocuments(parsedDocs)
           
           // Auto-select all documents
           const docIds = parsedDocs.map((doc: any) => doc.id)
           setSelectedDocuments(docIds)
-          console.log('Auto-selected document IDs:', docIds)
+          console.log('SocraticChatBot: Auto-selected document IDs:', docIds)
           
           // AUTO-START CHAT if documents are available
           if (parsedDocs.length > 0) {
-            console.log('Documents found, auto-starting chat...')
+            console.log('SocraticChatBot: Documents found, auto-starting chat...')
             setAutoStartChat(true)
             // Start chat immediately
             setTimeout(() => {
@@ -79,10 +79,10 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
             }, 100)
           }
         } else {
-          console.log('No documents found in localStorage')
+          console.log('SocraticChatBot: No documents found in localStorage')
         }
       } catch (error) {
-        console.error('Error loading documents:', error)
+        console.error('SocraticChatBot: Error loading documents:', error)
         localStorage.removeItem('pabo-documents')
       } finally {
         setIsLoading(false)
@@ -94,7 +94,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     // Listen for storage changes (when documents are uploaded)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'pabo-documents') {
-        console.log('Storage changed, reloading documents...')
+        console.log('SocraticChatBot: Storage changed, reloading documents...')
         loadDocuments()
       }
     }
@@ -102,8 +102,8 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     window.addEventListener('storage', handleStorageChange)
     
     // Also listen for custom events from document upload
-    const handleDocumentUpload = () => {
-      console.log('Document upload event detected, reloading...')
+    const handleDocumentUpload = (event: any) => {
+      console.log('SocraticChatBot: Document upload event detected, reloading...', event.detail)
       setTimeout(loadDocuments, 500) // Small delay to ensure localStorage is updated
     }
 
@@ -121,7 +121,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
 
   const startDirectChat = (docs?: UploadedDocument[]) => {
     const documents = docs || availableDocuments
-    console.log('Starting direct chat with documents:', documents)
+    console.log('SocraticChatBot: Starting direct chat with documents:', documents)
     
     setShowDirectChat(true)
     setSelectedOpdracht({

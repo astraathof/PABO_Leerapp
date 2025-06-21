@@ -252,17 +252,56 @@ export default function PABOLeerApp() {
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
   const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null)
   const [showDocumentManager, setShowDocumentManager] = useState(false)
+  const [showDirectChat, setShowDirectChat] = useState(false)
 
-  // Check URL hash for direct navigation - moved to useEffect to avoid SSR issues
+  // Check URL hash for direct navigation and handle document upload flow
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash === '#burgerschap-chat') {
-      setActiveModule('module8')
-      setActiveComponent('AI Begeleiding')
-    } else if (hash === '#modules') {
-      // Stay on homepage
-    } else if (hash === '#documents') {
-      setShowDocumentManager(true)
+    const handleHashChange = () => {
+      const hash = window.location.hash
+      console.log('Hash changed to:', hash)
+      
+      if (hash === '#start-chat') {
+        console.log('Starting direct chat from hash')
+        setShowDirectChat(true)
+        setShowDocumentManager(false)
+        setActiveModule(null)
+        setActiveComponent(null)
+        // Clear the hash
+        window.history.replaceState(null, '', window.location.pathname)
+      } else if (hash === '#burgerschap-chat') {
+        setActiveModule('module8')
+        setActiveComponent('AI Begeleiding')
+      } else if (hash === '#modules') {
+        // Stay on homepage
+      } else if (hash === '#documents') {
+        setShowDocumentManager(true)
+      }
+    }
+
+    // Handle initial hash
+    handleHashChange()
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange)
+
+    // Listen for document upload events
+    const handleDocumentUpload = (event: any) => {
+      console.log('Document upload event received:', event.detail)
+      if (event.detail && event.detail.documents && event.detail.documents.length > 0) {
+        console.log('Documents uploaded, starting chat...')
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+          setShowDirectChat(true)
+          setShowDocumentManager(false)
+        }, 500)
+      }
+    }
+
+    window.addEventListener('documentUploaded', handleDocumentUpload)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+      window.removeEventListener('documentUploaded', handleDocumentUpload)
     }
   }, [])
 
@@ -298,6 +337,43 @@ export default function PABOLeerApp() {
   const renderComponent = () => {
     if (showDocumentManager) {
       return <DocumentManager />
+    }
+
+    if (showDirectChat) {
+      return (
+        <div className="space-y-4">
+          {/* Chat Header */}
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">🤖 AI Chat met je Schooldocumenten</h3>
+                <p className="text-green-100 text-sm">Direct chatten over je geüploade documenten</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDirectChat(false)
+                  window.location.hash = ''
+                }}
+                className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                🔙 Terug naar overzicht
+              </button>
+            </div>
+          </div>
+
+          {/* Direct Chat */}
+          <SocraticChatBot 
+            module="Algemeen" 
+            opdrachten={[{
+              titel: "Chat met je Schooldocumenten",
+              beschrijving: "Stel vragen over je geüploade schooldocumenten",
+              type: "reflectie" as const,
+              startVraag: "Hoe kan ik je helpen met je schooldocumenten?",
+              context: "Je hebt schooldocumenten geüpload en wilt hier vragen over stellen aan de AI."
+            }]} 
+          />
+        </div>
+      )
     }
 
     if (!activeModule || !activeComponent) return null
@@ -383,6 +459,43 @@ export default function PABOLeerApp() {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <DocumentManager />
+        </div>
+      </div>
+    )
+  }
+
+  // Show Direct Chat
+  if (showDirectChat) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => {
+                    setShowDirectChat(false)
+                    window.location.hash = ''
+                  }}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <span className="text-xl">🔙</span>
+                  <span className="font-medium">Terug naar overzicht</span>
+                </button>
+                <div className="h-6 w-px bg-gray-300"></div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">💬</span>
+                  <span className="font-semibold text-gray-900">AI Chat</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {renderComponent()}
         </div>
       </div>
     )
