@@ -17,6 +17,16 @@ interface ChatMessage {
   timestamp: Date
 }
 
+interface UploadedDocument {
+  id: string
+  fileName: string
+  fileType: string
+  detectedType: string
+  text: string
+  wordCount: number
+  uploadDate: Date
+}
+
 interface SocraticChatBotProps {
   module: string
   opdrachten: Opdracht[]
@@ -28,7 +38,22 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [studentLevel, setStudentLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
+  const [availableDocuments, setAvailableDocuments] = useState<UploadedDocument[]>([])
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
+  const [useDocuments, setUseDocuments] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Load documents from localStorage
+  useEffect(() => {
+    const savedDocs = localStorage.getItem('pabo-documents')
+    if (savedDocs) {
+      const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
+        ...doc,
+        uploadDate: new Date(doc.uploadDate)
+      }))
+      setAvailableDocuments(parsedDocs)
+    }
+  }, [])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -40,17 +65,25 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
 
   const startOpdracht = (opdracht: Opdracht) => {
     setSelectedOpdracht(opdracht)
+    
+    let welcomeMessage = `Welkom bij de opdracht "${opdracht.titel}"! 
+
+${opdracht.beschrijving}
+
+Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral vragen ga stellen om je zelf tot inzichten te laten komen.`
+
+    if (useDocuments && selectedDocuments.length > 0) {
+      const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
+      welcomeMessage += `\n\n📄 Ik ga je helpen deze opdracht te koppelen aan jouw schooldocumenten:\n${selectedDocs.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}`
+    }
+
+    welcomeMessage += `\n\n${opdracht.startVraag}`
+
     setMessages([
       {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `Welkom bij de opdracht "${opdracht.titel}"! 
-
-${opdracht.beschrijving}
-
-Ik ga je begeleiden met de socratische methode - dat betekent dat ik je vooral vragen ga stellen om je zelf tot inzichten te laten komen. 
-
-${opdracht.startVraag}`,
+        content: welcomeMessage,
         timestamp: new Date()
       }
     ])
@@ -71,6 +104,16 @@ ${opdracht.startVraag}`,
     setIsLoading(true)
 
     try {
+      // Prepare context with selected documents
+      let contextWithDocuments = selectedOpdracht.context
+      
+      if (useDocuments && selectedDocuments.length > 0) {
+        const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
+        contextWithDocuments += `\n\nSCHOOLDOCUMENTEN CONTEXT:\n${selectedDocs.map(doc => 
+          `${doc.fileName} (${doc.detectedType}):\n${doc.text.substring(0, 2000)}...`
+        ).join('\n\n')}`
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -78,7 +121,7 @@ ${opdracht.startVraag}`,
         },
         body: JSON.stringify({
           message: inputMessage,
-          context: selectedOpdracht.context,
+          context: contextWithDocuments,
           module: module,
           studentLevel: studentLevel
         }),
@@ -123,6 +166,16 @@ ${opdracht.startVraag}`,
     setSelectedOpdracht(null)
     setMessages([])
     setInputMessage('')
+    setSelectedDocuments([])
+    setUseDocuments(false)
+  }
+
+  const toggleDocumentSelection = (docId: string) => {
+    setSelectedDocuments(prev => 
+      prev.includes(docId) 
+        ? prev.filter(id => id !== docId)
+        : [...prev, docId]
+    )
   }
 
   if (!selectedOpdracht) {
@@ -153,6 +206,56 @@ ${opdracht.startVraag}`,
           </div>
         </div>
 
+        {/* Document Integration */}
+        {availableDocuments.length > 0 && (
+          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-green-800">📚 Gebruik je schooldocumenten</h3>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={useDocuments}
+                  onChange={(e) => setUseDocuments(e.target.checked)}
+                  className="rounded border-green-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-green-700 text-sm">Activeer document-integratie</span>
+              </label>
+            </div>
+            
+            {useDocuments && (
+              <div className="space-y-2">
+                <p className="text-green-700 text-sm mb-3">
+                  Selecteer documenten die je wilt gebruiken in de AI-begeleiding:
+                </p>
+                <div className="grid gap-2 max-h-40 overflow-y-auto">
+                  {availableDocuments.map((doc) => (
+                    <label key={doc.id} className="flex items-center space-x-2 p-2 bg-white rounded border border-green-200 hover:bg-green-25 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDocuments.includes(doc.id)}
+                        onChange={() => toggleDocumentSelection(doc.id)}
+                        className="rounded border-green-300 text-green-600 focus:ring-green-500"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg">📄</span>
+                          <span className="font-medium text-green-800 text-sm truncate">{doc.fileName}</span>
+                        </div>
+                        <div className="text-xs text-green-600">{doc.detectedType} • {doc.wordCount.toLocaleString()} woorden</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                {selectedDocuments.length > 0 && (
+                  <div className="mt-2 p-2 bg-green-100 rounded text-sm text-green-700">
+                    ✅ {selectedDocuments.length} document(en) geselecteerd voor AI-begeleiding
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Opdracht Selector */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">🛠️ Kies een interactieve opdracht</h3>
@@ -179,9 +282,17 @@ ${opdracht.startVraag}`,
                   <p className="text-sm font-medium text-blue-700 mb-1">🤔 Startvraag:</p>
                   <p className="text-blue-800 italic">"{opdracht.startVraag}"</p>
                 </div>
-                <div className="mt-4 flex items-center text-sm text-gray-500">
-                  <span className="mr-2">🤖</span>
-                  <span>AI-begeleiding met socratische methode</span>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <span className="mr-2">🤖</span>
+                    <span>AI-begeleiding met socratische methode</span>
+                  </div>
+                  {useDocuments && selectedDocuments.length > 0 && (
+                    <div className="flex items-center text-sm text-green-600">
+                      <span className="mr-2">📚</span>
+                      <span>{selectedDocuments.length} document(en) geïntegreerd</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -210,7 +321,7 @@ ${opdracht.startVraag}`,
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600">✓</span>
-              <span className="text-purple-700">Eigen conclusies trekken</span>
+              <span className="text-purple-700">Koppeling aan jouw schooldocumenten</span>
             </div>
           </div>
         </div>
@@ -226,6 +337,9 @@ ${opdracht.startVraag}`,
           <div>
             <h3 className="font-semibold">🤖 AI Socratische Begeleiding</h3>
             <p className="text-blue-100 text-sm">Opdracht: {selectedOpdracht.titel}</p>
+            {useDocuments && selectedDocuments.length > 0 && (
+              <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${

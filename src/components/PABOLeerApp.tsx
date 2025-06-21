@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import SocraticChatBot from './SocraticChatBot'
-import DocumentUpload from './DocumentUpload'
+import DocumentManager from './DocumentManager'
 
 interface Module {
   id: number
@@ -22,7 +22,6 @@ interface Module {
   }[]
   bronnen: string[]
   completed: boolean
-  hasDocumentUpload?: boolean
 }
 
 const modules: Module[] = [
@@ -85,8 +84,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["https://tule.slo.nl", "https://curriculum.nu"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 2,
@@ -151,8 +149,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["G. Marzano, Classroom Management", "John Hattie, Visible Learning"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 3,
@@ -217,8 +214,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Kanjertraining.nl", "NJi Dossier SEL"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 4,
@@ -288,8 +284,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["SLO Differentiatiegids", "F. Wiliam, Embedded Formative Assessment"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 5,
@@ -359,8 +354,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["PO-Raad 'Werken met Data' toolkit", "Inspectie OK/2024"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 6,
@@ -430,8 +424,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Kennisnet Innovatiehub", "SLO 21-eeuwse vaardigheden"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 7,
@@ -501,8 +494,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Schoolleidersregister", "Kotter, Leading Change"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 8,
@@ -578,8 +570,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["SLO Burgerschapscurriculum", "Mediawijsheid.nl", "UNESCO AI Education"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   },
   {
     id: 9,
@@ -658,8 +649,7 @@ const modules: Module[] = [
       }
     ],
     bronnen: ["Cito Terugkoppeling Handleiding", "EDI Observatieprotocol", "GROW Coaching Model"],
-    completed: false,
-    hasDocumentUpload: true
+    completed: false
   }
 ]
 
@@ -667,6 +657,7 @@ export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat' | 'documenten'>('overzicht')
   const [completedModules, setCompletedModules] = useState<number[]>([])
+  const [showDocumentManager, setShowDocumentManager] = useState(false)
 
   const toggleModuleCompletion = (moduleId: number) => {
     setCompletedModules(prev => 
@@ -680,17 +671,42 @@ export default function PABOLeerApp() {
     return Math.round((completedModules.length / modules.length) * 100)
   }
 
+  // Document Manager View
+  if (showDocumentManager) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowDocumentManager(false)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  ← Terug naar modules
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800">📚 Document Manager</h1>
+                  <p className="text-gray-600 mt-1">Beheer al je schooldocumenten op één plek</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DocumentManager />
+        </div>
+      </div>
+    )
+  }
+
+  // Module Detail View
   if (selectedModule) {
     const tabs = [
       { id: 'overzicht', label: '📋 Overzicht', icon: '📋' },
       { id: 'theorie', label: '📚 Theorie', icon: '📚' },
       { id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' }
     ]
-
-    // Add document tab if module supports it
-    if (selectedModule.hasDocumentUpload) {
-      tabs.push({ id: 'documenten', label: '📄 Documenten', icon: '📄' })
-    }
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -793,23 +809,6 @@ export default function PABOLeerApp() {
                     </div>
                   </div>
 
-                  {/* Document Upload Info */}
-                  {selectedModule.hasDocumentUpload && (
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
-                      <h3 className="text-lg font-semibold text-green-800 mb-3">📄 Schoolspecifiek Leren</h3>
-                      <p className="text-green-700 mb-4">
-                        Deze module ondersteunt het uploaden van schooldocumenten voor gepersonaliseerd leren. 
-                        Upload je schoolplan, schoolgids of andere documenten om de theorie te koppelen aan jouw specifieke schoolcontext.
-                      </p>
-                      <button
-                        onClick={() => setActiveTab('documenten')}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        📤 Upload Schooldocumenten
-                      </button>
-                    </div>
-                  )}
-
                   {/* Bronnen */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-3">📖 Bronnen</h3>
@@ -871,17 +870,6 @@ export default function PABOLeerApp() {
                   />
                 </div>
               )}
-
-              {activeTab === 'documenten' && selectedModule.hasDocumentUpload && (
-                <div>
-                  <DocumentUpload 
-                    module={selectedModule.title}
-                    onDocumentAnalyzed={(analysis, document) => {
-                      console.log('Document analyzed:', analysis, document)
-                    }}
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -889,6 +877,7 @@ export default function PABOLeerApp() {
     )
   }
 
+  // Main Overview
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
@@ -903,7 +892,7 @@ export default function PABOLeerApp() {
           </p>
           
           {/* Progress Bar */}
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto mb-6">
             <div className="flex justify-between text-sm text-gray-600 mb-2">
               <span>Voortgang</span>
               <span>{completedModules.length}/{modules.length} modules</span>
@@ -916,6 +905,14 @@ export default function PABOLeerApp() {
             </div>
             <p className="text-sm text-gray-600 mt-1">{getProgressPercentage()}% voltooid</p>
           </div>
+
+          {/* Document Manager Button */}
+          <button
+            onClick={() => setShowDocumentManager(true)}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg"
+          >
+            📚 Beheer Schooldocumenten
+          </button>
         </div>
 
         {/* Modules Grid */}
@@ -964,12 +961,10 @@ export default function PABOLeerApp() {
                     <span className="mr-2">🤖</span>
                     <span>AI-begeleiding beschikbaar</span>
                   </div>
-                  {module.hasDocumentUpload && (
-                    <div className="flex items-center text-sm text-green-600">
-                      <span className="mr-2">📄</span>
-                      <span>Document upload ondersteund</span>
-                    </div>
-                  )}
+                  <div className="flex items-center text-sm text-green-600">
+                    <span className="mr-2">📚</span>
+                    <span>Schooldocument integratie</span>
+                  </div>
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-200">
