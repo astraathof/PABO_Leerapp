@@ -22,6 +22,7 @@ interface Module {
   category: 'Curriculum' | 'Ontwikkeling' | 'Pedagogiek' | 'Leiderschap' | 'Praktijk'
   components: string[]
   learningGoals: string[]
+  learningPath?: 'beginnend' | 'gevorderd' | 'leider'
 }
 
 const modules: Module[] = [
@@ -39,7 +40,8 @@ const modules: Module[] = [
       'Kerndoelen vertalen naar lesdoelen',
       'Progressie monitoren per groep',
       'Curriculum mapping toepassen'
-    ]
+    ],
+    learningPath: 'beginnend'
   },
   {
     id: 'module2',
@@ -55,7 +57,8 @@ const modules: Module[] = [
       'Theorie koppelen aan praktijk',
       'Leeftijdsadequaat onderwijs geven',
       'Individuele verschillen begrijpen'
-    ]
+    ],
+    learningPath: 'beginnend'
   },
   {
     id: 'module3',
@@ -71,7 +74,8 @@ const modules: Module[] = [
       'Klassenklimaat verbeteren',
       'Sociale vaardigheden ontwikkelen',
       'Conflicten constructief oplossen'
-    ]
+    ],
+    learningPath: 'beginnend'
   },
   {
     id: 'module4',
@@ -87,7 +91,8 @@ const modules: Module[] = [
       'Inclusief onderwijs vormgeven',
       'Adaptief onderwijs implementeren',
       'Alle leerlingen laten slagen'
-    ]
+    ],
+    learningPath: 'gevorderd'
   },
   {
     id: 'module5',
@@ -103,7 +108,8 @@ const modules: Module[] = [
       'Formatieve evaluatie toepassen',
       'Evidence-based werken',
       'Leerresultaten verbeteren'
-    ]
+    ],
+    learningPath: 'gevorderd'
   },
   {
     id: 'module6',
@@ -119,7 +125,8 @@ const modules: Module[] = [
       'Design thinking toepassen',
       'Digitale geletterdheid ontwikkelen',
       'Innovatief onderwijs vormgeven'
-    ]
+    ],
+    learningPath: 'gevorderd'
   },
   {
     id: 'module7',
@@ -135,7 +142,8 @@ const modules: Module[] = [
       'Veranderprocessen leiden',
       'Teamontwikkeling faciliteren',
       'Schoolcultuur vormgeven'
-    ]
+    ],
+    learningPath: 'leider'
   },
   {
     id: 'module8',
@@ -151,7 +159,8 @@ const modules: Module[] = [
       'Democratische waarden overdragen',
       'Diversiteit waarderen',
       'Sociale cohesie bevorderen'
-    ]
+    ],
+    learningPath: 'leider'
   },
   {
     id: 'module9',
@@ -167,7 +176,8 @@ const modules: Module[] = [
       'Monitoring groep 1-8 organiseren',
       'Coördinatorrollen effectief invullen',
       'Data-gedreven schoolverbetering'
-    ]
+    ],
+    learningPath: 'leider'
   }
 ]
 
@@ -240,6 +250,7 @@ const opdrachten = [
 export default function PABOLeerApp() {
   const [activeModule, setActiveModule] = useState<string | null>(null)
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
+  const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null)
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -252,12 +263,21 @@ export default function PABOLeerApp() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'Curriculum': return 'bg-blue-500'
+      case 'Curriculum': return 'bg-green-500'
       case 'Ontwikkeling': return 'bg-green-500'
-      case 'Pedagogiek': return 'bg-purple-500'
-      case 'Leiderschap': return 'bg-red-500'
-      case 'Praktijk': return 'bg-orange-500'
+      case 'Pedagogiek': return 'bg-blue-500'
+      case 'Leiderschap': return 'bg-purple-500'
+      case 'Praktijk': return 'bg-blue-500'
       default: return 'bg-gray-500'
+    }
+  }
+
+  const getLearningPathColor = (path: string) => {
+    switch (path) {
+      case 'beginnend': return 'border-green-500 bg-green-50'
+      case 'gevorderd': return 'border-blue-500 bg-blue-50'
+      case 'leider': return 'border-purple-500 bg-purple-50'
+      default: return 'border-gray-200'
     }
   }
 
@@ -274,11 +294,17 @@ export default function PABOLeerApp() {
         return <KerndoelenProgressieTracker />
       case 'Ontwikkelingsstadia Timeline':
         return <OntwikkelingsStadiaTimeline />
+      case 'Theorie Viewer':
+        return <DevelopmentTheoryViewer />
       case 'SEL Methodieken':
         return <SELMethodsViewer />
       case 'Competentie Radar':
         return <SELCompetentieRadar />
       case 'Cito Monitoring':
+        return <CitoMonitoringViewer />
+      case 'Coördinatorrollen':
+        return <CitoMonitoringViewer />
+      case 'Data Doorstroom':
         return <CitoMonitoringViewer />
       case 'Klikbare Theorie':
         return <ClickableTheoryViewer moduleId={activeModule} />
@@ -290,10 +316,27 @@ export default function PABOLeerApp() {
         return <SocraticChatBot module={moduleData.title} opdrachten={moduleOpdrachten} />
       case 'Document Manager':
         return <DocumentManager />
+      // Fallback components for missing ones
+      case 'Differentiatie Strategieën':
+      case 'Inclusief Onderwijs':
+      case 'Data Analyse':
+      case 'Formatieve Evaluatie':
+      case '21e-eeuwse Vaardigheden':
+      case 'Computational Thinking':
+      case 'Pedagogisch Leiderschap':
+      case 'Verandermanagement':
+      case 'Burgerschapsonderwijs':
+      case 'Interculturele Competentie':
+        return <ClickableTheoryViewer moduleId={activeModule} />
       default:
         return <div className="text-center py-12 text-gray-500">Component wordt geladen...</div>
     }
   }
+
+  // Filter modules based on selected learning path
+  const filteredModules = selectedLearningPath 
+    ? modules.filter(module => module.learningPath === selectedLearningPath)
+    : modules
 
   if (activeModule && activeComponent) {
     const moduleData = modules.find(m => m.id === activeModule)
@@ -483,13 +526,24 @@ export default function PABOLeerApp() {
               <span className="text-2xl">🎓</span>
               <span className="text-xl font-bold text-gray-900">PABO Leerapp</span>
             </div>
-            <button
-              onClick={() => setActiveComponent('Document Manager')}
-              className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <span>📚</span>
-              <span>Mijn Documenten</span>
-            </button>
+            <div className="flex items-center space-x-4">
+              {selectedLearningPath && (
+                <button
+                  onClick={() => setSelectedLearningPath(null)}
+                  className="flex items-center space-x-2 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                >
+                  <span>🔙</span>
+                  <span>Alle modules</span>
+                </button>
+              )}
+              <button
+                onClick={() => setActiveComponent('Document Manager')}
+                className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <span>📚</span>
+                <span>Mijn Documenten</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -551,81 +605,95 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
-        {/* Quick Start Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            🚀 Waar wil je beginnen?
+        {/* Learning Path Selection or Modules */}
+        {!selectedLearningPath ? (
+          <>
+            {/* Quick Start Section */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                🚀 Kies je leerpad
+              </h2>
+              
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div 
+                  onClick={() => setSelectedLearningPath('beginnend')}
+                  className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 cursor-pointer hover:shadow-lg transition-all"
+                >
+                  <div className="text-4xl mb-3">🌱</div>
+                  <h3 className="font-semibold text-green-800 mb-2">Beginnend PABO-student</h3>
+                  <p className="text-green-600 text-sm mb-4">Start met de basis: kerndoelen en ontwikkelingspsychologie</p>
+                  <div className="space-y-1 text-xs text-green-700">
+                    <div>📚 Curriculum & Kerndoelen</div>
+                    <div>🌱 Ontwikkelingspsychologie</div>
+                    <div>❤️ SEL & Klassenmanagement</div>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setSelectedLearningPath('gevorderd')}
+                  className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200 cursor-pointer hover:shadow-lg transition-all"
+                >
+                  <div className="text-4xl mb-3">🎯</div>
+                  <h3 className="font-semibold text-blue-800 mb-2">Gevorderd PABO-student</h3>
+                  <p className="text-blue-600 text-sm mb-4">Verdiep je in differentiatie en data-gedreven werken</p>
+                  <div className="space-y-1 text-xs text-blue-700">
+                    <div>🎯 Differentiatie & Inclusie</div>
+                    <div>📊 Data & Evaluatie</div>
+                    <div>💡 21e-eeuwse Vaardigheden</div>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setSelectedLearningPath('leider')}
+                  className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 cursor-pointer hover:shadow-lg transition-all"
+                >
+                  <div className="text-4xl mb-3">👑</div>
+                  <h3 className="font-semibold text-purple-800 mb-2">Aanstaand Schoolleider</h3>
+                  <p className="text-purple-600 text-sm mb-4">Focus op leiderschap en schoolontwikkeling</p>
+                  <div className="space-y-1 text-xs text-purple-700">
+                    <div>👑 Schoolleiderschap</div>
+                    <div>🏛️ Burgerschap & Diversiteit</div>
+                    <div>📈 Cito & Monitoring</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="text-gray-600 text-sm mb-4">Of bekijk alle modules hieronder 👇</p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                {selectedLearningPath === 'beginnend' ? '🌱 Beginnend PABO-student Leerpad' :
+                 selectedLearningPath === 'gevorderd' ? '🎯 Gevorderd PABO-student Leerpad' :
+                 '👑 Aanstaand Schoolleider Leerpad'}
+              </h2>
+              <p className="text-gray-600">
+                {selectedLearningPath === 'beginnend' ? 'Start met de fundamenten van het onderwijs' :
+                 selectedLearningPath === 'gevorderd' ? 'Verdiep je kennis en vaardigheden' :
+                 'Ontwikkel je leiderschapscompetenties'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Modules Grid */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            {selectedLearningPath ? 'Jouw Modules' : '📚 Alle Modules'}
           </h2>
           
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
-              <div className="text-4xl mb-3">🌱</div>
-              <h3 className="font-semibold text-green-800 mb-2">Ik ben nieuw</h3>
-              <p className="text-green-600 text-sm mb-4">Start met de basis: kerndoelen en ontwikkelingspsychologie</p>
-              <button
-                onClick={() => setActiveModule('module1')}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Start met Module 1
-              </button>
-            </div>
-
-            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-              <div className="text-4xl mb-3">🎯</div>
-              <h3 className="font-semibold text-blue-800 mb-2">Ik wil verdiepen</h3>
-              <p className="text-blue-600 text-sm mb-4">Kies een specifiek onderwerp dat je interesseert</p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => setActiveModule('module3')}
-                  className="w-full px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 transition-colors"
-                >
-                  SEL & Klassenmanagement
-                </button>
-                <button
-                  onClick={() => setActiveModule('module4')}
-                  className="w-full px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 transition-colors"
-                >
-                  Differentiatie & Inclusie
-                </button>
-              </div>
-            </div>
-
-            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
-              <div className="text-4xl mb-3">👑</div>
-              <h3 className="font-semibold text-purple-800 mb-2">Ik wil leiden</h3>
-              <p className="text-purple-600 text-sm mb-4">Focus op leiderschap en schoolontwikkeling</p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => setActiveModule('module7')}
-                  className="w-full px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm hover:bg-purple-200 transition-colors"
-                >
-                  Schoolleiderschap
-                </button>
-                <button
-                  onClick={() => setActiveModule('module9')}
-                  className="w-full px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm hover:bg-purple-200 transition-colors"
-                >
-                  Cito & Monitoring
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-gray-600 text-sm mb-4">Of bekijk alle modules hieronder 👇</p>
-          </div>
-        </div>
-
-        {/* All Modules Grid - Always Visible */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">📚 Alle Modules</h2>
-          
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {modules.map((module) => (
+            {filteredModules.map((module) => (
               <div
                 key={module.id}
                 onClick={() => setActiveModule(module.id)}
-                className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                className={`bg-white rounded-xl shadow-lg border-2 p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 ${
+                  module.learningPath ? getLearningPathColor(module.learningPath) : 'border-gray-200'
+                }`}
               >
                 <div className="flex items-center space-x-3 mb-4">
                   <span className="text-3xl">{module.icon}</span>
@@ -667,67 +735,6 @@ export default function PABOLeerApp() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Learning Path Recommendations */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">🎯 Aanbevolen Leerpaden</h2>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
-              <h3 className="font-semibold text-green-800 mb-3">🌱 Beginnend PABO-student</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">1</span>
-                  <span className="text-green-700">Curriculum & Kerndoelen</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">2</span>
-                  <span className="text-green-700">Ontwikkelingspsychologie</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">3</span>
-                  <span className="text-green-700">SEL & Klassenmanagement</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-              <h3 className="font-semibold text-blue-800 mb-3">🎯 Gevorderd PABO-student</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">1</span>
-                  <span className="text-blue-700">Differentiatie & Inclusie</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">2</span>
-                  <span className="text-blue-700">Data & Evaluatie</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">3</span>
-                  <span className="text-blue-700">21e-eeuwse Vaardigheden</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
-              <h3 className="font-semibold text-purple-800 mb-3">👑 Aanstaand Schoolleider</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs">1</span>
-                  <span className="text-purple-700">Schoolleiderschap</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs">2</span>
-                  <span className="text-purple-700">Cito & Monitoring</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs">3</span>
-                  <span className="text-purple-700">Burgerschap & Diversiteit</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
