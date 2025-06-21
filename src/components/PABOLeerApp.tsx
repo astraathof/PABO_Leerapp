@@ -570,12 +570,102 @@ const modules: Module[] = [
     ],
     bronnen: ["SLO Burgerschapscurriculum", "Mediawijsheid.nl", "UNESCO AI Education"],
     completed: false
+  },
+  {
+    id: 9,
+    title: "Schoolleiderschap: Resultaatsturing & Lesobservatie",
+    description: "Leer sturen op resultaten met Cito-data, LVS-interpretatie en effectieve lesobservatie",
+    leerdoelen: [
+      "Interpreteer Cito-scores en LVS-data voor schoolsturing en interventies",
+      "Voer effectieve lesobservaties uit met EDI-gebaseerde kijkwijzers",
+      "Geef constructieve feedback die leerkrachtontwikkeling stimuleert",
+      "Koppel observatieresultaten aan schoolbrede verbeterdoelen"
+    ],
+    theorie: {
+      concepten: [
+        {
+          naam: "Cito-score Interpretatie",
+          uitleg: "Cito-scores worden uitgedrukt in vaardigheidsniveaus (A t/m E) en percentielscores. Belangrijk is de ontwikkeling over tijd, niet alleen absolute scores.",
+          voorbeeld: "Groep 6 Rekenen: 65% behaalt niveau C of hoger (landelijk gemiddelde 70%). Trend: vorig jaar 58% → verbetering zichtbaar, maar nog onder gemiddelde"
+        },
+        {
+          naam: "LVS Trendanalyse",
+          uitleg: "Leerling Volg Systeem toont ontwikkeling per leerling, groep en school over meerdere meetmomenten. Focus op groei, niet alleen eindniveau.",
+          voorbeeld: "Leerling X: sept 25e percentiel → jan 35e percentiel → juni 45e percentiel. Positieve groei van 20 percentielpunten in 1 jaar"
+        },
+        {
+          naam: "Referentieniveau Doorstroom",
+          uitleg: "1F (basis), 1S (streef), 2F (havo/vwo). Minimaal 85% moet 1F halen, 65% moet 1S halen voor goede doorstroom naar VO.",
+          voorbeeld: "School X: 92% haalt 1F rekenen (✓), maar slechts 58% haalt 1S (✗). Actie: versterking rekenonderwijs groep 7-8"
+        },
+        {
+          naam: "EDI Lesobservatie Model",
+          uitleg: "Explicit Direct Instruction observatie: Lesdoel helder? Voorkennis geactiveerd? Modeling effectief? Guided practice voldoende? Independent practice gedifferentieerd?",
+          voorbeeld: "Observatie rekenen: Lesdoel onduidelijk (2/4), Modeling goed (4/4), Guided practice te kort (2/4) → Feedback: meer tijd voor begeleid oefenen"
+        },
+        {
+          naam: "Feedback Gesprekstechnieken",
+          uitleg: "GROW-model: Goal (wat wil je bereiken?), Reality (wat zie ik?), Options (wat zijn mogelijkheden?), Way forward (wat ga je doen?).",
+          voorbeeld: "Goal: 'Meer differentiatie'. Reality: 'Ik zie één niveau opdrachten'. Options: 'Drie niveaus, keuzemenu, hulpkaarten'. Way: 'Volgende week drie niveaus proberen'"
+        },
+        {
+          naam: "Schoolbrede Data-analyse",
+          uitleg: "Combineer Cito, LVS, observaties en tevredenheidsonderzoeken voor compleet beeld. Zoek patronen en verbanden tussen verschillende databronnen.",
+          voorbeeld: "Patroon: Groepen met hoge Cito-scores hebben ook hoge observatiescores op 'duidelijke instructie' → Focus op instructievaardigheden team"
+        }
+      ],
+      praktijktips: [
+        "Bespreek data altijd in context: wat speelde er in de klas/periode?",
+        "Gebruik observaties voor ontwikkeling, niet voor beoordeling",
+        "Geef binnen 48 uur na observatie feedback voor maximale impact",
+        "Koppel individuele feedback aan schoolbrede verbeterdoelen",
+        "Maak data visueel met grafieken en dashboards voor het team",
+        "Train leerkrachten in data-interpretatie voor eigenaarschap"
+      ]
+    },
+    interactieveOpdrachten: [
+      {
+        titel: "Cito Data Analist",
+        beschrijving: "Analyseer echte Cito-resultaten en bepaal interventies voor schoolverbetering",
+        type: "analyse",
+        startVraag: "Je krijgt de Cito-resultaten van je school. Rekenen groep 6: 58% niveau C+, groep 8: 72% niveau C+. Wat valt je op en wat ga je onderzoeken?",
+        context: "Je leert Cito-data kritisch interpreteren en actieplannen maken"
+      },
+      {
+        titel: "EDI Observatie Master",
+        beschrijving: "Voer een lesobservatie uit met EDI-kijkwijzer en geef constructieve feedback",
+        type: "toepassing",
+        startVraag: "Je observeert een rekenles. De leerkracht begint direct met sommen zonder uitleg. Hoe ga je dit bespreken in het feedbackgesprek?",
+        context: "Je oefent met lesobservatie en feedbackgesprekken"
+      },
+      {
+        titel: "Schooldata Dashboard Designer",
+        beschrijving: "Ontwerp een dashboard dat alle relevante schooldata overzichtelijk toont",
+        type: "ontwerp",
+        startVraag: "Als schoolleider wil je in één oogopslag zien hoe je school presteert. Welke data zou je willen zien en hoe presenteer je dat?",
+        context: "Je maakt een praktisch dashboard voor schoolsturing"
+      },
+      {
+        titel: "Interventie Strategist",
+        beschrijving: "Ontwikkel gerichte interventies op basis van data-analyse en observaties",
+        type: "toepassing",
+        startVraag: "Data toont: spelling groep 4 achterlopend, observaties tonen weinig expliciete instructie. Hoe pak je dit systematisch aan?",
+        context: "Je koppelt data aan concrete verbeteracties"
+      }
+    ],
+    bronnen: [
+      "Cito Schoolrapportage Handleiding",
+      "EDI Observatieprotocol (Hollingsworth & Ybarra)",
+      "PO-Raad Data-dashboard voorbeelden",
+      "Inspectie Onderzoekskader 2024"
+    ],
+    completed: false
   }
 ]
 
 export default function PABOLeerApp() {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
-  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat'>('overzicht')
+  const [activeTab, setActiveTab] = useState<'overzicht' | 'theorie' | 'chat' | 'tools'>('overzicht')
   const [completedModules, setCompletedModules] = useState<number[]>([])
 
   const toggleModuleCompletion = (moduleId: number) => {
@@ -588,6 +678,371 @@ export default function PABOLeerApp() {
 
   const getProgressPercentage = () => {
     return Math.round((completedModules.length / modules.length) * 100)
+  }
+
+  // Schoolleider module tools
+  const renderSchoolleiderTools = () => {
+    if (selectedModule?.id !== 9) return null
+
+    return (
+      <div className="space-y-8">
+        {/* Cito Score Voorbeelden */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Cito Score Voorbeelden & Interpretatie</h3>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Voorbeeld 1: Rekenen */}
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-3">🔢 Rekenen Groep 6 - Voorjaar 2024</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Niveau A (zeer zwak):</span>
+                  <span className="font-medium text-red-600">8% (landelijk: 5%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Niveau B (zwak):</span>
+                  <span className="font-medium text-orange-600">27% (landelijk: 20%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Niveau C (voldoende):</span>
+                  <span className="font-medium text-yellow-600">35% (landelijk: 40%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Niveau D (goed):</span>
+                  <span className="font-medium text-green-600">22% (landelijk: 25%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Niveau E (zeer goed):</span>
+                  <span className="font-medium text-green-700">8% (landelijk: 10%)</span>
+                </div>
+                <div className="border-t pt-2 mt-3">
+                  <div className="flex justify-between font-bold">
+                    <span>C+ (voldoende of hoger):</span>
+                    <span className="text-red-600">65% (landelijk: 75%)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-white rounded border-l-4 border-red-500">
+                <p className="text-sm text-red-700">
+                  <strong>Analyse:</strong> Te veel leerlingen in niveau A+B (35% vs 25% landelijk). 
+                  Actie: Versterking basisvaardigheden en differentiatie nodig.
+                </p>
+              </div>
+            </div>
+
+            {/* Voorbeeld 2: Begrijpend Lezen */}
+            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-3">📖 Begrijpend Lezen Groep 8 - Voorjaar 2024</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Onder 1F:</span>
+                  <span className="font-medium text-red-600">3% (landelijk: 8%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>1F (functioneel):</span>
+                  <span className="font-medium text-orange-600">12% (landelijk: 15%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>1S (streefniveau):</span>
+                  <span className="font-medium text-yellow-600">28% (landelijk: 32%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>2F (havo/vwo):</span>
+                  <span className="font-medium text-green-600">57% (landelijk: 45%)</span>
+                </div>
+                <div className="border-t pt-2 mt-3">
+                  <div className="flex justify-between font-bold">
+                    <span>1F+ (functioneel of hoger):</span>
+                    <span className="text-green-600">97% (landelijk: 92%)</span>
+                  </div>
+                  <div className="flex justify-between font-bold">
+                    <span>1S+ (streef of hoger):</span>
+                    <span className="text-green-600">85% (landelijk: 77%)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-white rounded border-l-4 border-green-500">
+                <p className="text-sm text-green-700">
+                  <strong>Analyse:</strong> Uitstekende resultaten! Meer leerlingen halen 2F dan landelijk. 
+                  Behoud kwaliteit en deel best practices.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Trendanalyse Voorbeeld */}
+          <div className="mt-6 bg-purple-50 rounded-lg p-4 border border-purple-200">
+            <h4 className="font-semibold text-purple-800 mb-3">📈 3-Jarige Trendanalyse Rekenen</h4>
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="font-medium text-purple-700">2022</div>
+                <div className="text-2xl font-bold text-red-600">58%</div>
+                <div className="text-xs text-gray-600">C+ niveau</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-purple-700">2023</div>
+                <div className="text-2xl font-bold text-orange-600">62%</div>
+                <div className="text-xs text-gray-600">C+ niveau</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-purple-700">2024</div>
+                <div className="text-2xl font-bold text-yellow-600">65%</div>
+                <div className="text-xs text-gray-600">C+ niveau</div>
+              </div>
+            </div>
+            <div className="mt-3 p-3 bg-white rounded border-l-4 border-purple-500">
+              <p className="text-sm text-purple-700">
+                <strong>Trend:</strong> Gestage verbetering (+7% in 3 jaar), maar nog steeds onder landelijk gemiddelde (75%). 
+                Interventies werken, doorzetten!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* EDI Observatie Kijkwijzer */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">👁️ EDI Lesobservatie Kijkwijzer</h3>
+          
+          <div className="space-y-6">
+            {/* Observatie Formulier */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-800 mb-3">📋 Observatieformulier - Explicit Direct Instruction</h4>
+              
+              <div className="space-y-4">
+                {[
+                  {
+                    fase: "1. Lesdoel & Activatie Voorkennis",
+                    items: [
+                      "Lesdoel is helder gecommuniceerd aan leerlingen",
+                      "Voorkennis wordt geactiveerd en gecontroleerd",
+                      "Verbinding met vorige lessen wordt gelegd",
+                      "Leerlingen weten wat ze gaan leren en waarom"
+                    ]
+                  },
+                  {
+                    fase: "2. Modeling (Ik doe, jullie kijken)",
+                    items: [
+                      "Leerkracht demonstreert stap-voor-stap",
+                      "Denkproces wordt hardop uitgesproken",
+                      "Voorbeelden zijn helder en relevant",
+                      "Leerlingen zijn actief betrokken bij modeling"
+                    ]
+                  },
+                  {
+                    fase: "3. Guided Practice (Wij doen samen)",
+                    items: [
+                      "Voldoende tijd voor begeleid oefenen",
+                      "Leerkracht controleert begrip van alle leerlingen",
+                      "Directe feedback en correctie waar nodig",
+                      "Geleidelijke afbouw van ondersteuning"
+                    ]
+                  },
+                  {
+                    fase: "4. Independent Practice (Jullie doen zelf)",
+                    items: [
+                      "Opdrachten zijn gedifferentieerd naar niveau",
+                      "Leerlingen werken zelfstandig aan passende taken",
+                      "Leerkracht monitort en ondersteunt waar nodig",
+                      "Tijd voor verdieping en uitbreiding"
+                    ]
+                  },
+                  {
+                    fase: "5. Afsluiting & Evaluatie",
+                    items: [
+                      "Lesdoel wordt geëvalueerd met leerlingen",
+                      "Belangrijkste punten worden samengevat",
+                      "Verbinding naar volgende les wordt gelegd",
+                      "Leerlingen reflecteren op hun leerproces"
+                    ]
+                  }
+                ].map((fase, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <h5 className="font-medium text-blue-800 mb-2">{fase.fase}</h5>
+                    <div className="grid gap-2">
+                      {fase.items.map((item, itemIndex) => (
+                        <div key={itemIndex} className="flex items-center space-x-3">
+                          <div className="flex space-x-1">
+                            {[1, 2, 3, 4].map((score) => (
+                              <div
+                                key={score}
+                                className="w-6 h-6 border border-gray-300 rounded text-xs flex items-center justify-center cursor-pointer hover:bg-blue-100"
+                              >
+                                {score}
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-700">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Scoring Uitleg */}
+              <div className="mt-4 bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <h5 className="font-medium text-blue-800 mb-2">📏 Scoring:</h5>
+                <div className="grid grid-cols-4 gap-2 text-xs">
+                  <div className="text-center">
+                    <div className="font-medium text-red-600">1 - Onvoldoende</div>
+                    <div>Niet zichtbaar</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-orange-600">2 - Matig</div>
+                    <div>Beperkt zichtbaar</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-yellow-600">3 - Voldoende</div>
+                    <div>Duidelijk zichtbaar</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-green-600">4 - Goed</div>
+                    <div>Uitstekend zichtbaar</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feedback Template */}
+            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-3">💬 Feedback Gesprek Template (GROW-model)</h4>
+              
+              <div className="space-y-3">
+                <div className="bg-white rounded p-3 border-l-4 border-green-500">
+                  <h5 className="font-medium text-green-700">🎯 GOAL - Wat wil je bereiken?</h5>
+                  <p className="text-sm text-gray-600 mt-1">
+                    "Wat is je doel voor de volgende les/periode? Waar wil je aan werken?"
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded p-3 border-l-4 border-blue-500">
+                  <h5 className="font-medium text-blue-700">👁️ REALITY - Wat heb ik gezien?</h5>
+                  <p className="text-sm text-gray-600 mt-1">
+                    "Ik zag dat... [concrete observaties]. Wat is jouw ervaring van de les?"
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded p-3 border-l-4 border-purple-500">
+                  <h5 className="font-medium text-purple-700">💡 OPTIONS - Wat zijn mogelijkheden?</h5>
+                  <p className="text-sm text-gray-600 mt-1">
+                    "Welke opties zie jij? Wat zou je anders kunnen doen? Wat heb je al eens geprobeerd?"
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded p-3 border-l-4 border-orange-500">
+                  <h5 className="font-medium text-orange-700">🚀 WAY FORWARD - Wat ga je doen?</h5>
+                  <p className="text-sm text-gray-600 mt-1">
+                    "Wat ga je concreet proberen? Wanneer? Hoe kan ik je ondersteunen?"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* LVS Dashboard Voorbeeld */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">📈 LVS Dashboard Voorbeeld</h3>
+          
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* Schoolniveau */}
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-3">🏫 Schoolniveau</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Rekenen gemiddeld:</span>
+                  <span className="font-medium">67e percentiel</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Spelling gemiddeld:</span>
+                  <span className="font-medium">72e percentiel</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Lezen gemiddeld:</span>
+                  <span className="font-medium">78e percentiel</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Trend (3 jaar):</span>
+                  <span className="font-medium text-green-600">↗️ +8%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Groepsniveau */}
+            <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+              <h4 className="font-semibold text-yellow-800 mb-3">👥 Groep 5A</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Rekenen:</span>
+                  <span className="font-medium text-red-600">45e percentiel</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Spelling:</span>
+                  <span className="font-medium text-green-600">82e percentiel</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Lezen:</span>
+                  <span className="font-medium text-yellow-600">65e percentiel</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Aandachtspunt:</span>
+                  <span className="font-medium text-red-600">Rekenen ↓</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Leerlingniveau */}
+            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-3">👤 Emma (Groep 5A)</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Rekenen voortgang:</span>
+                  <span className="font-medium text-green-600">25→35→42</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Spelling voortgang:</span>
+                  <span className="font-medium text-green-600">78→82→85</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Groei dit jaar:</span>
+                  <span className="font-medium text-green-600">+17 punten</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Status:</span>
+                  <span className="font-medium text-green-600">Op schema</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actieplan Template */}
+          <div className="mt-6 bg-orange-50 rounded-lg p-4 border border-orange-200">
+            <h4 className="font-semibold text-orange-800 mb-3">📋 Actieplan Template</h4>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <h5 className="font-medium text-orange-700 mb-2">🎯 Geconstateerd probleem:</h5>
+                <p className="text-gray-600 mb-3">Rekenprestaties groep 5A onder schoolgemiddelde</p>
+                
+                <h5 className="font-medium text-orange-700 mb-2">📊 Data-onderbouwing:</h5>
+                <p className="text-gray-600">45e percentiel vs 67e schoolgemiddelde</p>
+              </div>
+              <div>
+                <h5 className="font-medium text-orange-700 mb-2">🚀 Interventies:</h5>
+                <ul className="text-gray-600 space-y-1">
+                  <li>• Extra rekenles 2x per week</li>
+                  <li>• Differentiatie in drie niveaus</li>
+                  <li>• Coaching leerkracht EDI-model</li>
+                  <li>• Ouders informeren + huiswerk</li>
+                </ul>
+                
+                <h5 className="font-medium text-orange-700 mb-2 mt-3">📅 Evaluatie:</h5>
+                <p className="text-gray-600">Volgende meting januari 2025</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (selectedModule) {
@@ -632,7 +1087,8 @@ export default function PABOLeerApp() {
               {[
                 { id: 'overzicht', label: '📋 Overzicht', icon: '📋' },
                 { id: 'theorie', label: '📚 Theorie', icon: '📚' },
-                { id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' }
+                { id: 'chat', label: '🤖 AI Begeleiding', icon: '🤖' },
+                ...(selectedModule.id === 9 ? [{ id: 'tools', label: '🛠️ Praktijktools', icon: '🛠️' }] : [])
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -757,6 +1213,8 @@ export default function PABOLeerApp() {
                   />
                 </div>
               )}
+
+              {activeTab === 'tools' && renderSchoolleiderTools()}
             </div>
           </div>
         </div>
@@ -774,7 +1232,7 @@ export default function PABOLeerApp() {
           </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">PABO Leerapp</h1>
           <p className="text-xl text-blue-700 mb-4">
-            Interactieve leermodules voor aanstaande leerkrachten
+            Interactieve leermodules voor aanstaande leerkrachten & schoolleiders
           </p>
           
           {/* Progress Bar */}
@@ -800,20 +1258,29 @@ export default function PABOLeerApp() {
               key={module.id}
               className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
                 completedModules.includes(module.id) ? 'ring-2 ring-green-500' : ''
-              }`}
+              } ${module.id === 9 ? 'ring-2 ring-purple-500 bg-gradient-to-br from-purple-50 to-pink-50' : ''}`}
               onClick={() => setSelectedModule(module)}
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                      {module.id}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                      module.id === 9 ? 'bg-purple-600' : 'bg-blue-600'
+                    }`}>
+                      {module.id === 9 ? '👑' : module.id}
                     </div>
-                    <div className="text-sm text-gray-500">Module {module.id}</div>
+                    <div className="text-sm text-gray-500">
+                      {module.id === 9 ? 'Schoolleider' : `Module ${module.id}`}
+                    </div>
                   </div>
                   {completedModules.includes(module.id) && (
                     <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm">✓</span>
+                    </div>
+                  )}
+                  {module.id === 9 && (
+                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm">🛠️</span>
                     </div>
                   )}
                 </div>
@@ -839,11 +1306,21 @@ export default function PABOLeerApp() {
                     <span className="mr-2">🤖</span>
                     <span>AI-begeleiding beschikbaar</span>
                   </div>
+                  {module.id === 9 && (
+                    <div className="flex items-center text-sm text-purple-600 font-medium">
+                      <span className="mr-2">⭐</span>
+                      <span>Praktijktools & voorbeelden</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                    Start Module →
+                  <button className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                    module.id === 9 
+                      ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}>
+                    {module.id === 9 ? 'Start Schoolleider Module →' : 'Start Module →'}
                   </button>
                 </div>
               </div>
@@ -854,7 +1331,7 @@ export default function PABOLeerApp() {
         {/* Footer */}
         <div className="text-center mt-12">
           <p className="text-gray-500 text-sm">
-            💜 Gemaakt voor PABO studenten • Interactief leren met AI-ondersteuning
+            💜 Gemaakt voor PABO studenten & schoolleiders • Interactief leren met AI-ondersteuning
           </p>
         </div>
       </div>
