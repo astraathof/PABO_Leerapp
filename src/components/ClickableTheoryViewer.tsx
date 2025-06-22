@@ -700,7 +700,7 @@ const theoryTopics: TheoryTopic[] = [
   // MODULE 8: Burgerschap
   {
     id: 'burgerschapsonderwijs',
-    title: 'Burgerschapsonderwijs',
+    titel: 'Burgerschapsonderwijs',
     category: 'burgerschap',
     shortDescription: 'Onderwijs gericht op vorming van actieve, democratische burgers',
     fullContent: {
@@ -988,31 +988,41 @@ export default function ClickableTheoryViewer({ moduleId }: ClickableTheoryViewe
         {filteredTopics.map((topic) => (
           <div
             key={topic.id}
-            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all ${
-              selectedTopic?.id === topic.id ? 'border-teal-500' : 'border-gray-200 hover:border-gray-300'
+            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all cursor-pointer hover:shadow-xl hover:scale-[1.02] ${
+              selectedTopic?.id === topic.id ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-teal-300'
             }`}
+            onClick={() => setSelectedTopic(selectedTopic?.id === topic.id ? null : topic)}
           >
             <div className="p-6">
+              {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-12 h-12 ${getCategoryColor(topic.category)} rounded-full flex items-center justify-center text-white text-xl`}>
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className={`w-12 h-12 ${getCategoryColor(topic.category)} rounded-full flex items-center justify-center text-white text-xl flex-shrink-0`}>
                     {getCategoryIcon(topic.category)}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800">{topic.title}</h3>
                     <p className="text-gray-600 text-sm capitalize">{topic.category}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setSelectedTopic(selectedTopic?.id === topic.id ? null : topic)}
-                  className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  {selectedTopic?.id === topic.id ? '👁️‍🗨️' : '👁️'}
-                </button>
+                
+                {/* Prominent Eye Icon */}
+                <div className="flex-shrink-0 ml-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    selectedTopic?.id === topic.id 
+                      ? 'bg-teal-600 text-white shadow-lg scale-110' 
+                      : 'bg-teal-100 text-teal-600 hover:bg-teal-200 hover:scale-105'
+                  }`}>
+                    <span className="text-xl">
+                      {selectedTopic?.id === topic.id ? '👁️‍🗨️' : '👁️'}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <p className="text-gray-700 mb-4">{topic.shortDescription}</p>
 
+              {/* Expanded Details */}
               {selectedTopic?.id === topic.id && (
                 <div className="mt-6 pt-6 border-t border-gray-200 space-y-6">
                   {/* Definitie */}
@@ -1024,6 +1034,7 @@ export default function ClickableTheoryViewer({ moduleId }: ClickableTheoryViewe
                         __html: renderClickableText(topic.fullContent.definitie, topic.clickableTerms)
                       }}
                       onClick={(e) => {
+                        e.stopPropagation()
                         const target = e.target as HTMLElement
                         if (target.classList.contains('clickable-term')) {
                           handleTermClick(target.dataset.term || '')
@@ -1076,7 +1087,8 @@ export default function ClickableTheoryViewer({ moduleId }: ClickableTheoryViewe
                       {topic.fullContent.relatedTopics.map((related, index) => (
                         <button
                           key={index}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation()
                             const relatedTopic = theoryTopics.find(t => t.id === related)
                             if (relatedTopic) setSelectedTopic(relatedTopic)
                           }}
