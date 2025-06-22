@@ -56,7 +56,7 @@ export default function ContextAwareChat({
       const welcomeMessage: ChatMessage = {
         id: 'welcome-' + Date.now(),
         role: 'assistant',
-        content: `🎉 **Geweldig! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:**
+        content: `🎉 **Welkom! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:**
 
 ${selectedDocs.map(doc => `📄 **${doc.fileName}** (${doc.detectedType})`).join('\n')}
 
@@ -79,12 +79,12 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
           const questionMessage: ChatMessage = {
             id: 'initial-question-' + Date.now(),
             role: 'assistant',
-            content: initialQuestion,
+            content: `🤔 **${initialQuestion}**`,
             timestamp: new Date()
           }
           setMessages(prev => [...prev, questionMessage])
           setHasAskedInitialQuestion(true)
-        }, 500) // Shorter delay
+        }, 1000) // Give time for welcome message to be read
       }
     } else if (selectedDocuments.length === 0 && messages.length === 0) {
       const welcomeMessage: ChatMessage = {
