@@ -36,6 +36,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [documentAnalysis, setDocumentAnalysis] = useState<string>('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [initialQuestion, setInitialQuestion] = useState<string>('')
+  const [analysisComplete, setAnalysisComplete] = useState(false)
 
   // Load documents from localStorage
   useEffect(() => {
@@ -97,6 +98,8 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
 
   const analyzeDocumentsForModule = async (documents: UploadedDocument[], moduleTitle: string) => {
     setIsAnalyzing(true)
+    setAnalysisComplete(false)
+    
     try {
       const moduleGoals = getModuleGoals(moduleTitle)
       const documentTexts = documents.map(doc => 
@@ -111,20 +114,19 @@ ${moduleGoals}
 **SCHOOLDOCUMENTEN:**
 ${documentTexts}
 
-Geef een concrete, inhoudelijke analyse (200-300 woorden) waarin je:
+Geef een concrete, inhoudelijke analyse waarin je:
 
-1. **Welkom** de gebruiker en benoem welke documenten je hebt ontvangen
-2. **Analyseer** wat je concreet ziet in de documenten dat relevant is voor deze module
-3. **Koppel** specifieke passages uit de documenten aan de module doelen
-4. **Identificeer** sterke punten en verbeterpunten in de documenten
-5. **Eindig** met een specifieke, inhoudelijke vraag
+1. **Tops** - Wat zie je als sterke punten in de documenten voor deze module?
+2. **Tips** - Welke verbeterpunten of ontwikkelkansen zie je?
+3. **Relevante passages** - Citeer specifieke delen uit de documenten
+4. **Praktische koppeling** - Hoe sluit dit aan bij de module doelen?
 
 **BELANGRIJK:** 
 - Spreek de gebruiker aan als "je" of "jij", niet als "student"
 - Citeer letterlijk uit de documenten waar relevant
 - Geef concrete voorbeelden van wat je ziet
 - Maak de analyse specifiek voor deze school/documenten
-- Eindig met: "**Mijn eerste vraag:** [specifieke vraag over de documenten]"
+- Eindig met: "**Mijn openingsvraag voor je:** [specifieke, inhoudelijke vraag over de documenten]"
 
 Gebruik een professionele, bemoedigende toon en toon dat je echt de documenten hebt gelezen.`
 
@@ -147,34 +149,40 @@ Gebruik een professionele, bemoedigende toon en toon dat je echt de documenten h
         setDocumentAnalysis(analysisText)
         
         // Extract the initial question from the analysis
-        const questionMatch = analysisText.match(/\*\*Mijn eerste vraag:\*\*\s*(.+?)(?:\n|$)/i) ||
-                             analysisText.match(/Mijn eerste vraag:\s*(.+?)(?:\n|$)/i)
+        const questionMatch = analysisText.match(/\*\*Mijn openingsvraag voor je:\*\*\s*(.+?)(?:\n|$)/i) ||
+                             analysisText.match(/Mijn openingsvraag voor je:\s*(.+?)(?:\n|$)/i) ||
+                             analysisText.match(/\*\*Openingsvraag:\*\*\s*(.+?)(?:\n|$)/i)
+        
         if (questionMatch) {
           setInitialQuestion(questionMatch[1].trim())
         } else {
-          setInitialQuestion(`Hoe sluit wat je ziet in je schooldocumenten aan bij de doelen van de module "${moduleTitle}"?`)
+          // Fallback question based on module
+          setInitialQuestion(`Op basis van je schooldocumenten: hoe sluit jullie huidige aanpak aan bij de doelen van "${moduleTitle}"?`)
         }
+        
+        setAnalysisComplete(true)
       }
     } catch (error) {
       console.error('Document analysis error:', error)
-      setDocumentAnalysis(`**🎉 Welkom! Je documenten zijn succesvol geüpload**
-
-Ik heb je schooldocument(en) ontvangen en ben klaar om je te helpen met de module "${module}".
+      setDocumentAnalysis(`**🎯 Analyse van je schooldocumenten voor ${module}**
 
 **📚 Geüploade documenten:**
 ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wordCount.toLocaleString()} woorden`).join('\n')}
 
-**🎯 Module focus:** ${module}
+**💡 Tops:**
+• Je hebt waardevolle schooldocumenten geüpload die inzicht geven in jullie onderwijsvisie
+• Deze documenten vormen een goede basis voor gepersonaliseerde begeleiding
+• Ik kan nu specifieke verbanden leggen tussen theorie en jullie schoolpraktijk
 
-**💡 Wat ik kan doen:**
-• Analyseren hoe jullie schoolbeleid aansluit bij deze module
-• Concrete voorbeelden geven uit jullie documenten
-• Verbanden leggen tussen theorie en jullie schoolpraktijk
-• Suggesties doen voor verbeteringen
+**🔧 Tips:**
+• We kunnen samen onderzoeken hoe jullie beleid zich verhoudt tot de module "${module}"
+• Ik help je concrete verbeterpunten te identificeren
+• We kunnen praktische implementatiestrategieën ontwikkelen
 
-**Mijn eerste vraag:** Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
+**Mijn openingsvraag voor je:** Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
       
       setInitialQuestion(`Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
+      setAnalysisComplete(true)
     } finally {
       setIsAnalyzing(false)
     }
@@ -222,6 +230,7 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
     setAutoStartChat(false)
     setDocumentAnalysis('')
     setInitialQuestion('')
+    setAnalysisComplete(false)
   }
 
   const toggleDocumentSelection = (docId: string) => {
@@ -248,12 +257,12 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
   if (autoStartChat && availableDocuments.length > 0 && selectedOpdracht) {
     return (
       <div className="space-y-4">
-        {/* SIMPLIFIED DOCUMENT INFO - NO ANALYSIS TEXT */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
+        {/* IMPROVED DOCUMENT INFO BLOCK - BETTER READABILITY */}
+        <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-xl font-bold mb-2">🤖 AI-Analyse: {module}</h3>
-              <div className="flex items-center space-x-4 text-green-100 text-sm">
+              <div className="flex items-center space-x-4 text-emerald-100 text-sm">
                 <span>📚 {availableDocuments.length} document(en)</span>
                 <span>✅ {selectedDocuments.length} geselecteerd</span>
                 <span>🌱 {studentLevel}</span>
@@ -281,29 +290,52 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
             )}
           </div>
 
-          {/* SIMPLIFIED STATUS - NO ANALYSIS TEXT */}
+          {/* ANALYSIS STATUS - IMPROVED READABILITY */}
           {isAnalyzing ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                 <span className="text-white font-medium text-lg">AI analyseert je documenten...</span>
               </div>
-              <div className="space-y-2 text-green-100 text-sm">
+              <div className="space-y-2 text-emerald-100 text-sm">
                 <p>📖 Ik lees de inhoud van je {availableDocuments.length} document(en)</p>
                 <p>🎯 Koppel deze aan de doelen van "{module}"</p>
-                <p>💡 Identificeer sterke punten en verbeterpunten</p>
-                <p>❓ Formuleer een inhoudelijke eerste vraag</p>
+                <p>💡 Identificeer tops en tips</p>
+                <p>❓ Formuleer een relevante openingsvraag</p>
               </div>
               <div className="mt-3 bg-white bg-opacity-10 rounded p-2">
                 <p className="text-white text-xs">⏱️ Dit duurt ongeveer 10-15 seconden...</p>
               </div>
             </div>
+          ) : analysisComplete ? (
+            <div className="bg-white bg-opacity-20 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-white font-medium">✅ Analyse voltooid!</span>
+              </div>
+              <p className="text-emerald-100 text-sm">
+                📋 Ik heb je documenten geanalyseerd en een inhoudelijke openingsvraag geformuleerd. 
+                Deze staat nu in de chat hieronder waar je direct op kunt reageren.
+              </p>
+            </div>
           ) : (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <p className="text-white text-sm">✅ Documenten geanalyseerd - de openingsvraag staat in de chat hieronder!</p>
+              <p className="text-white text-sm">🔄 Documenten worden voorbereid voor analyse...</p>
             </div>
           )}
         </div>
+
+        {/* SEPARATE ANALYSIS BLOCK - BETTER READABILITY */}
+        {analysisComplete && documentAnalysis && (
+          <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+            <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+              <span className="text-xl mr-2">📋</span>
+              Inhoudelijke Analyse van je Documenten
+            </h4>
+            <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-wrap">{documentAnalysis}</div>
+            </div>
+          </div>
+        )}
 
         {/* Direct Chat Interface with Initial Question */}
         <ContextAwareChat
