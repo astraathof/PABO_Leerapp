@@ -73,7 +73,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       }
       setMessages([welcomeMessage])
       
-      // Add initial question if provided from analysis
+      // Add initial question from analysis as the FIRST question
       if (initialQuestion && !hasAskedInitialQuestion) {
         setTimeout(() => {
           const questionMessage: ChatMessage = {
@@ -84,7 +84,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
           }
           setMessages(prev => [...prev, questionMessage])
           setHasAskedInitialQuestion(true)
-        }, 1500)
+        }, 1000) // Shorter delay
       }
     } else if (selectedDocuments.length === 0 && messages.length === 0) {
       const welcomeMessage: ChatMessage = {
