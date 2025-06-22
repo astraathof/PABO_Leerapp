@@ -700,7 +700,7 @@ const theoryTopics: TheoryTopic[] = [
   // MODULE 8: Burgerschap
   {
     id: 'burgerschapsonderwijs',
-    titel: 'Burgerschapsonderwijs',
+    title: 'Burgerschapsonderwijs',
     category: 'burgerschap',
     shortDescription: 'Onderwijs gericht op vorming van actieve, democratische burgers',
     fullContent: {
