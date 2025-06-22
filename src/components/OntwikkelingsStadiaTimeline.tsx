@@ -276,7 +276,11 @@ export default function OntwikkelingsStadiaTimeline() {
             <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-purple-300"></div>
             
             {ontwikkelingsStadia.map((stadium, index) => (
-              <div key={index} className="relative flex items-start space-x-4 pb-8">
+              <div 
+                key={index} 
+                className="relative flex items-start space-x-4 pb-8 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all rounded-lg p-2"
+                onClick={() => setSelectedStadium(selectedStadium?.leeftijd === stadium.leeftijd ? null : stadium)}
+              >
                 {/* Age circle */}
                 <div className={`relative z-10 w-12 h-12 ${getDomeinColor(selectedDomein)} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
                   {index + 1}
@@ -286,12 +290,15 @@ export default function OntwikkelingsStadiaTimeline() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-gray-800">{stadium.leeftijd}</h4>
-                    <button
-                      onClick={() => setSelectedStadium(selectedStadium?.leeftijd === stadium.leeftijd ? null : stadium)}
-                      className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      {selectedStadium?.leeftijd === stadium.leeftijd ? '👁️‍🗨️' : '👁️'}
-                    </button>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                      selectedStadium?.leeftijd === stadium.leeftijd 
+                        ? `${getDomeinColor(selectedDomein)} text-white shadow-lg scale-110` 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
+                    }`}>
+                      <span className="text-lg">
+                        {selectedStadium?.leeftijd === stadium.leeftijd ? '👁️‍🗨️' : '👁️'}
+                      </span>
+                    </div>
                   </div>
                   
                   {/* Domain specific content */}

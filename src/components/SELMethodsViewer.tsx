@@ -644,9 +644,11 @@ export default function SELMethodsViewer() {
         {filteredMethods.map((method) => (
           <div
             key={method.id}
-            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all ${
-              selectedForComparison.includes(method.id) ? 'border-green-500 bg-green-50' : 'border-gray-200'
+            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all cursor-pointer hover:shadow-xl hover:scale-[1.02] ${
+              selectedForComparison.includes(method.id) ? 'border-green-500 bg-green-50' : 
+              selectedMethod?.id === method.id ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'
             }`}
+            onClick={() => setSelectedMethod(selectedMethod?.id === method.id ? null : method)}
           >
             <div className="p-6">
               {/* Header */}
@@ -656,7 +658,10 @@ export default function SELMethodsViewer() {
                     <h3 className="text-xl font-bold text-gray-800">{method.naam}</h3>
                     {compareMode && (
                       <button
-                        onClick={() => toggleComparison(method.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleComparison(method.id)
+                        }}
                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                           selectedForComparison.includes(method.id)
                             ? 'bg-green-600 text-white'
@@ -672,9 +677,12 @@ export default function SELMethodsViewer() {
                 </div>
                 
                 {/* Audio Controls */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   <button
-                    onClick={() => speakText(`${method.naam} van ${method.organisatie}. Kerncompetenties: ${method.kerncompetenties.join(', ')}`, method.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      speakText(`${method.naam} van ${method.organisatie}. Kerncompetenties: ${method.kerncompetenties.join(', ')}`, method.id)
+                    }}
                     className={`p-2 rounded-lg transition-colors ${
                       isPlaying === method.id
                         ? 'bg-red-500 text-white animate-pulse'
@@ -683,12 +691,15 @@ export default function SELMethodsViewer() {
                   >
                     {isPlaying === method.id ? '🛑' : '🔊'}
                   </button>
-                  <button
-                    onClick={() => setSelectedMethod(selectedMethod?.id === method.id ? null : method)}
-                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    {selectedMethod?.id === method.id ? '👁️‍🗨️' : '👁️'}
-                  </button>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    selectedMethod?.id === method.id 
+                      ? 'bg-green-600 text-white shadow-lg scale-110' 
+                      : 'bg-green-100 text-green-600 hover:bg-green-200 hover:scale-105'
+                  }`}>
+                    <span className="text-xl">
+                      {selectedMethod?.id === method.id ? '👁️‍🗨️' : '👁️'}
+                    </span>
+                  </div>
                 </div>
               </div>
 

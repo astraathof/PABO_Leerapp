@@ -285,8 +285,8 @@ export default function SELCompetentieRadar() {
           return (
             <div 
               key={index} 
-              className={`bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition-all ${
-                selectedCompetentie?.naam === competentie.naam ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-gray-300'
+              className={`bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] ${
+                selectedCompetentie?.naam === competentie.naam ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300'
               }`}
               onClick={() => setSelectedCompetentie(selectedCompetentie?.naam === competentie.naam ? null : competentie)}
             >

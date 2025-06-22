@@ -444,10 +444,10 @@ export default function CitoMonitoringViewer() {
                 {citoLevels.map((level, index) => (
                   <div
                     key={level.letter}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${
                       selectedLevel?.letter === level.letter
                         ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 hover:border-indigo-300'
                     }`}
                     onClick={() => setSelectedLevel(selectedLevel?.letter === level.letter ? null : level)}
                   >
@@ -596,10 +596,10 @@ export default function CitoMonitoringViewer() {
                 {monitoringTools.map((tool, index) => (
                   <div
                     key={tool.name}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${
                       selectedTool?.name === tool.name
                         ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 hover:border-green-300'
                     }`}
                     onClick={() => setSelectedTool(selectedTool?.name === tool.name ? null : tool)}
                   >
@@ -673,10 +673,10 @@ export default function CitoMonitoringViewer() {
                 {coordinatorRoles.map((role, index) => (
                   <div
                     key={role.title}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${
                       selectedRole?.title === role.title
                         ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-gray-200 hover:border-purple-300'
                     }`}
                     onClick={() => setSelectedRole(selectedRole?.title === role.title ? null : role)}
                   >

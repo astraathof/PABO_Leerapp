@@ -227,7 +227,10 @@ export default function KerndoelenProgressieTracker() {
         {kerndoelenProgressie.map((kerndoel) => (
           <div
             key={kerndoel.nummer}
-            className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all cursor-pointer hover:shadow-xl hover:scale-[1.02] ${
+              selectedKerndoel?.nummer === kerndoel.nummer ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
+            }`}
+            onClick={() => setSelectedKerndoel(selectedKerndoel?.nummer === kerndoel.nummer ? null : kerndoel)}
           >
             <div className="p-6">
               {/* Header */}
@@ -238,12 +241,15 @@ export default function KerndoelenProgressieTracker() {
                   </h3>
                   <p className="text-gray-600">{kerndoel.vakgebied}</p>
                 </div>
-                <button
-                  onClick={() => setSelectedKerndoel(selectedKerndoel?.nummer === kerndoel.nummer ? null : kerndoel)}
-                  className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-                >
-                  {selectedKerndoel?.nummer === kerndoel.nummer ? '👁️‍🗨️' : '👁️'}
-                </button>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  selectedKerndoel?.nummer === kerndoel.nummer 
+                    ? 'bg-blue-600 text-white shadow-lg scale-110' 
+                    : 'bg-blue-100 text-blue-600 hover:bg-blue-200 hover:scale-105'
+                }`}>
+                  <span className="text-xl">
+                    {selectedKerndoel?.nummer === kerndoel.nummer ? '👁️‍🗨️' : '👁️'}
+                  </span>
+                </div>
               </div>
 
               {/* Progressie Timeline */}

@@ -919,16 +919,19 @@ export default function KerndoelenViewer() {
         {filteredKerndoelen.map((kerndoel) => (
           <div
             key={kerndoel.nummer}
-            className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
+            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all cursor-pointer hover:shadow-xl hover:scale-[1.02] ${
+              selectedKerndoel?.nummer === kerndoel.nummer ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
+            }`}
+            onClick={() => setSelectedKerndoel(selectedKerndoel?.nummer === kerndoel.nummer ? null : kerndoel)}
           >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-12 h-12 ${getVakgebiedColor(kerndoel.vakgebied)} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className={`w-12 h-12 ${getVakgebiedColor(kerndoel.vakgebied)} rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0`}>
                     {kerndoel.nummer}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="text-lg">{getVakgebiedIcon(kerndoel.vakgebied)}</span>
                       <span className="text-sm font-medium text-gray-600">{kerndoel.vakgebied}</span>
@@ -938,9 +941,12 @@ export default function KerndoelenViewer() {
                 </div>
                 
                 {/* Audio Controls */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   <button
-                    onClick={() => speakText(`Kerndoel ${kerndoel.nummer}: ${kerndoel.titel}. ${kerndoel.beschrijving}`, kerndoel.nummer)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      speakText(`Kerndoel ${kerndoel.nummer}: ${kerndoel.titel}. ${kerndoel.beschrijving}`, kerndoel.nummer)
+                    }}
                     className={`p-2 rounded-lg transition-colors ${
                       isPlaying === kerndoel.nummer
                         ? 'bg-red-500 text-white animate-pulse'
@@ -950,13 +956,15 @@ export default function KerndoelenViewer() {
                   >
                     {isPlaying === kerndoel.nummer ? '🛑' : '🔊'}
                   </button>
-                  <button
-                    onClick={() => setSelectedKerndoel(selectedKerndoel?.nummer === kerndoel.nummer ? null : kerndoel)}
-                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                    title="Meer details"
-                  >
-                    {selectedKerndoel?.nummer === kerndoel.nummer ? '👁️‍🗨️' : '👁️'}
-                  </button>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    selectedKerndoel?.nummer === kerndoel.nummer 
+                      ? 'bg-blue-600 text-white shadow-lg scale-110' 
+                      : 'bg-blue-100 text-blue-600 hover:bg-blue-200 hover:scale-105'
+                  }`}>
+                    <span className="text-xl">
+                      {selectedKerndoel?.nummer === kerndoel.nummer ? '👁️‍🗨️' : '👁️'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -995,13 +1003,17 @@ export default function KerndoelenViewer() {
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
                     <button
-                      onClick={() => speakText(`Praktijkvoorbeelden voor ${kerndoel.titel}: ${kerndoel.voorbeelden.join(', ')}`, kerndoel.nummer + 1000)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        speakText(`Praktijkvoorbeelden voor ${kerndoel.titel}: ${kerndoel.voorbeelden.join(', ')}`, kerndoel.nummer + 1000)
+                      }}
                       className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm"
                     >
                       🔊 Voorbeelden beluisteren
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         const text = `Kerndoel ${kerndoel.nummer}: ${kerndoel.titel}\n\n${kerndoel.beschrijving}\n\nVoorbeelden:\n${kerndoel.voorbeelden.map(v => `• ${v}`).join('\n')}`
                         navigator.clipboard.writeText(text)
                         alert('Kerndoel gekopieerd naar klembord!')

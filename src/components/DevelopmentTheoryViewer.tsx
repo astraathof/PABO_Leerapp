@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-interface DevelopmentTheory {
+interface TheoryTopic {
   id: string
   naam: string
   auteur: string
@@ -19,7 +19,7 @@ interface DevelopmentTheory {
   relevantieVoorPABO: string
 }
 
-const ontwikkelingstheorieen: DevelopmentTheory[] = [
+const ontwikkelingstheorieen: TheoryTopic[] = [
   {
     id: 'piaget',
     naam: "Cognitieve Ontwikkelingstheorie",
@@ -418,7 +418,7 @@ const ontwikkelingstheorieen: DevelopmentTheory[] = [
 
 export default function DevelopmentTheoryViewer() {
   const [selectedCategory, setSelectedCategory] = useState<string>('alle')
-  const [selectedTheory, setSelectedTheory] = useState<DevelopmentTheory | null>(null)
+  const [selectedTheory, setSelectedTheory] = useState<TheoryTopic | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isPlaying, setIsPlaying] = useState<string | null>(null)
 
@@ -556,16 +556,19 @@ export default function DevelopmentTheoryViewer() {
         {filteredTheories.map((theory) => (
           <div
             key={theory.id}
-            className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
+            className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all cursor-pointer hover:shadow-xl hover:scale-[1.02] ${
+              selectedTheory?.id === theory.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
+            }`}
+            onClick={() => setSelectedTheory(selectedTheory?.id === theory.id ? null : theory)}
           >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-12 h-12 ${getCategoryColor(theory.categorie)} rounded-full flex items-center justify-center text-white text-xl`}>
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className={`w-12 h-12 ${getCategoryColor(theory.categorie)} rounded-full flex items-center justify-center text-white text-xl flex-shrink-0`}>
                     {getCategoryIcon(theory.categorie)}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-800">{theory.naam}</h3>
                     <p className="text-gray-600">door {theory.auteur}</p>
                     <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getCategoryColor(theory.categorie)} text-white`}>
@@ -575,9 +578,12 @@ export default function DevelopmentTheoryViewer() {
                 </div>
                 
                 {/* Audio Controls */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   <button
-                    onClick={() => speakText(`${theory.naam} door ${theory.auteur}. Kernprincipes: ${theory.kernprincipes.join(', ')}`, theory.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      speakText(`${theory.naam} door ${theory.auteur}. Kernprincipes: ${theory.kernprincipes.join(', ')}`, theory.id)
+                    }}
                     className={`p-2 rounded-lg transition-colors ${
                       isPlaying === theory.id
                         ? 'bg-red-500 text-white animate-pulse'
@@ -586,12 +592,15 @@ export default function DevelopmentTheoryViewer() {
                   >
                     {isPlaying === theory.id ? '🛑' : '🔊'}
                   </button>
-                  <button
-                    onClick={() => setSelectedTheory(selectedTheory?.id === theory.id ? null : theory)}
-                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    {selectedTheory?.id === theory.id ? '👁️‍🗨️' : '👁️'}
-                  </button>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    selectedTheory?.id === theory.id 
+                      ? 'bg-purple-600 text-white shadow-lg scale-110' 
+                      : 'bg-purple-100 text-purple-600 hover:bg-purple-200 hover:scale-105'
+                  }`}>
+                    <span className="text-xl">
+                      {selectedTheory?.id === theory.id ? '👁️‍🗨️' : '👁️'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -686,13 +695,17 @@ export default function DevelopmentTheoryViewer() {
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
                     <button
-                      onClick={() => speakText(`Praktijktoepassingen: ${theory.praktijktoepassingen.join(', ')}`, theory.id + '-praktijk')}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        speakText(`Praktijktoepassingen: ${theory.praktijktoepassingen.join(', ')}`, theory.id + '-praktijk')
+                      }}
                       className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm"
                     >
                       🔊 Praktijktips beluisteren
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         const text = `${theory.naam} - ${theory.auteur}\n\nKernprincipes:\n${theory.kernprincipes.map(p => `• ${p}`).join('\n')}\n\nPraktijktoepassingen:\n${theory.praktijktoepassingen.map(p => `• ${p}`).join('\n')}`
                         navigator.clipboard.writeText(text)
                         alert('Theorie gekopieerd naar klembord!')
