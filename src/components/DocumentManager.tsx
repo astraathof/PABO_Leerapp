@@ -22,6 +22,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const [selectedDocument, setSelectedDocument] = useState<UploadedDocument | null>(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -130,14 +131,6 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       setUploadSuccess(true)
       setShowSuccessMessage(true)
       
-      // Auto-start chat after 2 seconds
-      setTimeout(() => {
-        console.log('Auto-starting chat after 2 seconds...')
-        if (typeof window !== 'undefined') {
-          window.location.href = '/#start-chat'
-        }
-      }, 2000)
-      
       console.log('Upload process completed successfully')
       
     } catch (error) {
@@ -163,6 +156,13 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     }
   }
 
+  const deleteAllDocuments = () => {
+    if (confirm(`Weet je zeker dat je alle ${documents.length} document(en) wilt verwijderen?`)) {
+      setDocuments([])
+      setSelectedDocument(null)
+    }
+  }
+
   const getDocumentIcon = (detectedType: string) => {
     if (detectedType.includes('Schoolplan') || detectedType.includes('Schoolgids')) return '🏫'
     if (detectedType.includes('Curriculum')) return '📚'
@@ -170,6 +170,13 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     if (detectedType.includes('Resultaten')) return '📊'
     if (detectedType.includes('Burgerschap')) return '🤝'
     return '📄'
+  }
+
+  const getFileSize = (wordCount: number) => {
+    const estimatedBytes = wordCount * 6 // Rough estimate
+    if (estimatedBytes < 1024) return `${estimatedBytes} B`
+    if (estimatedBytes < 1024 * 1024) return `${Math.round(estimatedBytes / 1024)} KB`
+    return `${Math.round(estimatedBytes / (1024 * 1024))} MB`
   }
 
   const startAIChat = () => {
@@ -182,22 +189,19 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
 
   return (
     <div className="space-y-6">
-      {/* Success Message with Auto-Chat */}
+      {/* Success Message - NO AUTO-CHAT */}
       {uploadSuccess && showSuccessMessage && (
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-bold mb-2">🎉 Document succesvol geüpload!</h3>
               <p className="text-green-100 mb-3">
-                Je document wordt verwerkt. Over 2 seconden start automatisch de AI-chat met analyse!
+                Je document is verwerkt en toegevoegd aan je bibliotheek. Je kunt het nu gebruiken in alle modules.
               </p>
               <div className="bg-white bg-opacity-20 rounded-lg p-3 mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <p className="text-sm">
-                    💬 <strong>Auto-start over 2 seconden...</strong> De AI gaat je document analyseren!
-                  </p>
-                </div>
+                <p className="text-sm">
+                  💡 <strong>Tip:</strong> Ga naar een module om AI-analyse te krijgen op basis van dit document!
+                </p>
               </div>
             </div>
             <button
@@ -209,16 +213,21 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           </div>
           <div className="flex space-x-3">
             <button
-              onClick={startAIChat}
+              onClick={() => {
+                setShowSuccessMessage(false)
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/'
+                }
+              }}
               className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
-              💬 Start Nu Direct
+              📚 Ga naar Modules
             </button>
             <button
               onClick={() => setShowSuccessMessage(false)}
               className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
             >
-              Later
+              Sluiten
             </button>
           </div>
         </div>
@@ -228,7 +237,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">📚 Mijn Schooldocumenten</h2>
         <p className="text-gray-600 mb-6">
-          Upload hier alle documenten van jouw school. Deze kun je dan gebruiken in alle modules voor gepersonaliseerd leren.
+          Upload en beheer hier alle documenten van jouw school. Deze kun je dan gebruiken in alle modules voor gepersonaliseerd leren.
         </p>
         
         <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
@@ -292,104 +301,199 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       {/* Documents Library */}
       {documents.length > 0 && (
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-gray-800">📂 Geüploade Documenten ({documents.length})</h3>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">📂 Mijn Document Bibliotheek</h3>
+              <p className="text-gray-600 text-sm">{documents.length} document(en) • Klaar voor gebruik in modules</p>
+            </div>
             <div className="flex items-center space-x-3">
-              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                ✅ Beschikbaar voor AI-begeleiding
+              {/* View Mode Toggle */}
+              <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                    viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+                  }`}
+                >
+                  ⊞ Grid
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                    viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+                  }`}
+                >
+                  ☰ Lijst
+                </button>
               </div>
+              
+              {/* Action Buttons */}
               <button
                 onClick={startAIChat}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 💬 Start AI Chat
               </button>
+              <button
+                onClick={deleteAllDocuments}
+                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
+              >
+                🗑️ Alles Verwijderen
+              </button>
             </div>
           </div>
           
-          <div className="grid gap-4">
-            {documents.map((doc) => (
-              <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-green-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{getDocumentIcon(doc.detectedType)}</span>
-                    <div>
-                      <h4 className="font-medium text-gray-800">{doc.fileName}</h4>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>📄 {doc.fileType}</span>
-                        <span>🎯 {doc.detectedType}</span>
-                        <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
-                        <span>📅 {doc.uploadDate.toLocaleDateString()}</span>
-                      </div>
-                      <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                          🤖 Klaar voor AI-analyse
-                        </span>
+          {/* Grid View */}
+          {viewMode === 'grid' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {documents.map((doc) => (
+                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-blue-50 hover:scale-105">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-3xl">{getDocumentIcon(doc.detectedType)}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-800 truncate">{doc.fileName}</h4>
+                        <p className="text-xs text-gray-500">{doc.fileType}</p>
                       </div>
                     </div>
+                    <button
+                      onClick={() => deleteDocument(doc.id)}
+                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      title="Verwijder document"
+                    >
+                      🗑️
+                    </button>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Type:</span>
+                      <span className="font-medium text-gray-800">{doc.detectedType}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Woorden:</span>
+                      <span className="font-medium text-gray-800">{doc.wordCount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Grootte:</span>
+                      <span className="font-medium text-gray-800">{getFileSize(doc.wordCount)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Datum:</span>
+                      <span className="font-medium text-gray-800">{doc.uploadDate.toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                      ✅ Beschikbaar
+                    </span>
                     <button
                       onClick={() => setSelectedDocument(selectedDocument?.id === doc.id ? null : doc)}
-                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs"
                     >
                       {selectedDocument?.id === doc.id ? '👁️ Verberg' : '👁️ Bekijk'}
                     </button>
-                    <button
-                      onClick={() => deleteDocument(doc.id)}
-                      className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
-                    >
-                      🗑️ Verwijder
-                    </button>
                   </div>
                 </div>
-                
-                {selectedDocument?.id === doc.id && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h5 className="font-medium text-gray-700 mb-2">📄 Document Preview:</h5>
-                    <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                        {doc.text.substring(0, 1000)}
-                        {doc.text.length > 1000 && '...'}
-                      </p>
+              ))}
+            </div>
+          )}
+
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="space-y-3">
+              {documents.map((doc) => (
+                <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all bg-gradient-to-r from-green-50 to-blue-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <span className="text-2xl">{getDocumentIcon(doc.detectedType)}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-800">{doc.fileName}</h4>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                          <span>📄 {doc.fileType}</span>
+                          <span>🎯 {doc.detectedType}</span>
+                          <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
+                          <span>📅 {doc.uploadDate.toLocaleDateString()}</span>
+                          <span>💾 {getFileSize(doc.wordCount)}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-700">
-                        <strong>💡 AI Tip:</strong> Dit document is nu beschikbaar in alle modules met AI-begeleiding. 
-                        Klik op "Start AI Chat\" om direct te beginnen met vragen over dit document!
-                      </p>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                        ✅ Beschikbaar
+                      </span>
+                      <button
+                        onClick={() => setSelectedDocument(selectedDocument?.id === doc.id ? null : doc)}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                      >
+                        {selectedDocument?.id === doc.id ? '👁️ Verberg' : '👁️ Bekijk'}
+                      </button>
+                      <button
+                        onClick={() => deleteDocument(doc.id)}
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                      >
+                        🗑️ Verwijder
+                      </button>
                     </div>
                   </div>
-                )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Document Preview */}
+          {selectedDocument && (
+            <div className="mt-6 bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h5 className="font-medium text-gray-700">📄 Document Preview: {selectedDocument.fileName}</h5>
+                <button
+                  onClick={() => setSelectedDocument(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
               </div>
-            ))}
-          </div>
+              <div className="bg-white rounded-lg p-4 max-h-60 overflow-y-auto border">
+                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                  {selectedDocument.text.substring(0, 2000)}
+                  {selectedDocument.text.length > 2000 && '...'}
+                </p>
+              </div>
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-700">
+                  <strong>💡 Gebruik in modules:</strong> Dit document is beschikbaar in alle modules met AI-begeleiding. 
+                  Ga naar een module om specifieke analyse te krijgen!
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Quick Start with Documents */}
       {documents.length > 0 && (
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
-          <h3 className="text-xl font-bold mb-3">🚀 Klaar om te Chatten met je Documenten!</h3>
+          <h3 className="text-xl font-bold mb-3">🚀 Klaar om te Leren met je Documenten!</h3>
           <p className="text-purple-100 mb-4">
-            Je hebt {documents.length} document(en) geüpload. Start nu direct een gesprek met de AI over je schoolpraktijk!
+            Je hebt {documents.length} document(en) in je bibliotheek. Kies een module om specifieke AI-analyse te krijgen!
           </p>
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={startAIChat}
-              className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-            >
-              💬 Start AI Chat Nu
-            </button>
             <button
               onClick={() => {
                 if (typeof window !== 'undefined') {
                   window.location.href = '/'
                 }
               }}
-              className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
+              className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
               📚 Bekijk Alle Modules
+            </button>
+            <button
+              onClick={startAIChat}
+              className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
+            >
+              💬 Direct AI Chat
             </button>
           </div>
         </div>
@@ -397,7 +501,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
 
       {/* Usage Instructions */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200">
-        <h3 className="text-lg font-bold text-green-800 mb-3">💡 Hoe gebruik je je documenten met AI?</h3>
+        <h3 className="text-lg font-bold text-green-800 mb-3">💡 Hoe gebruik je je documenten?</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
@@ -406,11 +510,11 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">2️⃣</span>
-              <span className="text-green-700">Na 2 seconden start automatisch de AI-chat met analyse!</span>
+              <span className="text-green-700">Ga naar een module die je wilt leren</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">3️⃣</span>
-              <span className="text-green-700">Stel direct vragen over je documenten</span>
+              <span className="text-green-700">Start AI-begeleiding - documenten worden automatisch geanalyseerd</span>
             </div>
           </div>
           <div className="space-y-2">
@@ -420,7 +524,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">5️⃣</span>
-              <span className="text-green-700">Upload extra documenten wanneer je wilt!</span>
+              <span className="text-green-700">Beheer je documenten hier: bekijk, verwijder, voeg toe</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">6️⃣</span>
@@ -431,7 +535,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         
         <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-sm text-yellow-800">
-            <strong>🎯 Voorbeeld vraag:</strong> "Wat staat er in ons schoolplan over burgerschap en hoe kan ik dit concreet vormgeven in mijn klas?"
+            <strong>🎯 Voorbeeld:</strong> Upload je schoolplan → Ga naar module "Burgerschap" → AI analyseert automatisch hoe jullie burgerschap vormgeven!
           </p>
         </div>
       </div>
