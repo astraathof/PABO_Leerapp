@@ -103,84 +103,40 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     try {
       console.log(`🔍 Starting AI analysis for ${documents.length} documents and module: ${moduleTitle}`)
       
-      const moduleGoals = getModuleGoals(moduleTitle)
-      
-      // Prepare document content for AI - EXTRACT REAL CONTENT
+      // Prepare document content for AI analysis
       const documentTexts = documents.map(doc => {
         console.log(`📖 Processing document: ${doc.fileName}`)
         
-        // Extract HOOFDINHOUD section if available
-        let mainContent = ''
-        const hoofdinhoudMatch = doc.text.match(/=== HOOFDINHOUD ===([\s\S]*?)(?:===|$)/)
-        if (hoofdinhoudMatch) {
-          mainContent = hoofdinhoudMatch[1].trim()
+        // Use the full extracted text from the document
+        let content = doc.text
+        
+        // If the text is very long, take a meaningful sample
+        if (content.length > 3000) {
+          // Try to extract the most relevant parts
+          const sections = content.split(/===|---|\n\n/)
+          const relevantSections = sections
+            .filter(section => section.length > 50)
+            .slice(0, 5)
+            .join('\n\n')
+          
+          content = relevantSections || content.substring(0, 3000)
         }
         
-        // Extract BELANGRIJKE ZINNEN section
-        let importantSentences = ''
-        const zinnenMatch = doc.text.match(/=== BELANGRIJKE ZINNEN ===([\s\S]*?)(?:===|$)/)
-        if (zinnenMatch) {
-          importantSentences = zinnenMatch[1].trim()
-        }
-        
-        // Extract SCHOOLTERMEN section
-        let schoolTerms = ''
-        const termenMatch = doc.text.match(/=== SCHOOLTERMEN ===([\s\S]*?)(?:===|$)/)
-        if (termenMatch) {
-          schoolTerms = termenMatch[1].trim()
-        }
-        
-        // Combine all extracted content
-        const extractedContent = [mainContent, importantSentences, schoolTerms]
-          .filter(content => content.length > 10)
-          .join('\n\n')
-        
-        // Use extracted content or fallback to full text
-        const finalContent = extractedContent.length > 50 ? extractedContent : doc.text.substring(0, 2000)
-        
-        console.log(`📋 Using ${finalContent.length} characters for ${doc.fileName}`)
+        console.log(`📋 Using ${content.length} characters for ${doc.fileName}`)
         
         return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType})
 
 **INHOUD:**
-${finalContent}
+${content}
 
 **EINDE DOCUMENT**`
       }).join('\n\n')
       
       console.log(`📊 Total content for AI: ${documentTexts.length} characters`)
       
-      const analysisPrompt = `Je bent een ervaren PABO-docent. Analyseer deze schooldocumenten voor de module "${moduleTitle}".
-
-**MODULE DOELEN:**
-${moduleGoals}
-
-**SCHOOLDOCUMENTEN:**
-${documentTexts}
-
-Geef een **BEKNOPTE** analyse (max 200 woorden) met deze structuur:
-
-**📚 Documenten ontvangen**
-Benoem kort welke documenten je hebt.
-
-**💪 Pluspunten t.o.v. module doelen**
-2-3 concrete sterke punten die aansluiten bij de module doelen.
-
-**🔧 Ontwikkelkansen**
-2-3 specifieke verbeterpunten gerelateerd aan de module.
-
-**❓ Openingsvraag**
-Stel een concrete vraag gebaseerd op de documenten en module.
-
-**VEREISTEN:**
-- Spreek de gebruiker aan als "je"
-- Verwijs naar specifieke aspecten uit de documenten
-- Houd het beknopt en to-the-point
-- Focus op de koppeling tussen documenten en module doelen`
-
       console.log('🤖 Sending analysis request to AI...')
 
-      // Use the dedicated analyze-document endpoint instead of chat endpoint
+      // Use the analyze-document endpoint
       const response = await fetch('/api/analyze-document', {
         method: 'POST',
         headers: {
@@ -202,7 +158,8 @@ Stel een concrete vraag gebaseerd op de documenten en module.
         
         // Extract the initial question from the analysis
         const questionMatch = analysisText.match(/\*\*❓.*?\*\*\s*(.+?)(?:\n|$)/i) ||
-                             analysisText.match(/Openingsvraag.*?:\s*(.+?)(?:\n|$)/i)
+                             analysisText.match(/Openingsvraag.*?:\s*(.+?)(?:\n|$)/i) ||
+                             analysisText.match(/\*\*Openingsvraag\*\*\s*(.+?)(?:\n|$)/i)
         
         if (questionMatch) {
           const question = questionMatch[1].trim()
@@ -245,21 +202,6 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
     } finally {
       setIsAnalyzing(false)
     }
-  }
-
-  const getModuleGoals = (moduleTitle: string): string => {
-    const moduleGoalsMap: { [key: string]: string } = {
-      'Curriculum & Kerndoelen': '• Alle 58 kerndoelen beheersen\n• Kerndoelen vertalen naar lesdoelen\n• Progressie monitoren\n• Curriculum mapping',
-      'Ontwikkelingspsychologie': '• Ontwikkelingsstadia herkennen\n• Theorie koppelen aan praktijk\n• Leeftijdsadequaat onderwijs\n• Individuele verschillen begrijpen',
-      'SEL & Klassenmanagement': '• SEL-methodieken implementeren\n• Klassenklimaat verbeteren\n• Sociale vaardigheden ontwikkelen\n• Conflicten oplossen',
-      'Differentiatie & Inclusie': '• Differentiatie strategieën\n• Inclusief onderwijs\n• Adaptief onderwijs\n• Alle leerlingen laten slagen',
-      'Data & Evaluatie': '• Data interpreteren\n• Formatieve evaluatie\n• Evidence-based werken\n• Leerresultaten verbeteren',
-      'Schoolleiderschap': '• Pedagogisch leiderschap\n• Veranderprocessen leiden\n• Teamontwikkeling\n• Schoolcultuur vormgeven',
-      'Burgerschap & Diversiteit': '• Burgerschapsonderwijs\n• Democratische waarden\n• Diversiteit waarderen\n• Sociale cohesie',
-      'Cito & Monitoring': '• Cito niveaus begrijpen\n• Monitoring organiseren\n• Coördinatorrollen\n• Data-gedreven verbetering',
-      'Inspectie Onderzoekskader': '• Inspectiestandaarden\n• Zelfevaluatie\n• Inspectiebezoek voorbereiden\n• Kwaliteitszorg'
-    }
-    return moduleGoalsMap[moduleTitle] || 'PABO-competenties ontwikkelen'
   }
 
   const startOpdracht = (opdracht: Opdracht) => {
