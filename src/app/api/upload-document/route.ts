@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 import * as pdfjsLib from 'pdfjs-dist'
-import path from 'path'
-
-// Set worker source to the actual file path in node_modules
-pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(process.cwd(), 'node_modules/pdfjs-dist/build/pdf.worker.min.js')
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
     const loadingTask = pdfjsLib.getDocument({
       data: new Uint8Array(buffer),
-      useSystemFonts: true
+      useSystemFonts: true,
+      // Disable worker for serverless environment
+      disableWorker: true
     })
     
     const pdf = await loadingTask.promise
