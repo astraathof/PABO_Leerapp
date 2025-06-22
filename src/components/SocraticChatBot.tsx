@@ -233,26 +233,23 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
   if (autoStartChat && availableDocuments.length > 0 && selectedOpdracht) {
     return (
       <div className="space-y-4">
-        {/* CONSOLIDATED DOCUMENT & AI ANALYSIS BLOCK */}
+        {/* SINGLE CONSOLIDATED BLOCK - Document Info + AI Analysis + Status */}
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-bold mb-2">🤖 AI-Analyse van je Schooldocumenten</h3>
-              <p className="text-green-100">
-                {availableDocuments.length} document(en) • Actief voor {module} • {selectedDocuments.length} geselecteerd
-              </p>
+              <h3 className="text-xl font-bold mb-2">🤖 AI-Analyse: {module}</h3>
+              <div className="flex items-center space-x-4 text-green-100 text-sm">
+                <span>📚 {availableDocuments.length} document(en)</span>
+                <span>✅ {selectedDocuments.length} geselecteerd</span>
+                <span>🌱 {studentLevel}</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
-                🌱 {studentLevel}
-              </span>
-              <button
-                onClick={resetChat}
-                className="px-4 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
-              >
-                ⚙️ Instellingen
-              </button>
-            </div>
+            <button
+              onClick={resetChat}
+              className="px-4 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+            >
+              ⚙️ Instellingen
+            </button>
           </div>
           
           {/* Document List */}
@@ -404,47 +401,6 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
           </div>
         </div>
 
-        {/* Document Integration */}
-        {availableDocuments.length > 0 && (
-          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-green-800">📚 Je Schooldocumenten</h3>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-green-700">Actief</span>
-                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <p className="text-green-700 text-sm mb-3">
-                ✅ Alle documenten zijn automatisch geselecteerd voor AI-begeleiding:
-              </p>
-              <div className="grid gap-2 max-h-32 overflow-y-auto">
-                {availableDocuments.map((doc) => (
-                  <div key={doc.id} className="flex items-center space-x-2 p-2 bg-white rounded border border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedDocuments.includes(doc.id)}
-                      onChange={() => toggleDocumentSelection(doc.id)}
-                      className="rounded border-green-300 text-green-600 focus:ring-green-500"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg">📄</span>
-                        <span className="font-medium text-green-800 text-sm truncate">{doc.fileName}</span>
-                      </div>
-                      <div className="text-xs text-green-600">{doc.detectedType} • {doc.wordCount.toLocaleString()} woorden</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 p-2 bg-green-100 rounded text-sm text-green-700">
-                ✅ {selectedDocuments.length} document(en) klaar voor AI-analyse
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Opdracht Selector */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">🛠️ Of kies een gestructureerde opdracht</h3>
@@ -525,21 +481,6 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
           </div>
         </div>
       </div>
-
-      {/* Document Analysis */}
-      {(isAnalyzing || documentAnalysis) && (
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-          <h4 className="font-semibold text-blue-800 mb-3">🔍 AI Analyse van je Documenten</h4>
-          {isAnalyzing ? (
-            <div className="flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-blue-700">Ik analyseer je documenten in relatie tot de module "{module}"...</span>
-            </div>
-          ) : (
-            <div className="text-blue-800 whitespace-pre-wrap">{documentAnalysis}</div>
-          )}
-        </div>
-      )}
 
       {/* Context-Aware Chat Component */}
       <ContextAwareChat
