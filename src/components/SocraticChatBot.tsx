@@ -50,7 +50,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
             uploadDate: new Date(doc.uploadDate)
           }))
           
-          console.log('🚀 Loading documents for REVOLUTIONARY AI analysis:', parsedDocs.length)
+          console.log('📚 Loading documents for AI analysis:', parsedDocs.length)
           setAvailableDocuments(parsedDocs)
           
           // Auto-select all documents
@@ -60,7 +60,6 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           // AUTO-START CHAT if documents are available
           if (parsedDocs.length > 0) {
             setAutoStartChat(true)
-            // Start analysis immediately when documents are loaded
             setTimeout(() => {
               startDirectChatWithAnalysis(parsedDocs)
             }, 500)
@@ -102,83 +101,84 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     setAnalysisComplete(false)
     
     try {
-      console.log(`🚀 Starting REVOLUTIONARY CONCRETE AI analysis for ${documents.length} documents and module: ${moduleTitle}`)
+      console.log(`🔍 Starting AI analysis for ${documents.length} documents and module: ${moduleTitle}`)
       
       const moduleGoals = getModuleGoals(moduleTitle)
       
-      // Prepare COMPLETE document content for AI - NO FILTERING
+      // Prepare document content for AI - EXTRACT REAL CONTENT
       const documentTexts = documents.map(doc => {
-        console.log(`📖 Processing document: ${doc.fileName}, content length: ${doc.text.length}`)
+        console.log(`📖 Processing document: ${doc.fileName}`)
         
-        // Send COMPLETE content to AI - remove only technical metadata
-        let fullContent = doc.text
+        // Extract HOOFDINHOUD section if available
+        let mainContent = ''
+        const hoofdinhoudMatch = doc.text.match(/=== HOOFDINHOUD ===([\s\S]*?)(?:===|$)/)
+        if (hoofdinhoudMatch) {
+          mainContent = hoofdinhoudMatch[1].trim()
+        }
         
-        // Remove only technical extraction metadata, keep ALL extracted content
-        fullContent = fullContent
-          .replace(/\[(?:PDF|DOCX|TXT) EXTRACTION SUCCESS\][\s\S]*?(?=\n\n|$)/g, '')
-          .replace(/Status: ✅[\s\S]*?(?=\n\n|$)/g, '')
-          .replace(/Kwaliteit: [\s\S]*?(?=\n\n|$)/g, '')
-          .trim()
+        // Extract BELANGRIJKE ZINNEN section
+        let importantSentences = ''
+        const zinnenMatch = doc.text.match(/=== BELANGRIJKE ZINNEN ===([\s\S]*?)(?:===|$)/)
+        if (zinnenMatch) {
+          importantSentences = zinnenMatch[1].trim()
+        }
         
-        console.log(`📋 Sending ${fullContent.length} characters to AI for ${doc.fileName}`)
+        // Extract SCHOOLTERMEN section
+        let schoolTerms = ''
+        const termenMatch = doc.text.match(/=== SCHOOLTERMEN ===([\s\S]*?)(?:===|$)/)
+        if (termenMatch) {
+          schoolTerms = termenMatch[1].trim()
+        }
         
-        return `**DOCUMENT: ${doc.fileName}**
-Type: ${doc.detectedType}
-Formaat: ${doc.fileType}
+        // Combine all extracted content
+        const extractedContent = [mainContent, importantSentences, schoolTerms]
+          .filter(content => content.length > 10)
+          .join('\n\n')
+        
+        // Use extracted content or fallback to full text
+        const finalContent = extractedContent.length > 50 ? extractedContent : doc.text.substring(0, 2000)
+        
+        console.log(`📋 Using ${finalContent.length} characters for ${doc.fileName}`)
+        
+        return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType})
 
-**VOLLEDIGE DOCUMENTINHOUD VOOR AI-ANALYSE:**
-${fullContent}
+**INHOUD:**
+${finalContent}
 
-**EINDE DOCUMENT: ${doc.fileName}**`
-      }).join('\n\n=== VOLGEND DOCUMENT ===\n\n')
+**EINDE DOCUMENT**`
+      }).join('\n\n')
       
       console.log(`📊 Total content for AI: ${documentTexts.length} characters`)
       
-      const analysisPrompt = `Je bent een ervaren PABO-docent en onderwijsadviseur. Analyseer deze schooldocumenten GRONDIG en CONCREET voor de module "${moduleTitle}".
+      const analysisPrompt = `Je bent een ervaren PABO-docent. Analyseer deze schooldocumenten voor de module "${moduleTitle}".
 
 **MODULE DOELEN:**
 ${moduleGoals}
 
-**VOLLEDIGE SCHOOLDOCUMENTEN:**
+**SCHOOLDOCUMENTEN:**
 ${documentTexts}
 
-GEEF EEN PROFESSIONELE, CONCRETE ANALYSE (500-600 woorden) met deze EXACTE structuur:
+Geef een **BEKNOPTE** analyse (max 200 woorden) met deze structuur:
 
-**🎯 WELKOM & DOCUMENTOVERZICHT**
-Begroet de gebruiker en benoem welke documenten je hebt ontvangen.
+**📚 Documenten ontvangen**
+Benoem kort welke documenten je hebt.
 
-**📋 CONCRETE INHOUDELIJKE ANALYSE**
-Analyseer de SPECIFIEKE inhoud die je DAADWERKELIJK ziet in de documenten. 
-CITEER LETTERLIJK uit de documenten waar mogelijk.
-Verwijs naar CONCRETE passages, zinnen, of begrippen die je ECHT ziet.
+**💪 Pluspunten t.o.v. module doelen**
+2-3 concrete sterke punten die aansluiten bij de module doelen.
 
-**💪 STERKE PUNTEN IN DE DOCUMENTEN**
-Identificeer concrete sterke punten die je DAADWERKELIJK ziet in de documentinhoud.
-Geef SPECIFIEKE voorbeelden van wat goed is.
+**🔧 Ontwikkelkansen**
+2-3 specifieke verbeterpunten gerelateerd aan de module.
 
-**🔧 ONTWIKKELKANSEN EN VERBETERPUNTEN**
-Benoem specifieke verbeterpunten gebaseerd op wat je ECHT ziet (of niet ziet) in de documenten.
-Wees concreet over wat er ontbreekt of beter kan.
+**❓ Openingsvraag**
+Stel een concrete vraag gebaseerd op de documenten en module.
 
-**📚 KOPPELING AAN MODULE "${moduleTitle}"**
-Leg SPECIFIEKE verbanden tussen de documentinhoud en de module doelen.
-Verwijs naar concrete aspecten uit de documenten.
+**VEREISTEN:**
+- Spreek de gebruiker aan als "je"
+- Verwijs naar specifieke aspecten uit de documenten
+- Houd het beknopt en to-the-point
+- Focus op de koppeling tussen documenten en module doelen`
 
-**❓ CONCRETE OPENINGSVRAAG**
-Stel een specifieke vraag gebaseerd op wat je DAADWERKELIJK in de documenten hebt gelezen.
-
-**ABSOLUTE VEREISTEN:**
-- Spreek de gebruiker aan als "je" of "jij", NOOIT als "student"
-- CITEER LETTERLIJK uit de documenten waar mogelijk
-- Verwijs naar SPECIFIEKE aspecten die je in de documenten ziet
-- Geef CONCRETE voorbeelden uit de ECHTE documentinhoud
-- Toon dat je de documenten ECHT hebt gelezen door specifieke verwijzingen
-- GEEN algemene opmerkingen - alles moet gebaseerd zijn op ECHTE documentinhoud
-- Maak de analyse specifiek voor deze school en documenten
-
-Eindig met: "**Mijn concrete openingsvraag:** [Een specifieke vraag gebaseerd op wat je ECHT in de documenten hebt gelezen]"`
-
-      console.log('🤖 Sending REVOLUTIONARY analysis request to AI...')
+      console.log('🤖 Sending analysis request to AI...')
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -187,7 +187,7 @@ Eindig met: "**Mijn concrete openingsvraag:** [Een specifieke vraag gebaseerd op
         },
         body: JSON.stringify({
           message: analysisPrompt,
-          context: `Je bent een ervaren PABO-docent en onderwijsadviseur. Je analyseert ${documents.length} schooldocument(en): ${documents.map(d => d.fileName).join(', ')}. Je hebt VOLLEDIGE toegang tot de COMPLETE inhoud van deze documenten en MOET specifieke aspecten bespreken die je DAADWERKELIJK in de documenten ziet. CITEER LETTERLIJK waar mogelijk. Geef concrete, inhoudelijke analyses die echt waarde toevoegen. Spreek de gebruiker aan als "je" of "jij". Toon dat je de documenten ECHT hebt gelezen door specifieke verwijzingen en citaten. GEEN algemene opmerkingen - alles moet gebaseerd zijn op ECHTE documentinhoud.`,
+          context: `Je analyseert ${documents.length} schooldocument(en) voor de module "${moduleTitle}". Geef een beknopte, inhoudelijke analyse die pluspunten en ontwikkelkansen koppelt aan de module doelen. Spreek de gebruiker aan als "je".`,
           module: moduleTitle,
           studentLevel: studentLevel
         }),
@@ -196,24 +196,21 @@ Eindig met: "**Mijn concrete openingsvraag:** [Een specifieke vraag gebaseerd op
       if (response.ok) {
         const result = await response.json()
         const analysisText = result.response
-        console.log('🎉 REVOLUTIONARY AI analysis completed successfully')
+        console.log('✅ AI analysis completed successfully')
         setDocumentAnalysis(analysisText)
         
         // Extract the initial question from the analysis
-        const questionMatch = analysisText.match(/\*\*Mijn concrete openingsvraag:\*\*\s*(.+?)(?:\n|$)/i) ||
-                             analysisText.match(/Mijn concrete openingsvraag:\s*(.+?)(?:\n|$)/i) ||
-                             analysisText.match(/\*\*Openingsvraag:\*\*\s*(.+?)(?:\n|$)/i)
+        const questionMatch = analysisText.match(/\*\*❓.*?\*\*\s*(.+?)(?:\n|$)/i) ||
+                             analysisText.match(/Openingsvraag.*?:\s*(.+?)(?:\n|$)/i)
         
         if (questionMatch) {
           const question = questionMatch[1].trim()
           setInitialQuestion(question)
-          console.log('✅ Extracted concrete initial question:', question)
+          console.log('✅ Extracted initial question:', question)
         } else {
-          // Enhanced fallback question based on documents
-          const docTypes = documents.map(d => d.detectedType).join(' en ')
-          const fallbackQuestion = `Welk specifiek aspect van je ${docTypes.toLowerCase()} vind je het meest relevant voor de module "${moduleTitle}" en waarom?`
+          const fallbackQuestion = `Welk aspect van je ${documents.map(d => d.detectedType.toLowerCase()).join(' en ')} vind je het meest relevant voor "${moduleTitle}"?`
           setInitialQuestion(fallbackQuestion)
-          console.log('🔄 Using enhanced fallback question:', fallbackQuestion)
+          console.log('🔄 Using fallback question:', fallbackQuestion)
         }
         
         setAnalysisComplete(true)
@@ -223,39 +220,25 @@ Eindig met: "**Mijn concrete openingsvraag:** [Een specifieke vraag gebaseerd op
     } catch (error) {
       console.error('❌ Document analysis error:', error)
       
-      // ENHANCED fallback analysis with concrete promises
-      const fallbackAnalysis = `**🎯 Welkom bij je persoonlijke PABO-begeleiding voor ${module}**
+      // Fallback analysis
+      const fallbackAnalysis = `**📚 Documenten ontvangen**
+Je hebt ${documents.length} schooldocument(en) geüpload: ${documents.map(doc => doc.fileName).join(', ')}.
 
-Ik zie dat je ${documents.length} schooldocument(en) hebt geüpload: ${documents.map(doc => `**${doc.fileName}** (${doc.detectedType})`).join(', ')}. Dit is uitstekend materiaal om mee te werken!
+**💪 Pluspunten t.o.v. module doelen**
+• Je documenten bieden concrete schoolcontext voor de module "${module}"
+• Ze maken het mogelijk om theorie te koppelen aan jullie specifieke praktijk
+• Er is materiaal beschikbaar om praktische verbeteringen te identificeren
 
-**📋 CONCRETE INHOUDELIJKE ANALYSE:**
-Je hebt waardevolle schooldocumenten geüpload die perfect aansluiten bij de module "${module}". Deze documenten bevatten concrete informatie over jullie onderwijsvisie, praktijk en beleid die ik kan analyseren en bespreken.
+**🔧 Ontwikkelkansen**
+• We kunnen samen onderzoeken hoe jullie aanpak zich verhoudt tot de module doelen
+• Er zijn mogelijkheden om concrete implementatiestrategieën te ontwikkelen
+• We kunnen verbanden leggen tussen theorie en jullie schoolsituatie
 
-**💪 STERKE PUNTEN VAN JE DOCUMENTEN:**
-• Je hebt concrete schooldocumenten die uitstekend aansluiten bij de module "${module}"
-• Deze documenten geven inzicht in jullie specifieke onderwijscontext en aanpak
-• Ze vormen een solide basis voor het koppelen van PABO-theorie aan jullie schoolrealiteit
-• Met deze documenten kunnen we specifieke, praktische verbeteringen identificeren
-
-**🔧 ONTWIKKELKANSEN:**
-• We kunnen samen onderzoeken hoe jullie huidige aanpak zich verhoudt tot de nieuwste onderwijsinzichten
-• Ik help je concrete verbeterpunten identificeren die aansluiten bij jullie context
-• We kunnen praktische implementatiestrategieën ontwikkelen die passen bij jullie school
-• Samen kunnen we theorie en praktijk nog beter verbinden
-
-**📚 KOPPELING AAN MODULE "${module}":**
-• Je documenten bieden perfecte aanknopingspunten voor alle aspecten van deze module
-• We kunnen PABO-theorie direct koppelen aan jullie specifieke schoolsituatie
-• Ik help je verbanden leggen tussen wat je leert en wat jullie in de praktijk doen
-• Concrete toepassingen worden mogelijk door de rijke context van je documenten
-
-**❓ SAMEN AAN DE SLAG:**
-Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren over je PABO-ontwikkeling en de praktische toepassing in jullie school.
-
-**Mijn concrete openingsvraag:** Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}" - bijvoorbeeld een bepaald beleid, visie-element, of praktijkvoorbeeld dat je interesseert?`
+**❓ Openingsvraag**
+Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`
       
       setDocumentAnalysis(fallbackAnalysis)
-      setInitialQuestion(`Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
+      setInitialQuestion(`Welk aspect van je schooldocumenten is het meest relevant voor de module "${module}"?`)
       setAnalysisComplete(true)
     } finally {
       setIsAnalyzing(false)
@@ -264,17 +247,17 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
 
   const getModuleGoals = (moduleTitle: string): string => {
     const moduleGoalsMap: { [key: string]: string } = {
-      'Curriculum & Kerndoelen': '• Alle 58 kerndoelen beheersen en implementeren\n• Kerndoelen vertalen naar concrete lesdoelen\n• Progressie monitoren per groep\n• Curriculum mapping toepassen\n• Leerlijnen ontwikkelen',
-      'Ontwikkelingspsychologie': '• Ontwikkelingsstadia herkennen en toepassen\n• Theorie koppelen aan praktijk\n• Leeftijdsadequaat onderwijs geven\n• Individuele verschillen begrijpen\n• Observatie en signalering',
-      'SEL & Klassenmanagement': '• SEL-methodieken vergelijken en implementeren\n• Klassenklimaat verbeteren\n• Sociale vaardigheden ontwikkelen\n• Conflicten constructief oplossen\n• Sociale veiligheid waarborgen',
-      'Differentiatie & Inclusie': '• Differentiatie strategieën toepassen\n• Inclusief onderwijs vormgeven\n• Adaptief onderwijs implementeren\n• Alle leerlingen laten slagen\n• Ondersteuningsbehoeften herkennen',
-      'Data & Evaluatie': '• Data interpreteren en gebruiken\n• Formatieve evaluatie toepassen\n• Evidence-based werken\n• Leerresultaten verbeteren\n• Monitoring systemen opzetten',
-      'Schoolleiderschap': '• Pedagogisch leiderschap ontwikkelen\n• Veranderprocessen leiden\n• Teamontwikkeling faciliteren\n• Schoolcultuur vormgeven\n• Visie en missie implementeren',
-      'Burgerschap & Diversiteit': '• Burgerschapsonderwijs vormgeven\n• Democratische waarden overdragen\n• Diversiteit waarderen\n• Sociale cohesie bevorderen\n• Interculturele competentie ontwikkelen',
-      'Cito & Monitoring': '• Cito A-E en I-V niveaus begrijpen\n• Monitoring groep 1-8 organiseren\n• Coördinatorrollen effectief invullen\n• Data-gedreven schoolverbetering\n• LVS systemen optimaliseren',
-      'Inspectie Onderzoekskader': '• Alle 5 inspectiestandaarden beheersen\n• Zelfevaluatie systematisch uitvoeren\n• Inspectiebezoek professioneel voorbereiden\n• Kwaliteitszorg cyclisch organiseren\n• Evidence verzamelen en documenteren'
+      'Curriculum & Kerndoelen': '• Alle 58 kerndoelen beheersen\n• Kerndoelen vertalen naar lesdoelen\n• Progressie monitoren\n• Curriculum mapping',
+      'Ontwikkelingspsychologie': '• Ontwikkelingsstadia herkennen\n• Theorie koppelen aan praktijk\n• Leeftijdsadequaat onderwijs\n• Individuele verschillen begrijpen',
+      'SEL & Klassenmanagement': '• SEL-methodieken implementeren\n• Klassenklimaat verbeteren\n• Sociale vaardigheden ontwikkelen\n• Conflicten oplossen',
+      'Differentiatie & Inclusie': '• Differentiatie strategieën\n• Inclusief onderwijs\n• Adaptief onderwijs\n• Alle leerlingen laten slagen',
+      'Data & Evaluatie': '• Data interpreteren\n• Formatieve evaluatie\n• Evidence-based werken\n• Leerresultaten verbeteren',
+      'Schoolleiderschap': '• Pedagogisch leiderschap\n• Veranderprocessen leiden\n• Teamontwikkeling\n• Schoolcultuur vormgeven',
+      'Burgerschap & Diversiteit': '• Burgerschapsonderwijs\n• Democratische waarden\n• Diversiteit waarderen\n• Sociale cohesie',
+      'Cito & Monitoring': '• Cito niveaus begrijpen\n• Monitoring organiseren\n• Coördinatorrollen\n• Data-gedreven verbetering',
+      'Inspectie Onderzoekskader': '• Inspectiestandaarden\n• Zelfevaluatie\n• Inspectiebezoek voorbereiden\n• Kwaliteitszorg'
     }
-    return moduleGoalsMap[moduleTitle] || 'Algemene PABO-competenties ontwikkelen'
+    return moduleGoalsMap[moduleTitle] || 'PABO-competenties ontwikkelen'
   }
 
   const startOpdracht = (opdracht: Opdracht) => {
@@ -284,18 +267,18 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
   const startDirectChatWithAnalysis = async (docs?: UploadedDocument[]) => {
     const documents = docs || availableDocuments
     
-    console.log(`🚀 Starting direct chat with REVOLUTIONARY CONCRETE analysis for ${documents.length} documents`)
+    console.log(`🚀 Starting direct chat with analysis for ${documents.length} documents`)
     
     // Set up the chat first
     setSelectedOpdracht({
       titel: "Chat met je Schooldocumenten",
-      beschrijving: "Chat direct met de AI over je geüploade schooldocumenten en PABO-onderwerpen",
+      beschrijving: "Chat direct met de AI over je geüploade schooldocumenten",
       type: "reflectie",
-      startVraag: "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
-      context: `Je bent een ervaren PABO-docent die gebruikers helpt met vragen over hun studie en schoolpraktijk. De gebruiker heeft ${documents.length} schooldocument(en) geüpload: ${documents.map(d => d.fileName).join(', ')}. Je hebt VOLLEDIGE toegang tot de COMPLETE inhoud van deze documenten en kunt specifieke aspecten bespreken. CITEER LETTERLIJK uit de documenten waar mogelijk. Gebruik de socratische methode om gebruikers zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de gebruiker verbanden te leggen tussen theorie en hun specifieke schoolsituatie. Geef concrete, praktische adviezen gebaseerd op de ECHTE documentinhoud. Spreek de gebruiker aan als "je" of "jij". Toon dat je de documenten ECHT hebt gelezen door specifieke verwijzingen. GEEN algemene opmerkingen - alles moet gebaseerd zijn op ECHTE documentinhoud.`
+      startVraag: "Hoe kan ik je helpen met je schooldocumenten?",
+      context: `Je bent een ervaren PABO-docent die gebruikers helpt met vragen over hun studie en schoolpraktijk. De gebruiker heeft ${documents.length} schooldocument(en) geüpload. Gebruik de socratische methode en verwijs naar de documenten waar relevant. Spreek de gebruiker aan als "je".`
     })
     
-    // Start REVOLUTIONARY CONCRETE analysis AFTER setting up chat
+    // Start analysis AFTER setting up chat
     if (documents.length > 0) {
       await analyzeDocumentsForModule(documents, module)
     }
@@ -325,19 +308,15 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
   if (autoStartChat && availableDocuments.length > 0 && selectedOpdracht) {
     return (
       <div className="space-y-4">
-        {/* REVOLUTIONARY DOCUMENT INFO BLOCK */}
-        <div className="bg-gradient-to-r from-green-800 to-emerald-800 rounded-lg p-6 text-white shadow-xl border-l-4 border-green-400">
+        {/* Document Info Block */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-bold mb-2 flex items-center">
-                🚀 REVOLUTIONARY AI-Analyse: {module}
-                <span className="ml-2 px-2 py-1 bg-green-400 text-green-900 rounded-full text-xs font-bold">CONCRETE INHOUD</span>
-              </h3>
+              <h3 className="text-xl font-bold mb-2">🤖 AI-Analyse: {module}</h3>
               <div className="flex items-center space-x-4 text-green-100 text-sm">
                 <span>📚 {availableDocuments.length} document(en)</span>
                 <span>✅ {selectedDocuments.length} geselecteerd</span>
                 <span>🌱 {studentLevel}</span>
-                <span className="px-2 py-1 bg-green-400 text-green-900 rounded-full text-xs font-bold">LETTERLIJKE CITATEN</span>
               </div>
             </div>
             <button
@@ -362,59 +341,47 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
             )}
           </div>
 
-          {/* REVOLUTIONARY ANALYSIS STATUS */}
+          {/* Analysis Status */}
           {isAnalyzing ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span className="text-white font-medium text-lg">🚀 REVOLUTIONARY AI analyseert concrete documentinhoud...</span>
+                <span className="text-white font-medium">🔍 AI analyseert je documenten...</span>
               </div>
-              <div className="space-y-2 text-green-100 text-sm">
-                <p>📖 Ik lees de VOLLEDIGE inhoud van je {availableDocuments.length} document(en)</p>
-                <p>🔍 Zoek naar SPECIFIEKE passages en concrete informatie</p>
-                <p>📋 Identificeer LETTERLIJKE citaten en verwijzingen</p>
-                <p>🎯 Koppel CONCRETE inhoud aan de doelen van "{module}"</p>
-                <p>💡 Identificeer SPECIFIEKE sterke punten en ontwikkelkansen</p>
-                <p>📊 Formuleer concrete adviezen gebaseerd op ECHTE inhoud</p>
-                <p>❓ Stel een specifieke openingsvraag gebaseerd op wat ik DAADWERKELIJK lees</p>
-              </div>
-              <div className="mt-3 bg-white bg-opacity-15 rounded p-2">
-                <p className="text-white text-xs">⏱️ Grondige analyse met letterlijke citaten duurt 20-30 seconden...</p>
-              </div>
+              <p className="text-green-100 text-sm">
+                Ik analyseer de inhoud van je documenten en koppel deze aan de doelen van "{module}"
+              </p>
             </div>
           ) : analysisComplete ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
-                <span className="text-white font-medium">🎉 REVOLUTIONARY concrete inhoudelijke analyse voltooid!</span>
+                <span className="text-white font-medium">✅ Analyse voltooid!</span>
               </div>
               <p className="text-green-100 text-sm">
-                📋 Ik heb je documenten GRONDIG geanalyseerd met SPECIFIEKE verwijzingen naar de inhoud, 
-                LETTERLIJKE citaten waar mogelijk, concrete sterke punten, praktische verbeterpunten en een 
-                inhoudelijke openingsvraag gebaseerd op wat ik DAADWERKELIJK heb gelezen.
+                Ik heb je documenten geanalyseerd en gekoppeld aan de module doelen.
               </p>
             </div>
           ) : (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <p className="text-white text-sm">🔄 Documenten worden voorbereid voor REVOLUTIONARY inhoudelijke AI-analyse...</p>
+              <p className="text-white text-sm">🔄 Documenten worden voorbereid voor analyse...</p>
             </div>
           )}
         </div>
 
-        {/* SEPARATE ANALYSIS BLOCK - BETTER READABILITY */}
+        {/* Analysis Results */}
         {analysisComplete && documentAnalysis && (
           <div className="bg-white rounded-lg p-6 border-l-4 border-green-500 shadow-lg">
             <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
               <span className="text-xl mr-2">📋</span>
-              REVOLUTIONARY Concrete Inhoudelijke Analyse van je Schooldocumenten
-              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">MET LETTERLIJKE CITATEN</span>
+              Analyse van je Schooldocumenten
             </h4>
-            <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+            <div className="prose prose-sm max-w-none text-gray-700">
               <div className="whitespace-pre-wrap">{documentAnalysis}</div>
             </div>
           </div>
         )}
 
-        {/* Direct Chat Interface with Initial Question */}
+        {/* Chat Interface */}
         <ContextAwareChat
           module={module}
           context={selectedOpdracht.context}
@@ -423,34 +390,6 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
           selectedDocuments={selectedDocuments}
           initialQuestion={initialQuestion}
         />
-
-        {/* Quick Actions for Documents */}
-        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <h4 className="font-semibold text-blue-800 mb-3">💡 Probeer deze CONCRETE vragen over je documenten:</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {[
-              "Citeer een SPECIFIEKE passage uit mijn document over dit onderwerp",
-              "Welke CONCRETE doelen zie je LETTERLIJK in mijn jaarplan staan?",
-              "Vergelijk wat er EXACT in mijn document staat met de PABO-theorie",
-              "Geef praktische tips gebaseerd op wat je DAADWERKELIJK in mijn document leest",
-              "Wat staat er PRECIES in mijn document over dit beleid?",
-              "Hoe kan ik de SPECIFIEKE plannen uit mijn document beter implementeren?"
-            ].map((vraag, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  const event = new CustomEvent('sendMessage', { detail: vraag })
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(event)
-                  }
-                }}
-                className="text-left p-3 bg-white border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-50 transition-colors"
-              >
-                💬 {vraag}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     )
   }
@@ -463,12 +402,12 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
         {availableDocuments.length === 0 && (
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white text-center">
             <div className="text-4xl mb-3">📚</div>
-            <h3 className="text-xl font-bold mb-2">Start met je schooldocumenten uploaden!</h3>
+            <h3 className="text-xl font-bold mb-2">Upload je schooldocumenten!</h3>
             <p className="text-orange-100 mb-4">
-              Upload eerst je schooldocumenten (schoolplan, beleid, etc.) voor de beste AI-begeleiding
+              Upload eerst je schooldocumenten voor de beste AI-begeleiding
             </p>
             <p className="text-orange-100 text-sm">
-              💡 Tip: Gebruik het documentenpaneel bovenaan deze pagina om bestanden te uploaden
+              💡 Tip: Gebruik het documentenpaneel bovenaan deze pagina
             </p>
           </div>
         )}
@@ -478,9 +417,9 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
           <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold mb-2">🚀 Klaar voor REVOLUTIONARY Concrete Analyse!</h3>
+                <h3 className="text-xl font-bold mb-2">🚀 Klaar voor AI-Analyse!</h3>
                 <p className="text-green-100 mb-4">
-                  Je hebt {availableDocuments.length} document(en) geüpload. Begin direct met concrete, inhoudelijke gesprekken met letterlijke citaten!
+                  Je hebt {availableDocuments.length} document(en) geüpload. Begin direct met inhoudelijke gesprekken!
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {availableDocuments.slice(0, 3).map((doc, index) => (
@@ -497,9 +436,9 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
               </div>
               <button
                 onClick={() => startDirectChatWithAnalysis()}
-                className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg"
+                className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
               >
-                💬 Start REVOLUTIONARY Chat
+                💬 Start Chat
               </button>
             </div>
           </div>
@@ -556,20 +495,6 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
                   <p className="text-sm font-medium text-blue-700 mb-1">🤔 Startvraag:</p>
                   <p className="text-blue-800 italic">"{opdracht.startVraag}"</p>
                 </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <span className="mr-2">🤖</span>
-                    <span>AI-begeleiding met socratische methode</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    {selectedDocuments.length > 0 && (
-                      <div className="flex items-center text-green-600">
-                        <span className="mr-1">📚</span>
-                        <span>{selectedDocuments.length} docs</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             ))}
           </div>
@@ -584,30 +509,20 @@ Met deze waardevolle documenten kunnen we een echt betekenisvol gesprek voeren o
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-4 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold">🚀 REVOLUTIONARY AI Socratische Begeleiding</h3>
+            <h3 className="font-semibold">🤖 AI Socratische Begeleiding</h3>
             <p className="text-blue-100 text-sm">
               Opdracht: {selectedOpdracht.titel}
             </p>
-            <div className="flex items-center space-x-3 mt-1">
-              {selectedDocuments.length > 0 && (
-                <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
-              )}
-            </div>
+            {selectedDocuments.length > 0 && (
+              <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
+            )}
           </div>
-          <div className="flex items-center space-x-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              studentLevel === 'beginnend' ? 'bg-green-500' :
-              studentLevel === 'gevorderd' ? 'bg-yellow-500' : 'bg-red-500'
-            }`}>
-              {studentLevel === 'beginnend' ? '🌱' : studentLevel === 'gevorderd' ? '🌿' : '🌳'} {studentLevel}
-            </span>
-            <button
-              onClick={resetChat}
-              className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
-            >
-              Nieuwe opdracht
-            </button>
-          </div>
+          <button
+            onClick={resetChat}
+            className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+          >
+            Nieuwe opdracht
+          </button>
         </div>
       </div>
 

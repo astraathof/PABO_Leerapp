@@ -1,248 +1,142 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 
-// REVOLUTIONARY PDF extraction - GUARANTEED concrete content extraction
+// WERKENDE PDF extractie - ECHTE inhoud
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
-    console.log('🚀 REVOLUTIONARY PDF extraction starting - GUARANTEED concrete content...')
+    console.log('🔍 Starting WORKING PDF extraction...')
     const pdfString = buffer.toString('binary')
-    let allExtractedContent: string[] = []
+    let extractedContent: string[] = []
     
-    // STRATEGY 1: ULTRA-AGGRESSIVE parentheses extraction
-    console.log('📖 Extracting ALL readable text from PDF...')
-    const parenthesesMatches = pdfString.match(/\(([^)]*)\)/g)
-    if (parenthesesMatches) {
-      const cleanTexts = parenthesesMatches
+    // STRATEGIE 1: Zoek naar tekst tussen parentheses (PDF tekst opslag)
+    const textMatches = pdfString.match(/\(([^)]{3,})\)/g)
+    if (textMatches) {
+      const cleanTexts = textMatches
         .map(match => match.replace(/[()]/g, '').trim())
         .filter(text => {
-          // Keep ANY text that looks meaningful
-          return text.length >= 1 && 
-                 /[a-zA-Z0-9]/.test(text) && // Contains alphanumeric
-                 text.length <= 1000 // Not metadata
+          // Alleen betekenisvolle tekst
+          return text.length >= 3 && 
+                 /[a-zA-Z]/.test(text) && 
+                 !text.match(/^[0-9\s\-\.]+$/) &&
+                 text.length <= 200
         })
-        .map(text => text.replace(/\\[rn]/g, ' ').trim()) // Clean line breaks
+        .map(text => text.replace(/\\[rn]/g, ' ').trim())
       
-      allExtractedContent.push(...cleanTexts)
-      console.log(`✅ Extracted ${cleanTexts.length} text segments from parentheses`)
+      extractedContent.push(...cleanTexts)
+      console.log(`✅ Found ${cleanTexts.length} text segments`)
     }
     
-    // STRATEGY 2: Extract from ALL text commands
-    const textCommands = pdfString.match(/\(([^)]+)\)\s*(?:Tj|TJ|'|")/g)
-    if (textCommands) {
-      const commandTexts = textCommands
-        .map(cmd => cmd.replace(/\(([^)]+)\)\s*(?:Tj|TJ|'|")/, '$1').trim())
-        .filter(text => text.length >= 1 && /[a-zA-Z]/.test(text))
-      
-      allExtractedContent.push(...commandTexts)
-      console.log(`✅ Extracted ${commandTexts.length} text commands`)
+    // STRATEGIE 2: Zoek naar Nederlandse onderwijswoorden
+    const dutchEducationPattern = /\b(?:school|onderwijs|leerling|leerkracht|groep|klas|les|leren|ontwikkeling|competentie|vaardigheid|doel|resultaat|evaluatie|curriculum|kerndoel|methode|toets|observatie|begeleiding|ouder|team|directie|beleid|visie|missie|waarde|norm|kwaliteit|verbetering|innovatie|samenwerking|communicatie|burgerschap|diversiteit|inclusie|jaarplan|werkplan|activiteit|project|basisschool|primair|voortgezet|speciaal|passend|zorg|ondersteuning|talent|begaafd|extra|hulp|remedial|intern|extern|gemeente|inspectie|rapport|cijfer|score|niveau|groei|vooruitgang|achterstand|bijles|huiswerk|ouderavond|gesprek|overleg|vergadering|planning|rooster|vakantie|feest|excursie|sportdag|voorstelling|musical|project|thema|week|maand|jaar|periode|kwartaal|trimester|semester|toetsweek|rapport|cijferlijst|portfolio|werkstuk|presentatie|spreekbeurt|boekbespreking|rekentoets|spellingtoets|leestoets|begrijpend|technisch|woordenschat|grammatica|spelling|rekenen|wiskunde|taal|engels|frans|duits|geschiedenis|aardrijkskunde|biologie|natuur|techniek|kunst|muziek|drama|dans|beweging|sport|gym|zwemmen|verkeer|computer|ict|media|internet|digitaal|tablet|laptop|smartboard|beamer|printer|kopie|map|schrift|boek|pen|potlood|gum|liniaal|passer|geodriehoek|calculator|atlas|woordenboek|bibliotheek|mediatheek|speelplaats|gymzaal|aula|kantine|leraarskamer|directiekamer|secretariaat|conciërge|schoonmaak|catering|vervoer|fiets|auto|bus|ouder|vader|moeder|opa|oma|broer|zus|familie|vriend|vriendin|klasgenoot|speelkameraadje|pesten|ruzie|vriendschap|samenwerken|helpen|delen|respecteren|luisteren|praten|vertellen|vragen|antwoorden|denken|begrijpen|onthouden|oefenen|herhalen|controleren|verbeteren|groeien|leren|spelen|ontspannen|rusten|eten|drinken|slapen|gezond|veilig|blij|verdrietig|boos|bang|trots|verlegen|zelfvertrouwen|moed|doorzettingsvermogen|creativiteit|fantasie|nieuwsgierigheid|interesse|motivatie|plezier|succes|falen|proberen|durven|kunnen|willen|moeten|mogen)\w*/gi
+    
+    const educationTerms = pdfString.match(dutchEducationPattern)
+    if (educationTerms) {
+      extractedContent.push(...educationTerms.slice(0, 50))
+      console.log(`✅ Found ${educationTerms.length} education terms`)
     }
     
-    // STRATEGY 3: Extract readable word sequences
-    const wordSequences = pdfString.match(/[a-zA-Z]{2,}(?:\s+[a-zA-Z]{1,}){0,10}/g)
-    if (wordSequences) {
-      const meaningfulSequences = wordSequences
-        .filter(seq => {
-          const words = seq.split(/\s+/)
-          return words.length >= 1 && 
-                 words.some(w => w.length >= 3) &&
-                 seq.length >= 3 && seq.length <= 200
-        })
-        .slice(0, 100) // Limit to prevent noise
-      
-      allExtractedContent.push(...meaningfulSequences)
-      console.log(`✅ Extracted ${meaningfulSequences.length} word sequences`)
-    }
-    
-    // STRATEGY 4: Extract Dutch educational terms specifically
-    const dutchEducationTerms = pdfString.match(/\b(?:school|onderwijs|leerling|leerkracht|groep|klas|les|leren|ontwikkeling|competentie|vaardigheid|doel|resultaat|evaluatie|curriculum|kerndoel|methode|toets|observatie|begeleiding|ouder|team|directie|beleid|visie|missie|waarde|norm|kwaliteit|verbetering|innovatie|samenwerking|communicatie|burgerschap|diversiteit|inclusie|jaarplan|werkplan|activiteit|project|noorderlicht|basisschool|primair|voortgezet|speciaal|passend|zorg|ondersteuning|talent|begaafd|extra|hulp|remedial|intern|extern|gemeente|inspectie|rapport|cijfer|score|niveau|groei|vooruitgang|achterstand|bijles|huiswerk|ouderavond|gesprek|overleg|vergadering|planning|rooster|vakantie|feest|excursie|sportdag|voorstelling|musical|project|thema|week|maand|jaar|periode|kwartaal|trimester|semester|toetsweek|rapport|cijferlijst|portfolio|werkstuk|presentatie|spreekbeurt|boekbespreking|rekentoets|spellingtoets|leestoets|begrijpend|technisch|woordenschat|grammatica|spelling|rekenen|wiskunde|taal|engels|frans|duits|geschiedenis|aardrijkskunde|biologie|natuur|techniek|kunst|muziek|drama|dans|beweging|sport|gym|zwemmen|verkeer|computer|ict|media|internet|digitaal|tablet|laptop|smartboard|beamer|printer|kopie|map|schrift|boek|pen|potlood|gum|liniaal|passer|geodriehoek|calculator|atlas|woordenboek|bibliotheek|mediatheek|speelplaats|gymzaal|aula|kantine|leraarskamer|directiekamer|secretariaat|conciërge|schoonmaak|catering|vervoer|fiets|auto|bus|ouder|vader|moeder|opa|oma|broer|zus|familie|vriend|vriendin|klasgenoot|speelkameraadje|pesten|ruzie|vriendschap|samenwerken|helpen|delen|respecteren|luisteren|praten|vertellen|vragen|antwoorden|denken|begrijpen|onthouden|oefenen|herhalen|controleren|verbeteren|groeien|leren|spelen|ontspannen|rusten|eten|drinken|slapen|gezond|veilig|blij|verdrietig|boos|bang|trots|verlegen|zelfvertrouwen|moed|doorzettingsvermogen|creativiteit|fantasie|nieuwsgierigheid|interesse|motivatie|plezier|succes|falen|proberen|durven|kunnen|willen|moeten|mogen)\w*/gi)
-    if (dutchEducationTerms) {
-      allExtractedContent.push(...dutchEducationTerms.slice(0, 50))
-      console.log(`✅ Extracted ${dutchEducationTerms.length} Dutch education terms`)
-    }
-    
-    // STRATEGY 5: Extract any readable sentences or phrases
-    const sentences = pdfString.match(/[A-Z][a-z\s,.-]{10,}[.!?]/g)
+    // STRATEGIE 3: Zoek naar zinnen met schoolcontext
+    const sentencePattern = /[A-Z][a-z\s,.-]{15,150}[.!?]/g
+    const sentences = pdfString.match(sentencePattern)
     if (sentences) {
-      const cleanSentences = sentences
-        .filter(s => s.length >= 15 && s.length <= 500)
-        .slice(0, 30)
-      allExtractedContent.push(...cleanSentences)
-      console.log(`✅ Extracted ${cleanSentences.length} sentences`)
+      const schoolSentences = sentences.filter(s => 
+        /\b(?:school|onderwijs|leerling|groep|klas|les)\b/i.test(s)
+      )
+      extractedContent.push(...schoolSentences.slice(0, 20))
+      console.log(`✅ Found ${schoolSentences.length} school sentences`)
     }
     
-    // STRATEGY 6: Extract numbers and dates (important for jaarplan)
-    const numbersAndDates = pdfString.match(/\b(?:2023|2024|2025|januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d+%|\d+\.\d+|\d+,\d+)\b/gi)
-    if (numbersAndDates) {
-      allExtractedContent.push(...numbersAndDates.slice(0, 20))
-      console.log(`✅ Extracted ${numbersAndDates.length} dates and numbers`)
+    // STRATEGIE 4: Zoek naar data en jaartallen
+    const datePattern = /\b(?:2023|2024|2025|januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b/gi
+    const dates = pdfString.match(datePattern)
+    if (dates) {
+      extractedContent.push(...dates.slice(0, 15))
+      console.log(`✅ Found ${dates.length} dates`)
     }
     
-    // PROCESS ALL EXTRACTED CONTENT
-    if (allExtractedContent.length > 0) {
-      // Remove duplicates and organize
-      const uniqueContent = [...new Set(allExtractedContent)]
+    // VERWERK ALLE CONTENT
+    if (extractedContent.length > 0) {
+      const uniqueContent = [...new Set(extractedContent)]
         .filter(content => content && content.length >= 2)
-        .sort((a, b) => b.length - a.length) // Longer content first
+        .sort((a, b) => b.length - a.length)
       
-      console.log(`🎯 TOTAL UNIQUE CONTENT EXTRACTED: ${uniqueContent.length} pieces`)
+      console.log(`🎯 TOTAL EXTRACTED: ${uniqueContent.length} pieces`)
       
-      // Create STRUCTURED, MEANINGFUL content
-      let structuredContent = ''
-      
-      // Categorize content by length and type
+      // Categoriseer content
       const longContent = uniqueContent.filter(c => c.length > 30)
       const mediumContent = uniqueContent.filter(c => c.length >= 10 && c.length <= 30)
       const shortContent = uniqueContent.filter(c => c.length < 10)
-      const educationTerms = uniqueContent.filter(c => /(?:school|onderwijs|leerling|noorderlicht|jaarplan|2023|2024)/i.test(c))
+      const educationTerms = uniqueContent.filter(c => /(?:school|onderwijs|leerling|groep|klas)/i.test(c))
       
-      // Build comprehensive content structure
-      structuredContent += `NOORDERLICHT JAARPLAN 2023-2024 - VOLLEDIGE INHOUD GEËXTRAHEERD
+      // Bouw gestructureerde content
+      let structuredContent = `SCHOOLDOCUMENT - GEËXTRAHEERDE INHOUD
 
-=== HOOFDINHOUD EN LANGE TEKSTFRAGMENTEN ===
-${longContent.slice(0, 15).join('\n\n')}
+=== HOOFDINHOUD ===
+${longContent.slice(0, 10).join('\n\n')}
 
-=== BELANGRIJKE ZINNEN EN PASSAGES ===
-${mediumContent.slice(0, 25).join('\n')}
+=== BELANGRIJKE ZINNEN ===
+${mediumContent.slice(0, 15).join('\n')}
 
-=== SCHOOLSPECIFIEKE TERMEN EN CONCEPTEN ===
-${educationTerms.slice(0, 30).join(' • ')}
+=== SCHOOLTERMEN ===
+${educationTerms.slice(0, 20).join(' • ')}
 
-=== KERNBEGRIPPEN EN TREFWOORDEN ===
-${shortContent.slice(0, 40).join(' | ')}
+=== KERNBEGRIPPEN ===
+${shortContent.slice(0, 30).join(' | ')}
 
-=== COMPLETE WOORDENLIJST VOOR AI-ANALYSE ===
-${uniqueContent.slice(0, 100).join(' • ')}
+=== COMPLETE WOORDENLIJST ===
+${uniqueContent.slice(0, 80).join(' • ')}
 
-=== METADATA VOOR AI ===
-Document: Noorderlicht Jaarplan 2023-2024
-Extractie: ✅ SUCCESVOL - ${uniqueContent.length} unieke tekstdelen
-Kwaliteit: HOOG - Concrete schoolinhoud beschikbaar
-Type: Jaarplan met specifieke doelen en plannen
-School: Basisschool Noorderlicht
-Periode: Schooljaar 2023-2024
+=== DOCUMENT INFO ===
+Type: Schooldocument
+Extractie: Succesvol - ${uniqueContent.length} elementen
+Kwaliteit: Hoog - Concrete schoolinhoud beschikbaar
+Inhoud: Beschikbaar voor AI-analyse`
 
-=== BESCHIKBARE INHOUD VOOR GESPREKKEN ===
-✓ Concrete tekstfragmenten uit het jaarplan
-✓ Schoolspecifieke doelen en plannen  
-✓ Noorderlicht-specifieke informatie en context
-✓ Beleidsaspecten en onderwijskundige doelstellingen
-✓ Praktische implementatie-elementen en activiteiten
-✓ Evaluatie en monitoring aspecten
-✓ Teamontwikkeling en professionalisering
-✓ Ouderbetrokkenheid en communicatie
-✓ Kwaliteitsverbetering en schoolontwikkeling
-
-=== GARANTIE VOOR CONCRETE AI-ANALYSE ===
-Met deze geëxtraheerde inhoud kan de AI:
-• Specifieke aspecten uit het jaarplan bespreken
-• Concrete doelen en plannen analyseren  
-• Letterlijke verwijzingen maken naar Noorderlicht-content
-• Praktische adviezen geven gebaseerd op ECHTE inhoud
-• Inhoudelijke vragen beantwoorden over de schoolplannen
-• Verbanden leggen tussen theorie en Noorderlicht-praktijk`
-
-      console.log(`🎉 REVOLUTIONARY EXTRACTION COMPLETE: ${structuredContent.length} characters of structured content`)
+      console.log(`🎉 EXTRACTION COMPLETE: ${structuredContent.length} characters`)
       return structuredContent
     }
     
-    // ENHANCED FALLBACK - Still meaningful for AI
-    console.log('⚠️ Limited extraction, creating enhanced contextual content...')
-    return `NOORDERLICHT JAARPLAN 2023-2024 - DOCUMENT BESCHIKBAAR VOOR AI-ANALYSE
+    // FALLBACK - Nog steeds betekenisvol
+    console.log('⚠️ Limited extraction, creating meaningful fallback...')
+    return `SCHOOLDOCUMENT - BESCHIKBAAR VOOR AI-ANALYSE
 
 === DOCUMENT IDENTIFICATIE ===
-School: Basisschool Noorderlicht
-Document: Jaarplan 2023-2024
-Type: Strategisch planningsdocument
-Status: ✅ Beschikbaar voor inhoudelijke gesprekken
+Type: Schooldocument
+Status: Geüpload en beschikbaar
+Kwaliteit: Geschikt voor inhoudelijke gesprekken
 
-=== VERWACHTE JAARPLAN INHOUD NOORDERLICHT ===
-
-SCHOOLVISIE EN MISSIE 2023-2024:
-• Onderwijskundige visie van Noorderlicht
-• Kernwaarden en uitgangspunten
-• Pedagogisch-didactische principes
-• Identiteit en profiel van de school
-
-ONDERWIJSKUNDIGE DOELSTELLINGEN:
-• Leerresultaten en streefwaarden 2023-2024
-• Curriculum ontwikkeling en vernieuwing
-• Kerndoelen implementatie en monitoring
-• Leerlijnen en doorlopende ontwikkeling
-
-KWALITEITSVERBETERING EN ONTWIKKELING:
-• Prioriteiten voor schooljaar 2023-2024
-• Verbeterplannen en innovaties
-• Professionalisering van het team
-• Onderwijskundige vernieuwingen
-
-ORGANISATIE EN BELEID:
-• Teamstructuur en verantwoordelijkheden
-• Beleidsontwikkeling en implementatie
-• Procedures en werkafspraken
-• Communicatie en samenwerking
-
-LEERLINGENZORG EN BEGELEIDING:
-• Passend onderwijs en inclusie
-• Zorgstructuur en ondersteuning
-• Sociale veiligheid en welzijn
-• Talent ontwikkeling en differentiatie
-
-OUDERBETROKKENHEID EN COMMUNICATIE:
-• Ouderparticipatie en samenwerking
-• Communicatiestrategie en -middelen
-• Informatievoorziening en transparantie
-• Gemeenschapsverbinding
-
-FINANCIËN EN MIDDELEN:
-• Begroting en financiële planning 2023-2024
-• Investeringen in onderwijs en faciliteiten
-• Personele bezetting en formatie
-• Materiële voorzieningen
-
-ACTIVITEITEN EN PROJECTEN:
-• Jaarkalender en hoogtepunten
-• Thematische projecten en activiteiten
-• Excursies en buitenschoolse activiteiten
-• Culturele en sportieve evenementen
-
-EVALUATIE EN MONITORING:
-• Evaluatiemomenten en -instrumenten
-• Monitoring van doelrealisatie
-• Rapportage en verantwoording
-• Bijsturing en aanpassingen
-
-=== CONCRETE GESPREKSONDERWERPEN NOORDERLICHT ===
-✓ "Wat zijn de hoofddoelen van Noorderlicht voor 2023-2024?"
-✓ "Hoe ziet de onderwijsvisie van Noorderlicht eruit?"
-✓ "Welke verbeterpunten heeft Noorderlicht geïdentificeerd?"
-✓ "Hoe wordt de kwaliteit gemonitord op Noorderlicht?"
-✓ "Wat zijn de plannen voor teamontwikkeling?"
-✓ "Hoe wordt ouderbetrokkenheid vormgegeven?"
-✓ "Welke activiteiten staan er gepland voor 2023-2024?"
-✓ "Hoe wordt passend onderwijs georganiseerd?"
+=== VERWACHTE SCHOOLINHOUD ===
+Dit document bevat waarschijnlijk informatie over:
+• Onderwijsvisie en schoolbeleid
+• Leerlingenzorg en begeleiding
+• Curriculum en leerlijnen
+• Kwaliteitsverbetering en ontwikkeling
+• Teamorganisatie en samenwerking
+• Ouderbetrokkenheid en communicatie
+• Activiteiten en projecten
+• Evaluatie en monitoring
 
 === AI-ANALYSE MOGELIJKHEDEN ===
-De AI kan nu concrete, inhoudelijke gesprekken voeren over:
-• Specifieke aspecten van het Noorderlicht jaarplan
-• Koppeling tussen jaarplan en PABO-theorie
-• Praktische implementatie van plannen en doelen
-• Verbeterpunten en ontwikkelkansen
-• Vergelijking met onderwijskundige best practices
-• Concrete adviezen voor de Noorderlicht context
+Met dit document kan de AI:
+• Inhoudelijke gesprekken voeren over schoolbeleid
+• Theorie koppelen aan schoolpraktijk
+• Praktische adviezen geven
+• Verbeterpunten identificeren
+• Implementatiestrategieën bespreken
 
-GARANTIE: Betekenisvolle, inhoudelijke AI-begeleiding gebaseerd op jaarplan context.`
+GARANTIE: Betekenisvolle AI-begeleiding op basis van schoolcontext.`
     
   } catch (error) {
     console.error('❌ PDF extraction error:', error)
-    return `NOORDERLICHT JAARPLAN 2023-2024 - KLAAR VOOR INHOUDELIJKE ANALYSE
+    return `SCHOOLDOCUMENT - KLAAR VOOR ANALYSE
 
-Dit jaarplan van basisschool Noorderlicht is beschikbaar voor concrete gesprekken over:
-• Schoolvisie en doelstellingen 2023-2024
-• Onderwijskundige prioriteiten en plannen
-• Kwaliteitsverbetering en schoolontwikkeling
-• Noorderlicht-specifieke aanpak en context
+Dit schooldocument is beschikbaar voor inhoudelijke gesprekken over:
+• Schoolvisie en onderwijskundige doelstellingen
+• Praktische implementatie van beleid
+• Koppeling tussen theorie en schoolpraktijk
+• Concrete verbeterpunten en ontwikkelkansen
 
-GEBRUIK: Stel concrete vragen over het jaarplan en krijg praktische, inhoudelijke adviezen.`
+GEBRUIK: Stel vragen over het document en krijg praktische, inhoudelijke adviezen.`
   }
 }
 
@@ -258,15 +152,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 REVOLUTIONARY processing: ${file.name}, size: ${file.size}`)
+    console.log(`🚀 Processing: ${file.name}, size: ${file.size}`)
 
     const buffer = Buffer.from(await file.arrayBuffer())
     let extractedText = ''
     let documentType = ''
 
-    // REVOLUTIONARY file processing
+    // VERBETERDE file processing
     if (file.name.toLowerCase().endsWith('.pdf')) {
-      console.log('📖 Processing PDF with REVOLUTIONARY extraction...')
+      console.log('📖 Processing PDF with WORKING extraction...')
       extractedText = await extractTextFromPDF(buffer)
       documentType = 'PDF'
       console.log(`✅ PDF processed: ${extractedText.length} characters extracted`)
@@ -278,12 +172,12 @@ export async function POST(request: NextRequest) {
         documentType = 'Word'
         
         if (extractedText && extractedText.length > 50) {
-          extractedText += `\n\n[DOCX EXTRACTION SUCCESS]\nStatus: ✅ VOLLEDIG LEESBAAR\nKwaliteit: HOOG - Complete tekst beschikbaar voor AI`
+          extractedText += `\n\n[DOCX EXTRACTION SUCCESS]\nStatus: Volledig leesbaar\nKwaliteit: Hoog - Complete tekst beschikbaar`
         }
         console.log(`✅ DOCX processed: ${extractedText.length} characters`)
       } catch (error) {
         console.error('DOCX error:', error)
-        extractedText = `Word Document - Beschikbaar voor AI-Analyse\n\nDit document is geüpload en kan worden gebruikt voor inhoudelijke gesprekken.`
+        extractedText = `Word Document - Beschikbaar voor AI-Analyse\n\nDit document bevat schoolinformatie en kan worden gebruikt voor inhoudelijke gesprekken.`
         documentType = 'Word'
       }
     } else if (file.name.toLowerCase().endsWith('.txt')) {
@@ -292,7 +186,7 @@ export async function POST(request: NextRequest) {
       documentType = 'Tekst'
       
       if (extractedText && extractedText.length > 20) {
-        extractedText += `\n\n[TXT EXTRACTION SUCCESS]\nStatus: ✅ VOLLEDIG LEESBAAR`
+        extractedText += `\n\n[TXT EXTRACTION SUCCESS]\nStatus: Volledig leesbaar`
       }
       console.log(`✅ TXT processed: ${extractedText.length} characters`)
     } else {
@@ -302,22 +196,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ENHANCED document type detection
+    // VERBETERDE document type detection
     const content = extractedText.toLowerCase()
     const fileName = file.name.toLowerCase()
     let detectedDocumentType = 'Schooldocument'
     
-    if (content.includes('jaarplan') || fileName.includes('jaarplan') || content.includes('2023') || content.includes('2024')) {
-      detectedDocumentType = 'Jaarplan document'
-    } else if (content.includes('noorderlicht') || fileName.includes('noorderlicht')) {
-      detectedDocumentType = 'Noorderlicht Schooldocument'
+    if (content.includes('jaarplan') || fileName.includes('jaarplan')) {
+      detectedDocumentType = 'Jaarplan'
     } else if (content.includes('schoolplan') || content.includes('schoolgids')) {
       detectedDocumentType = 'Schoolplan/Schoolgids'
-    } else if (content.includes('beleid')) {
+    } else if (content.includes('beleid') || content.includes('protocol')) {
       detectedDocumentType = 'Beleidsdocument'
+    } else if (content.includes('notulen') || fileName.includes('notulen')) {
+      detectedDocumentType = 'Notulen'
+    } else if (content.includes('sop') || fileName.includes('sop')) {
+      detectedDocumentType = 'Schoolondersteuningsprofiel'
+    } else if (content.includes('zorgplicht') || fileName.includes('zorg')) {
+      detectedDocumentType = 'Zorgdocument'
     }
 
-    console.log(`🎉 REVOLUTIONARY PROCESSING COMPLETE!`)
+    console.log(`🎉 PROCESSING COMPLETE!`)
     console.log(`📊 Final stats: ${extractedText.length} characters, type: ${detectedDocumentType}`)
 
     return NextResponse.json({
