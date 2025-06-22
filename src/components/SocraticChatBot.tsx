@@ -180,22 +180,23 @@ Stel een concrete vraag gebaseerd op de documenten en module.
 
       console.log('🤖 Sending analysis request to AI...')
 
-      const response = await fetch('/api/chat', {
+      // Use the dedicated analyze-document endpoint instead of chat endpoint
+      const response = await fetch('/api/analyze-document', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: analysisPrompt,
-          context: `Je analyseert ${documents.length} schooldocument(en) voor de module "${moduleTitle}". Geef een beknopte, inhoudelijke analyse die pluspunten en ontwikkelkansen koppelt aan de module doelen. Spreek de gebruiker aan als "je".`,
-          module: moduleTitle,
-          studentLevel: studentLevel
+          documentText: documentTexts,
+          documentType: 'schooldocument',
+          analysisType: 'praktijk-reflectie',
+          module: moduleTitle
         }),
       })
 
       if (response.ok) {
         const result = await response.json()
-        const analysisText = result.response
+        const analysisText = result.analysis
         console.log('✅ AI analysis completed successfully')
         setDocumentAnalysis(analysisText)
         
@@ -215,7 +216,8 @@ Stel een concrete vraag gebaseerd op de documenten en module.
         
         setAnalysisComplete(true)
       } else {
-        throw new Error(`Analysis request failed: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(`Analysis request failed: ${response.status} - ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('❌ Document analysis error:', error)
