@@ -233,26 +233,14 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
   if (autoStartChat && availableDocuments.length > 0 && selectedOpdracht) {
     return (
       <div className="space-y-4">
-        {/* Chat Header with Document Info */}
+        {/* CONSOLIDATED DOCUMENT & AI ANALYSIS BLOCK */}
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-bold mb-2">🎉 Perfect! Je documenten zijn klaar voor AI-analyse</h3>
-              <p className="text-green-100 mb-3">
-                Ik heb toegang tot {availableDocuments.length} van jouw schooldocumenten en kan nu gepersonaliseerde begeleiding geven!
+              <h3 className="text-xl font-bold mb-2">🤖 AI-Analyse van je Schooldocumenten</h3>
+              <p className="text-green-100">
+                {availableDocuments.length} document(en) • Actief voor {module} • {selectedDocuments.length} geselecteerd
               </p>
-              <div className="flex flex-wrap gap-2">
-                {availableDocuments.slice(0, 3).map((doc, index) => (
-                  <span key={index} className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
-                    📄 {doc.fileName}
-                  </span>
-                ))}
-                {availableDocuments.length > 3 && (
-                  <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
-                    +{availableDocuments.length - 3} meer
-                  </span>
-                )}
-              </div>
             </div>
             <div className="flex items-center space-x-2">
               <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
@@ -266,22 +254,39 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Document Analysis */}
-        {(isAnalyzing || documentAnalysis) && (
-          <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-            <h4 className="font-semibold text-blue-800 mb-3">🔍 AI Analyse van je Documenten</h4>
-            {isAnalyzing ? (
-              <div className="flex items-center space-x-3">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                <span className="text-blue-700">Ik analyseer je documenten in relatie tot de module "{module}"...</span>
-              </div>
-            ) : (
-              <div className="text-blue-800 whitespace-pre-wrap">{documentAnalysis}</div>
+          
+          {/* Document List */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {availableDocuments.slice(0, 3).map((doc, index) => (
+              <span key={index} className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+                📄 {doc.fileName}
+              </span>
+            ))}
+            {availableDocuments.length > 3 && (
+              <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+                +{availableDocuments.length - 3} meer
+              </span>
             )}
           </div>
-        )}
+
+          {/* AI Analysis Status/Result */}
+          {isAnalyzing ? (
+            <div className="bg-white bg-opacity-20 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span className="text-white">AI analyseert je documenten voor de module "{module}"...</span>
+              </div>
+            </div>
+          ) : documentAnalysis ? (
+            <div className="bg-white bg-opacity-20 rounded-lg p-4">
+              <div className="text-white whitespace-pre-wrap text-sm">{documentAnalysis}</div>
+            </div>
+          ) : (
+            <div className="bg-white bg-opacity-20 rounded-lg p-4">
+              <p className="text-white text-sm">✅ Documenten geladen en klaar voor AI-begeleiding</p>
+            </div>
+          )}
+        </div>
 
         {/* Direct Chat Interface with Initial Question */}
         <ContextAwareChat
