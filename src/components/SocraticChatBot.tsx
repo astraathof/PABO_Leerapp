@@ -98,25 +98,33 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     setIsAnalyzing(true)
     try {
       const moduleGoals = getModuleGoals(moduleTitle)
-      const documentTexts = documents.map(doc => `${doc.fileName}: ${doc.text.substring(0, 2000)}`).join('\n\n')
+      const documentTexts = documents.map(doc => 
+        `**${doc.fileName}** (${doc.detectedType}):\n${doc.text.substring(0, 1500)}`
+      ).join('\n\n---\n\n')
       
-      const analysisPrompt = `Analyseer deze schooldocumenten in relatie tot de module "${moduleTitle}" en stel een concrete eerste vraag.
+      const analysisPrompt = `Analyseer deze schooldocumenten grondig in relatie tot de module "${moduleTitle}".
 
-MODULE DOELEN:
+**MODULE DOELEN:**
 ${moduleGoals}
 
-SCHOOLDOCUMENTEN:
+**SCHOOLDOCUMENTEN:**
 ${documentTexts}
 
-Geef een analyse (max 200 woorden) waarin je:
-1. **Welkom heet** de student en benoemt welke documenten je hebt ontvangen
-2. **Koppelt** wat je ziet in de documenten aan de module doelen  
-3. **Concrete voorbeelden** geeft uit de documenten die relevant zijn
-4. **Eindigt** met 1 specifieke, concrete vraag gebaseerd op de documenten en module
+Geef een concrete, inhoudelijke analyse (200-300 woorden) waarin je:
 
-BELANGRIJK: Eindig je analyse met een duidelijke vraag die begint met "Mijn eerste vraag aan jou is:" gevolgd door een specifieke vraag over de documenten in relatie tot de module.
+1. **Welkom** de student en benoem welke documenten je hebt ontvangen
+2. **Analyseer** wat je concreet ziet in de documenten dat relevant is voor deze module
+3. **Koppel** specifieke passages uit de documenten aan de module doelen
+4. **Identificeer** sterke punten en verbeterpunten in de documenten
+5. **Eindig** met een specifieke, inhoudelijke vraag
 
-Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages uit de documenten.`
+**BELANGRIJK:** 
+- Citeer letterlijk uit de documenten waar relevant
+- Geef concrete voorbeelden van wat je ziet
+- Maak de analyse specifiek voor deze school/documenten
+- Eindig met: "**Mijn eerste vraag:** [specifieke vraag over de documenten]"
+
+Gebruik een professionele, bemoedigende toon en toon dat je echt de documenten hebt gelezen.`
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -125,7 +133,7 @@ Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages u
         },
         body: JSON.stringify({
           message: analysisPrompt,
-          context: `Je bent een ervaren PABO-docent die documenten analyseert voor de module ${moduleTitle}. Geef een inhoudelijke analyse met concrete verwijzingen naar de documenten en eindig met een specifieke vraag.`,
+          context: `Je bent een ervaren PABO-docent en onderwijsadviseur die schooldocumenten analyseert. Geef een grondige, inhoudelijke analyse met concrete verwijzingen naar de documenten. Toon expertise en geef waardevolle inzichten.`,
           module: moduleTitle,
           studentLevel: studentLevel
         }),
@@ -137,7 +145,8 @@ Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages u
         setDocumentAnalysis(analysisText)
         
         // Extract the initial question from the analysis
-        const questionMatch = analysisText.match(/Mijn eerste vraag aan jou is:\s*(.+?)(?:\n|$)/i)
+        const questionMatch = analysisText.match(/\*\*Mijn eerste vraag:\*\*\s*(.+?)(?:\n|$)/i) ||
+                             analysisText.match(/Mijn eerste vraag:\s*(.+?)(?:\n|$)/i)
         if (questionMatch) {
           setInitialQuestion(questionMatch[1].trim())
         } else {
@@ -146,19 +155,22 @@ Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages u
       }
     } catch (error) {
       console.error('Document analysis error:', error)
-      setDocumentAnalysis(`🎉 **Welkom! Je documenten zijn succesvol geüpload**
+      setDocumentAnalysis(`**🎉 Welkom! Je documenten zijn succesvol geüpload**
 
 Ik heb je schooldocument(en) ontvangen en ben klaar om je te helpen met de module "${module}".
 
-**📚 Wat ik heb ontvangen:**
-${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
+**📚 Geüploade documenten:**
+${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wordCount.toLocaleString()} woorden`).join('\n')}
 
-**💡 Wat kun je me vragen?**
-• Hoe sluit ons schoolbeleid aan bij deze module?
-• Wat zie je in onze documenten dat relevant is?
-• Geef concrete voorbeelden uit onze schoolcontext
+**🎯 Module focus:** ${module}
 
-**Mijn eerste vraag aan jou is:** Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
+**💡 Wat ik kan doen:**
+• Analyseren hoe jullie schoolbeleid aansluit bij deze module
+• Concrete voorbeelden geven uit jullie documenten
+• Verbanden leggen tussen theorie en jullie schoolpraktijk
+• Suggesties doen voor verbeteringen
+
+**Mijn eerste vraag:** Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
       
       setInitialQuestion(`Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
     } finally {
@@ -168,15 +180,15 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
 
   const getModuleGoals = (moduleTitle: string): string => {
     const moduleGoalsMap: { [key: string]: string } = {
-      'Curriculum & Kerndoelen': '• Alle 58 kerndoelen beheersen\n• Kerndoelen vertalen naar lesdoelen\n• Progressie monitoren per groep\n• Curriculum mapping toepassen',
-      'Ontwikkelingspsychologie': '• Ontwikkelingsstadia herkennen\n• Theorie koppelen aan praktijk\n• Leeftijdsadequaat onderwijs geven\n• Individuele verschillen begrijpen',
-      'SEL & Klassenmanagement': '• SEL-methodieken vergelijken\n• Klassenklimaat verbeteren\n• Sociale vaardigheden ontwikkelen\n• Conflicten constructief oplossen',
-      'Differentiatie & Inclusie': '• Differentiatie strategieën toepassen\n• Inclusief onderwijs vormgeven\n• Adaptief onderwijs implementeren\n• Alle leerlingen laten slagen',
-      'Data & Evaluatie': '• Data interpreteren en gebruiken\n• Formatieve evaluatie toepassen\n• Evidence-based werken\n• Leerresultaten verbeteren',
-      'Schoolleiderschap': '• Pedagogisch leiderschap ontwikkelen\n• Veranderprocessen leiden\n• Teamontwikkeling faciliteren\n• Schoolcultuur vormgeven',
-      'Burgerschap & Diversiteit': '• Burgerschapsonderwijs vormgeven\n• Democratische waarden overdragen\n• Diversiteit waarderen\n• Sociale cohesie bevorderen',
-      'Cito & Monitoring': '• Cito A-E en I-V niveaus begrijpen\n• Monitoring groep 1-8 organiseren\n• Coördinatorrollen effectief invullen\n• Data-gedreven schoolverbetering',
-      'Inspectie Onderzoekskader': '• Alle 5 inspectiestandaarden beheersen\n• Zelfevaluatie systematisch uitvoeren\n• Inspectiebezoek professioneel voorbereiden\n• Kwaliteitszorg cyclisch organiseren'
+      'Curriculum & Kerndoelen': '• Alle 58 kerndoelen beheersen en implementeren\n• Kerndoelen vertalen naar concrete lesdoelen\n• Progressie monitoren per groep\n• Curriculum mapping toepassen\n• Leerlijnen ontwikkelen',
+      'Ontwikkelingspsychologie': '• Ontwikkelingsstadia herkennen en toepassen\n• Theorie koppelen aan praktijk\n• Leeftijdsadequaat onderwijs geven\n• Individuele verschillen begrijpen\n• Observatie en signalering',
+      'SEL & Klassenmanagement': '• SEL-methodieken vergelijken en implementeren\n• Klassenklimaat verbeteren\n• Sociale vaardigheden ontwikkelen\n• Conflicten constructief oplossen\n• Sociale veiligheid waarborgen',
+      'Differentiatie & Inclusie': '• Differentiatie strategieën toepassen\n• Inclusief onderwijs vormgeven\n• Adaptief onderwijs implementeren\n• Alle leerlingen laten slagen\n• Ondersteuningsbehoeften herkennen',
+      'Data & Evaluatie': '• Data interpreteren en gebruiken\n• Formatieve evaluatie toepassen\n• Evidence-based werken\n• Leerresultaten verbeteren\n• Monitoring systemen opzetten',
+      'Schoolleiderschap': '• Pedagogisch leiderschap ontwikkelen\n• Veranderprocessen leiden\n• Teamontwikkeling faciliteren\n• Schoolcultuur vormgeven\n• Visie en missie implementeren',
+      'Burgerschap & Diversiteit': '• Burgerschapsonderwijs vormgeven\n• Democratische waarden overdragen\n• Diversiteit waarderen\n• Sociale cohesie bevorderen\n• Interculturele competentie ontwikkelen',
+      'Cito & Monitoring': '• Cito A-E en I-V niveaus begrijpen\n• Monitoring groep 1-8 organiseren\n• Coördinatorrollen effectief invullen\n• Data-gedreven schoolverbetering\n• LVS systemen optimaliseren',
+      'Inspectie Onderzoekskader': '• Alle 5 inspectiestandaarden beheersen\n• Zelfevaluatie systematisch uitvoeren\n• Inspectiebezoek professioneel voorbereiden\n• Kwaliteitszorg cyclisch organiseren\n• Evidence verzamelen en documenteren'
     }
     return moduleGoalsMap[moduleTitle] || 'Algemene PABO-competenties ontwikkelen'
   }
@@ -266,17 +278,23 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
             )}
           </div>
 
-          {/* AI Analysis Status/Result */}
+          {/* AI Analysis Status/Result - ECHTE INHOUDELIJKE ANALYSE */}
           {isAnalyzing ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 mb-2">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span className="text-white">AI analyseert je documenten voor de module "{module}"...</span>
+                <span className="text-white font-medium">AI analyseert je documenten...</span>
               </div>
+              <p className="text-green-100 text-sm">
+                Ik lees je {availableDocuments.length} document(en) en koppel deze aan de doelen van "{module}"
+              </p>
             </div>
           ) : documentAnalysis ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <div className="text-white whitespace-pre-wrap text-sm">{documentAnalysis}</div>
+              <h4 className="font-semibold text-white mb-3">📋 Inhoudelijke Analyse:</h4>
+              <div className="text-white text-sm leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">
+                {documentAnalysis}
+              </div>
             </div>
           ) : (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
