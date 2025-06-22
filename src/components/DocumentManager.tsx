@@ -142,24 +142,47 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   }
 
   const deleteDocument = (documentId: string) => {
-    const docToDelete = documents.find(doc => doc.id === documentId)
-    if (confirm(`Weet je zeker dat je "${docToDelete?.fileName}" wilt verwijderen?`)) {
-      console.log('Deleting document:', documentId)
-      setDocuments(prev => {
-        const updated = prev.filter(doc => doc.id !== documentId)
-        console.log('Documents after deletion:', updated)
-        return updated
-      })
-      if (selectedDocument?.id === documentId) {
-        setSelectedDocument(null)
+    try {
+      const docToDelete = documents.find(doc => doc.id === documentId)
+      if (!docToDelete) {
+        console.warn('Document not found for deletion:', documentId)
+        return
       }
+
+      if (confirm(`Weet je zeker dat je "${docToDelete.fileName}" wilt verwijderen?`)) {
+        console.log('Deleting document:', documentId)
+        
+        // Update state
+        setDocuments(prev => {
+          const updated = prev.filter(doc => doc.id !== documentId)
+          console.log('Documents after deletion:', updated)
+          return updated
+        })
+        
+        // Clear selected document if it was the deleted one
+        if (selectedDocument?.id === documentId) {
+          setSelectedDocument(null)
+        }
+        
+        console.log('Document deletion completed successfully')
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error)
+      alert('❌ Fout bij verwijderen van document. Probeer het opnieuw.')
     }
   }
 
   const deleteAllDocuments = () => {
-    if (confirm(`Weet je zeker dat je alle ${documents.length} document(en) wilt verwijderen?`)) {
-      setDocuments([])
-      setSelectedDocument(null)
+    try {
+      if (confirm(`Weet je zeker dat je alle ${documents.length} document(en) wilt verwijderen?`)) {
+        console.log('Deleting all documents')
+        setDocuments([])
+        setSelectedDocument(null)
+        console.log('All documents deleted successfully')
+      }
+    } catch (error) {
+      console.error('Error deleting all documents:', error)
+      alert('❌ Fout bij verwijderen van alle documenten. Probeer het opnieuw.')
     }
   }
 
@@ -357,7 +380,10 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                       </div>
                     </div>
                     <button
-                      onClick={() => deleteDocument(doc.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteDocument(doc.id)
+                      }}
                       className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                       title="Verwijder document"
                     >
@@ -389,7 +415,10 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                       ✅ Beschikbaar
                     </span>
                     <button
-                      onClick={() => setSelectedDocument(selectedDocument?.id === doc.id ? null : doc)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedDocument(selectedDocument?.id === doc.id ? null : doc)
+                      }}
                       className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs"
                     >
                       {selectedDocument?.id === doc.id ? '👁️ Verberg' : '👁️ Bekijk'}
@@ -424,13 +453,19 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                         ✅ Beschikbaar
                       </span>
                       <button
-                        onClick={() => setSelectedDocument(selectedDocument?.id === doc.id ? null : doc)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedDocument(selectedDocument?.id === doc.id ? null : doc)
+                        }}
                         className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
                       >
                         {selectedDocument?.id === doc.id ? '👁️ Verberg' : '👁️ Bekijk'}
                       </button>
                       <button
-                        onClick={() => deleteDocument(doc.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteDocument(doc.id)
+                        }}
                         className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
                       >
                         🗑️ Verwijder

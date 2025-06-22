@@ -124,9 +124,20 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
   }
 
   const deleteDocument = (documentId: string) => {
-    const docToDelete = documents.find(doc => doc.id === documentId)
-    if (confirm(`Weet je zeker dat je "${docToDelete?.fileName}" wilt verwijderen?`)) {
-      setDocuments(prev => prev.filter(doc => doc.id !== documentId))
+    try {
+      const docToDelete = documents.find(doc => doc.id === documentId)
+      if (!docToDelete) {
+        console.warn('Document not found for deletion:', documentId)
+        return
+      }
+
+      if (confirm(`Weet je zeker dat je "${docToDelete.fileName}" wilt verwijderen?`)) {
+        setDocuments(prev => prev.filter(doc => doc.id !== documentId))
+        console.log('Document deleted successfully from PersistentDocumentPanel')
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error)
+      alert('❌ Fout bij verwijderen van document. Probeer het opnieuw.')
     }
   }
 
@@ -235,7 +246,10 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                     </div>
                   </div>
                   <button
-                    onClick={() => deleteDocument(doc.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteDocument(doc.id)
+                    }}
                     className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                     title="Verwijder document"
                   >
@@ -276,7 +290,10 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                         ✅ Actief
                       </span>
                       <button
-                        onClick={() => deleteDocument(doc.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteDocument(doc.id)
+                        }}
                         className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors text-xs"
                       >
                         🗑️
