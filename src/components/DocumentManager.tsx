@@ -130,6 +130,14 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       setUploadSuccess(true)
       setShowSuccessMessage(true)
       
+      // Auto-start chat after 2 seconds
+      setTimeout(() => {
+        console.log('Auto-starting chat after 2 seconds...')
+        if (typeof window !== 'undefined') {
+          window.location.href = '/#start-chat'
+        }
+      }, 2000)
+      
       console.log('Upload process completed successfully')
       
     } catch (error) {
@@ -181,12 +189,15 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             <div>
               <h3 className="text-xl font-bold mb-2">🎉 Document succesvol geüpload!</h3>
               <p className="text-green-100 mb-3">
-                Je document is verwerkt en klaar voor AI-analyse. Start nu direct een gesprek!
+                Je document wordt verwerkt. Over 2 seconden start automatisch de AI-chat met analyse!
               </p>
               <div className="bg-white bg-opacity-20 rounded-lg p-3 mb-4">
-                <p className="text-sm">
-                  💬 <strong>Wat kun je nu doen?</strong> Stel vragen over je schooldocument aan de AI-mentor!
-                </p>
+                <div className="flex items-center space-x-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <p className="text-sm">
+                    💬 <strong>Auto-start over 2 seconden...</strong> De AI gaat je document analyseren!
+                  </p>
+                </div>
               </div>
             </div>
             <button
@@ -201,7 +212,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
               onClick={startAIChat}
               className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
-              💬 Start AI Chat Nu
+              💬 Start Nu Direct
             </button>
             <button
               onClick={() => setShowSuccessMessage(false)}
@@ -395,7 +406,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">2️⃣</span>
-              <span className="text-green-700">Klik op "Start AI Chat" - de chatbot start automatisch!</span>
+              <span className="text-green-700">Na 2 seconden start automatisch de AI-chat met analyse!</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">3️⃣</span>
@@ -409,7 +420,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">5️⃣</span>
-              <span className="text-green-700">Gebruik spraakherkenning voor hands-free chatten!</span>
+              <span className="text-green-700">Upload extra documenten wanneer je wilt!</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">6️⃣</span>

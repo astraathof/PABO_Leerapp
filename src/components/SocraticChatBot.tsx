@@ -93,15 +93,15 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
 
     loadDocuments()
 
-    // Listen for storage changes (when documents are uploaded)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'pabo-documents') {
-        console.log('SocraticChatBot: Storage changed, reloading documents...')
-        loadDocuments()
-      }
-    }
-
     if (typeof window !== 'undefined') {
+      // Listen for storage changes (when documents are uploaded)
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'pabo-documents') {
+          console.log('SocraticChatBot: Storage changed, reloading documents...')
+          loadDocuments()
+        }
+      }
+
       window.addEventListener('storage', handleStorageChange)
       
       // Also listen for custom events from document upload
@@ -134,12 +134,13 @@ ${moduleGoals}
 SCHOOLDOCUMENTEN:
 ${documentTexts}
 
-Geef een korte analyse (max 200 woorden) waarin je:
+Geef een korte analyse (max 250 woorden) waarin je:
 1. Benoemt wat je ziet in de documenten dat relevant is voor deze module
-2. Koppelt aan de module doelen
-3. Eindigt met 2-3 socratische vragen om het gesprek te starten
+2. Koppelt aan de module doelen  
+3. Geeft concrete voorbeelden uit de documenten
+4. Eindigt met 2-3 socratische vragen om het gesprek te starten
 
-Wees specifiek en verwijs naar concrete passages uit de documenten.`
+Wees specifiek en verwijs naar concrete passages uit de documenten. Gebruik een vriendelijke, bemoedigende toon.`
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -148,7 +149,7 @@ Wees specifiek en verwijs naar concrete passages uit de documenten.`
         },
         body: JSON.stringify({
           message: analysisPrompt,
-          context: `Je bent een PABO-docent die documenten analyseert voor de module ${moduleTitle}`,
+          context: `Je bent een ervaren PABO-docent die documenten analyseert voor de module ${moduleTitle}. Geef een inhoudelijke analyse met concrete verwijzingen naar de documenten.`,
           module: moduleTitle,
           studentLevel: studentLevel
         }),
@@ -160,7 +161,18 @@ Wees specifiek en verwijs naar concrete passages uit de documenten.`
       }
     } catch (error) {
       console.error('Document analysis error:', error)
-      setDocumentAnalysis('Ik heb je documenten bekeken en ben klaar om je te helpen met vragen over je schoolpraktijk!')
+      setDocumentAnalysis(`🔍 **Welkom bij de AI-analyse!**
+
+Ik heb je schooldocument(en) bekeken en ben klaar om je te helpen met de module "${module}".
+
+**💡 Wat kun je me vragen?**
+• Hoe sluit ons schoolbeleid aan bij deze module?
+• Wat zie je in onze documenten dat relevant is?
+• Geef concrete voorbeelden uit onze schoolcontext
+
+**🤔 Laten we beginnen:**
+• Wat wil je als eerste weten over je schooldocumenten?
+• Hoe kan ik je helpen deze module te koppelen aan je schoolpraktijk?`)
     } finally {
       setIsAnalyzing(false)
     }
@@ -321,6 +333,24 @@ Wees specifiek en verwijs naar concrete passages uit de documenten.`
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Additional Document Upload */}
+        <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+          <h4 className="font-semibold text-yellow-800 mb-3">📤 Extra Documenten Toevoegen</h4>
+          <p className="text-yellow-700 text-sm mb-3">
+            Je kunt altijd extra documenten uploaden om de AI-analyse nog rijker te maken!
+          </p>
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = '#documents'
+              }
+            }}
+            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm"
+          >
+            📚 Upload Meer Documenten
+          </button>
         </div>
       </div>
     )
