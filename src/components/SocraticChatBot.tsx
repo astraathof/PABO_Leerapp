@@ -49,6 +49,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [isLoading, setIsLoading] = useState(true)
   const [documentAnalysis, setDocumentAnalysis] = useState<string>('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [initialQuestion, setInitialQuestion] = useState<string>('')
 
   // Load documents from localStorage with better error handling
   useEffect(() => {
@@ -126,7 +127,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
       const moduleGoals = getModuleGoals(moduleTitle)
       const documentTexts = documents.map(doc => `${doc.fileName}: ${doc.text.substring(0, 2000)}`).join('\n\n')
       
-      const analysisPrompt = `Analyseer deze schooldocumenten in relatie tot de module "${moduleTitle}".
+      const analysisPrompt = `Analyseer deze schooldocumenten in relatie tot de module "${moduleTitle}" en stel een concrete eerste vraag.
 
 MODULE DOELEN:
 ${moduleGoals}
@@ -134,13 +135,15 @@ ${moduleGoals}
 SCHOOLDOCUMENTEN:
 ${documentTexts}
 
-Geef een korte analyse (max 300 woorden) waarin je:
+Geef een analyse (max 200 woorden) waarin je:
 1. **Welkom heet** de student en benoemt welke documenten je hebt ontvangen
 2. **Koppelt** wat je ziet in de documenten aan de module doelen  
 3. **Concrete voorbeelden** geeft uit de documenten die relevant zijn
-4. **Eindigt** met 2-3 socratische vragen om het gesprek te starten
+4. **Eindigt** met 1 specifieke, concrete vraag gebaseerd op de documenten en module
 
-Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages uit de documenten. Begin met een persoonlijke begroeting.`
+BELANGRIJK: Eindig je analyse met een duidelijke vraag die begint met "Mijn eerste vraag aan jou is:" gevolgd door een specifieke vraag over de documenten in relatie tot de module.
+
+Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages uit de documenten.`
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -149,7 +152,7 @@ Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages u
         },
         body: JSON.stringify({
           message: analysisPrompt,
-          context: `Je bent een ervaren PABO-docent die documenten analyseert voor de module ${moduleTitle}. Geef een inhoudelijke analyse met concrete verwijzingen naar de documenten.`,
+          context: `Je bent een ervaren PABO-docent die documenten analyseert voor de module ${moduleTitle}. Geef een inhoudelijke analyse met concrete verwijzingen naar de documenten en eindig met een specifieke vraag.`,
           module: moduleTitle,
           studentLevel: studentLevel
         }),
@@ -157,7 +160,17 @@ Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages u
 
       if (response.ok) {
         const result = await response.json()
-        setDocumentAnalysis(result.response)
+        const analysisText = result.response
+        setDocumentAnalysis(analysisText)
+        
+        // Extract the initial question from the analysis
+        const questionMatch = analysisText.match(/Mijn eerste vraag aan jou is:\s*(.+?)(?:\n|$)/i)
+        if (questionMatch) {
+          setInitialQuestion(questionMatch[1].trim())
+        } else {
+          // Fallback question if extraction fails
+          setInitialQuestion(`Hoe sluit wat je ziet in je schooldocumenten aan bij de doelen van de module "${moduleTitle}"?`)
+        }
       }
     } catch (error) {
       console.error('Document analysis error:', error)
@@ -173,9 +186,9 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
 • Wat zie je in onze documenten dat relevant is?
 • Geef concrete voorbeelden uit onze schoolcontext
 
-**🤔 Laten we beginnen:**
-• Wat wil je als eerste weten over je schooldocumenten?
-• Hoe kan ik je helpen deze module te koppelen aan je schoolpraktijk?`)
+**Mijn eerste vraag aan jou is:** Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
+      
+      setInitialQuestion(`Welk aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`)
     } finally {
       setIsAnalyzing(false)
     }
@@ -190,7 +203,8 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
       'Data & Evaluatie': '• Data interpreteren en gebruiken\n• Formatieve evaluatie toepassen\n• Evidence-based werken\n• Leerresultaten verbeteren',
       'Schoolleiderschap': '• Pedagogisch leiderschap ontwikkelen\n• Veranderprocessen leiden\n• Teamontwikkeling faciliteren\n• Schoolcultuur vormgeven',
       'Burgerschap & Diversiteit': '• Burgerschapsonderwijs vormgeven\n• Democratische waarden overdragen\n• Diversiteit waarderen\n• Sociale cohesie bevorderen',
-      'Cito & Monitoring': '• Cito A-E en I-V niveaus begrijpen\n• Monitoring groep 1-8 organiseren\n• Coördinatorrollen effectief invullen\n• Data-gedreven schoolverbetering'
+      'Cito & Monitoring': '• Cito A-E en I-V niveaus begrijpen\n• Monitoring groep 1-8 organiseren\n• Coördinatorrollen effectief invullen\n• Data-gedreven schoolverbetering',
+      'Inspectie Onderzoekskader': '• Alle 5 inspectiestandaarden beheersen\n• Zelfevaluatie systematisch uitvoeren\n• Inspectiebezoek professioneel voorbereiden\n• Kwaliteitszorg cyclisch organiseren'
     }
     return moduleGoalsMap[moduleTitle] || 'Algemene PABO-competenties ontwikkelen'
   }
@@ -214,7 +228,7 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
       titel: "Chat met je Schooldocumenten",
       beschrijving: "Chat direct met de AI over je geüploade schooldocumenten en PABO-onderwerpen",
       type: "reflectie",
-      startVraag: "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
+      startVraag: initialQuestion || "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
       context: `Je bent een ervaren PABO-docent die studenten helpt met vragen over hun studie en schoolpraktijk. De student heeft ${documents.length} schooldocument(en) geüpload: ${documents.map(d => d.fileName).join(', ')}. Gebruik de socratische methode om studenten zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
     })
   }
@@ -224,6 +238,7 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
     setShowDirectChat(false)
     setAutoStartChat(false)
     setDocumentAnalysis('')
+    setInitialQuestion('')
   }
 
   const toggleDocumentSelection = (docId: string) => {
@@ -300,13 +315,14 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
           </div>
         )}
 
-        {/* Direct Chat Interface */}
+        {/* Direct Chat Interface with Initial Question */}
         <ContextAwareChat
           module={module}
           context={selectedOpdracht.context}
           studentLevel={studentLevel}
           availableDocuments={availableDocuments}
           selectedDocuments={selectedDocuments}
+          initialQuestion={initialQuestion}
         />
 
         {/* Quick Actions for Documents */}
@@ -314,12 +330,12 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
           <h4 className="font-semibold text-blue-800 mb-3">💡 Probeer deze vragen over je documenten:</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {[
-              "Wat staat er in ons schoolplan over burgerschap?",
+              "Wat staat er in ons schoolplan over dit onderwerp?",
               "Hoe kan ik de visie van onze school toepassen in mijn lessen?",
               "Vergelijk onze aanpak met de theorie die ik geleerd heb",
               "Geef concrete voorbeelden uit onze schoolcontext",
               "Wat zijn de kernwaarden van onze school?",
-              "Hoe monitoren we leerresultaten volgens ons beleid?"
+              "Hoe monitoren we dit volgens ons beleid?"
             ].map((vraag, index) => (
               <button
                 key={index}
@@ -337,24 +353,6 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
             ))}
           </div>
         </div>
-
-        {/* Additional Document Upload */}
-        <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-          <h4 className="font-semibold text-yellow-800 mb-3">📤 Extra Documenten Toevoegen</h4>
-          <p className="text-yellow-700 text-sm mb-3">
-            Je kunt altijd extra documenten uploaden om de AI-analyse nog rijker te maken!
-          </p>
-          <button
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.location.href = '#documents'
-              }
-            }}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm"
-          >
-            📚 Upload Meer Documenten
-          </button>
-        </div>
       </div>
     )
   }
@@ -371,17 +369,9 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
             <p className="text-orange-100 mb-4">
               Upload eerst je schooldocumenten (schoolplan, beleid, etc.) voor de beste AI-begeleiding
             </p>
-            <button
-              onClick={() => {
-                // Navigate to document manager
-                if (typeof window !== 'undefined') {
-                  window.location.href = '#documents'
-                }
-              }}
-              className="px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-            >
-              📤 Upload Documenten Nu
-            </button>
+            <p className="text-orange-100 text-sm">
+              💡 Tip: Gebruik het documentenpaneel bovenaan deze pagina om bestanden te uploaden
+            </p>
           </div>
         )}
 
@@ -650,6 +640,7 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
         studentLevel={studentLevel}
         availableDocuments={availableDocuments}
         selectedDocuments={selectedDocuments}
+        initialQuestion={initialQuestion}
       />
     </div>
   )

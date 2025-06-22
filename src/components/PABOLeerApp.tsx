@@ -12,6 +12,7 @@ import KerndoelenProgressieTracker from './KerndoelenProgressieTracker'
 import OntwikkelingsStadiaTimeline from './OntwikkelingsStadiaTimeline'
 import SELCompetentieRadar from './SELCompetentieRadar'
 import InspectionFrameworkViewer from './InspectionFrameworkViewer'
+import PersistentDocumentPanel from './PersistentDocumentPanel'
 
 interface Module {
   id: string
@@ -24,6 +25,16 @@ interface Module {
   components: string[]
   learningGoals: string[]
   learningPath?: 'beginnend' | 'gevorderd' | 'leider'
+}
+
+interface UploadedDocument {
+  id: string
+  fileName: string
+  fileType: string
+  detectedType: string
+  text: string
+  wordCount: number
+  uploadDate: Date
 }
 
 const modules: Module[] = [
@@ -278,7 +289,7 @@ export default function PABOLeerApp() {
   const [selectedLearningPath, setSelectedLearningPath] = useState<string | null>(null)
   const [showDocumentManager, setShowDocumentManager] = useState(false)
   const [showDirectChat, setShowDirectChat] = useState(false)
-  const [showQuickUpload, setShowQuickUpload] = useState(false)
+  const [documents, setDocuments] = useState<UploadedDocument[]>([])
 
   // Check URL hash for direct navigation and handle document upload flow
   useEffect(() => {
@@ -544,8 +555,16 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
+        {/* Persistent Document Panel */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <PersistentDocumentPanel 
+            onDocumentsChange={setDocuments}
+            currentModule="Algemeen"
+          />
+        </div>
+
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {renderComponent()}
         </div>
       </div>
@@ -587,8 +606,16 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
+        {/* Persistent Document Panel */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <PersistentDocumentPanel 
+            onDocumentsChange={setDocuments}
+            currentModule={moduleData?.title}
+          />
+        </div>
+
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {renderComponent()}
         </div>
       </div>
@@ -620,8 +647,16 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
+        {/* Persistent Document Panel */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <PersistentDocumentPanel 
+            onDocumentsChange={setDocuments}
+            currentModule={moduleData.title}
+          />
+        </div>
+
         {/* Module Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* Module Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-8 text-white mb-8">
             <div className="flex items-center space-x-4 mb-4">
@@ -760,15 +795,6 @@ export default function PABOLeerApp() {
                 </button>
               )}
               
-              {/* Quick Upload Button */}
-              <button
-                onClick={() => setShowQuickUpload(!showQuickUpload)}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg"
-              >
-                <span>📤</span>
-                <span>Upload Document</span>
-              </button>
-              
               <button
                 onClick={() => setShowDocumentManager(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -782,57 +808,13 @@ export default function PABOLeerApp() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Quick Upload Section */}
-        {showQuickUpload && (
-          <div className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-800">📤 Snel Document Uploaden</h3>
-              <button
-                onClick={() => setShowQuickUpload(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-              <div className="space-y-3">
-                <div className="text-3xl">📁</div>
-                <div>
-                  <p className="text-lg font-medium text-gray-700 mb-2">
-                    Sleep je schooldocument hier of klik om te uploaden
-                  </p>
-                  <p className="text-sm text-gray-500 mb-4">
-                    PDF, DOCX, TXT • Na upload start automatisch de AI-chat!
-                  </p>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    className="hidden"
-                    id="quick-upload"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        // Redirect to document manager for actual upload
-                        setShowQuickUpload(false)
-                        setShowDocumentManager(true)
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="quick-upload"
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer transition-colors"
-                  >
-                    📤 Selecteer Document
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                💡 <strong>Tip:</strong> Upload je schoolplan, beleid of andere documenten voor gepersonaliseerde AI-begeleiding!
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Persistent Document Panel */}
+        <div className="mb-8">
+          <PersistentDocumentPanel 
+            onDocumentsChange={setDocuments}
+            currentModule={undefined}
+          />
+        </div>
 
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -882,12 +864,6 @@ export default function PABOLeerApp() {
               ✨ Spraakherkenning • 📊 Real-time feedback • 🧠 Context-bewuste responses • 🎭 Multi-modal learning
             </p>
             <div className="flex justify-center space-x-4">
-              <button
-                onClick={() => setShowQuickUpload(true)}
-                className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-              >
-                📤 Upload Document Nu
-              </button>
               <button
                 onClick={() => setShowDocumentManager(true)}
                 className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"

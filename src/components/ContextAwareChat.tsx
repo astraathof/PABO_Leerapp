@@ -22,6 +22,7 @@ interface ContextAwareChatProps {
   studentLevel: string
   availableDocuments: any[]
   selectedDocuments: string[]
+  initialQuestion?: string
 }
 
 export default function ContextAwareChat({ 
@@ -29,13 +30,15 @@ export default function ContextAwareChat({
   context, 
   studentLevel, 
   availableDocuments, 
-  selectedDocuments 
+  selectedDocuments,
+  initialQuestion 
 }: ContextAwareChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [conversationContext, setConversationContext] = useState<string[]>([])
+  const [hasAskedInitialQuestion, setHasAskedInitialQuestion] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -46,7 +49,7 @@ export default function ContextAwareChat({
     scrollToBottom()
   }, [messages])
 
-  // Add welcome message when documents are selected
+  // Add welcome message and initial question when documents are selected
   useEffect(() => {
     if (selectedDocuments.length > 0 && messages.length === 0) {
       const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
@@ -65,12 +68,24 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
 • "Vergelijk onze aanpak met de theorie die ik geleerd heb"
 • "Geef concrete voorbeelden uit onze schoolcontext"
 
-🎙️ **Tip:** Gebruik spraakherkenning door op de microfoon te klikken voor hands-free chatten!
-
-🚀 **Stel gerust je eerste vraag over je schooldocumenten!**`,
+🎙️ **Tip:** Gebruik spraakherkenning door op de microfoon te klikken voor hands-free chatten!`,
         timestamp: new Date()
       }
       setMessages([welcomeMessage])
+      
+      // Add initial question if provided
+      if (initialQuestion && !hasAskedInitialQuestion) {
+        setTimeout(() => {
+          const questionMessage: ChatMessage = {
+            id: 'initial-question-' + Date.now(),
+            role: 'assistant',
+            content: `🤔 **${initialQuestion}**`,
+            timestamp: new Date()
+          }
+          setMessages(prev => [...prev, questionMessage])
+          setHasAskedInitialQuestion(true)
+        }, 1500) // Delay to let welcome message be read first
+      }
     } else if (selectedDocuments.length === 0 && messages.length === 0) {
       // Welcome message without documents
       const welcomeMessage: ChatMessage = {
@@ -84,14 +99,14 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
 • Bespreek uitdagingen in de klas
 • Reflecteer op je leerervaringen
 
-💡 **Tip:** Voor nog betere begeleiding kun je je schooldocumenten uploaden via "Mijn Documenten" in het hoofdmenu. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
+💡 **Tip:** Voor nog betere begeleiding kun je je schooldocumenten uploaden via het documentenpaneel bovenaan. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
 
 🎙️ **Gebruik spraak:** Klik op de microfoon voor hands-free chatten!`,
         timestamp: new Date()
       }
       setMessages([welcomeMessage])
     }
-  }, [selectedDocuments, availableDocuments, messages.length])
+  }, [selectedDocuments, availableDocuments, messages.length, initialQuestion, hasAskedInitialQuestion])
 
   // Listen for custom sendMessage events from quick action buttons
   useEffect(() => {
