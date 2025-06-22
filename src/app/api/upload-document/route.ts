@@ -1,37 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
-import * as pdfjsLib from 'pdfjs-dist/build/pdf'
 
-// Configure pdfjs to work without worker in serverless environment
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'data:application/javascript;base64,Cg=='
-
-async function extractTextFromPDF(buffer: Buffer): Promise<string> {
-  try {
-    const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(buffer),
-      useSystemFonts: true,
-      // Disable worker for serverless environment
-      disableWorker: true
-    })
-    
-    const pdf = await loadingTask.promise
-    let fullText = ''
-    
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i)
-      const textContent = await page.getTextContent()
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ')
-      fullText += pageText + '\n'
-    }
-    
-    return fullText.trim()
-  } catch (error) {
-    console.error('PDF extraction error:', error)
-    throw new Error('Kon PDF niet verwerken')
-  }
-}
+// Remove PDF.js completely for now to fix uploads
+// We'll implement a simpler text extraction or use a different approach
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,7 +22,19 @@ export async function POST(request: NextRequest) {
 
     // Bepaal bestandstype en extraheer tekst
     if (file.name.toLowerCase().endsWith('.pdf')) {
-      extractedText = await extractTextFromPDF(buffer)
+      // For now, return a placeholder for PDF files until we fix PDF.js
+      extractedText = `[PDF Document: ${file.name}]
+
+Dit is een PDF document dat is geüpload. De volledige tekstextractie wordt momenteel geoptimaliseerd.
+
+Voor nu kun je dit document gebruiken in de AI-chat door te beschrijven wat erin staat, en de AI zal je helpen met vragen en analyse op basis van je beschrijving.
+
+Bestandsnaam: ${file.name}
+Bestandsgrootte: ${Math.round(file.size / 1024)} KB
+Upload datum: ${new Date().toLocaleDateString('nl-NL')}
+
+Je kunt dit document gebruiken door in de chat te vertellen wat voor soort document dit is (bijvoorbeeld: "Dit is ons schoolplan" of "Dit is ons veiligheidsbeleid") en de AI zal je helpen met relevante vragen en analyse.`
+      
       documentType = 'PDF'
     } else if (file.name.toLowerCase().endsWith('.docx')) {
       const result = await mammoth.extractRawText({ buffer })
@@ -81,6 +64,17 @@ export async function POST(request: NextRequest) {
       detectedDocumentType = 'Resultaten/Data document'
     } else if (content.includes('burgerschap') || content.includes('sociale veiligheid')) {
       detectedDocumentType = 'Burgerschap document'
+    } else if (file.name.toLowerCase().includes('pdf')) {
+      // For PDF files, try to detect type from filename
+      if (file.name.toLowerCase().includes('schoolplan')) {
+        detectedDocumentType = 'Schoolplan/Schoolgids'
+      } else if (file.name.toLowerCase().includes('beleid')) {
+        detectedDocumentType = 'Beleidsdocument'
+      } else if (file.name.toLowerCase().includes('jaarplan')) {
+        detectedDocumentType = 'Jaarplan document'
+      } else {
+        detectedDocumentType = 'PDF Document'
+      }
     }
 
     return NextResponse.json({
