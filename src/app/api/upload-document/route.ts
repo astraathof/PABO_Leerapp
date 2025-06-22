@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
-import * as pdfjsLib from 'pdfjs-dist'
+import * as pdfjsLib from 'pdfjs-dist/build/pdf'
 
 // Configure pdfjs to work without worker in serverless environment
-pdfjsLib.GlobalWorkerOptions.workerSrc = ''
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'data:application/javascript;base64,Cg=='
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
