@@ -73,7 +73,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       }
       setMessages([welcomeMessage])
       
-      // Add initial question if provided
+      // Add initial question if provided from analysis
       if (initialQuestion && !hasAskedInitialQuestion) {
         setTimeout(() => {
           const questionMessage: ChatMessage = {
