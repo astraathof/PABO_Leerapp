@@ -58,9 +58,10 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           // AUTO-START CHAT if documents are available
           if (parsedDocs.length > 0) {
             setAutoStartChat(true)
+            // Start analysis immediately when documents are loaded
             setTimeout(() => {
               startDirectChatWithAnalysis(parsedDocs)
-            }, 100)
+            }, 500) // Small delay to ensure UI is ready
           }
         }
       } catch (error) {
@@ -112,13 +113,14 @@ ${documentTexts}
 
 Geef een concrete, inhoudelijke analyse (200-300 woorden) waarin je:
 
-1. **Welkom** de student en benoem welke documenten je hebt ontvangen
+1. **Welkom** de gebruiker en benoem welke documenten je hebt ontvangen
 2. **Analyseer** wat je concreet ziet in de documenten dat relevant is voor deze module
 3. **Koppel** specifieke passages uit de documenten aan de module doelen
 4. **Identificeer** sterke punten en verbeterpunten in de documenten
 5. **Eindig** met een specifieke, inhoudelijke vraag
 
 **BELANGRIJK:** 
+- Spreek de gebruiker aan als "je" of "jij", niet als "student"
 - Citeer letterlijk uit de documenten waar relevant
 - Geef concrete voorbeelden van wat je ziet
 - Maak de analyse specifiek voor deze school/documenten
@@ -133,7 +135,7 @@ Gebruik een professionele, bemoedigende toon en toon dat je echt de documenten h
         },
         body: JSON.stringify({
           message: analysisPrompt,
-          context: `Je bent een ervaren PABO-docent en onderwijsadviseur die schooldocumenten analyseert. Geef een grondige, inhoudelijke analyse met concrete verwijzingen naar de documenten. Toon expertise en geef waardevolle inzichten.`,
+          context: `Je bent een ervaren PABO-docent en onderwijsadviseur die schooldocumenten analyseert. Geef een grondige, inhoudelijke analyse met concrete verwijzingen naar de documenten. Toon expertise en geef waardevolle inzichten. Spreek de gebruiker aan als "je" of "jij".`,
           module: moduleTitle,
           studentLevel: studentLevel
         }),
@@ -200,18 +202,19 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
   const startDirectChatWithAnalysis = async (docs?: UploadedDocument[]) => {
     const documents = docs || availableDocuments
     
-    // Start document analysis
-    if (documents.length > 0) {
-      await analyzeDocumentsForModule(documents, module)
-    }
-    
+    // Set up the chat first
     setSelectedOpdracht({
       titel: "Chat met je Schooldocumenten",
       beschrijving: "Chat direct met de AI over je geüploade schooldocumenten en PABO-onderwerpen",
       type: "reflectie",
-      startVraag: initialQuestion || "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
-      context: `Je bent een ervaren PABO-docent die studenten helpt met vragen over hun studie en schoolpraktijk. De student heeft ${documents.length} schooldocument(en) geüpload: ${documents.map(d => d.fileName).join(', ')}. Gebruik de socratische methode om studenten zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie.`
+      startVraag: "Hoe kan ik je helpen met je schooldocumenten en PABO-studie?",
+      context: `Je bent een ervaren PABO-docent die gebruikers helpt met vragen over hun studie en schoolpraktijk. De gebruiker heeft ${documents.length} schooldocument(en) geüpload: ${documents.map(d => d.fileName).join(', ')}. Gebruik de socratische methode om gebruikers zelf tot inzichten te laten komen. Verwijs specifiek naar de geüploade documenten en help de gebruiker verbanden te leggen tussen theorie en hun specifieke schoolsituatie. Spreek de gebruiker aan als "je" of "jij".`
     })
+    
+    // Start document analysis AFTER setting up chat
+    if (documents.length > 0) {
+      await analyzeDocumentsForModule(documents, module)
+    }
   }
 
   const resetChat = () => {
@@ -281,13 +284,19 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
           {/* AI Analysis Status/Result - ECHTE INHOUDELIJKE ANALYSE */}
           {isAnalyzing ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span className="text-white font-medium">AI analyseert je documenten...</span>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <span className="text-white font-medium text-lg">AI analyseert je documenten...</span>
               </div>
-              <p className="text-green-100 text-sm">
-                Ik lees je {availableDocuments.length} document(en) en koppel deze aan de doelen van "{module}"
-              </p>
+              <div className="space-y-2 text-green-100 text-sm">
+                <p>📖 Ik lees de inhoud van je {availableDocuments.length} document(en)</p>
+                <p>🎯 Koppel deze aan de doelen van "{module}"</p>
+                <p>💡 Identificeer sterke punten en verbeterpunten</p>
+                <p>❓ Formuleer een inhoudelijke eerste vraag</p>
+              </div>
+              <div className="mt-3 bg-white bg-opacity-10 rounded p-2">
+                <p className="text-white text-xs">⏱️ Dit duurt ongeveer 10-15 seconden...</p>
+              </div>
             </div>
           ) : documentAnalysis ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">

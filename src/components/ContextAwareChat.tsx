@@ -151,7 +151,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       if (selectedDocuments.length > 0) {
         const selectedDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.id))
         enhancedContext += `\n\n=== SCHOOLDOCUMENTEN CONTEXT ===\n`
-        enhancedContext += `De student heeft ${selectedDocs.length} schooldocument(en) geüpload die ZEER BELANGRIJK zijn voor gepersonaliseerde antwoorden:\n\n`
+        enhancedContext += `De gebruiker heeft ${selectedDocs.length} schooldocument(en) geüpload die ZEER BELANGRIJK zijn voor gepersonaliseerde antwoorden:\n\n`
         
         selectedDocs.forEach(doc => {
           enhancedContext += `DOCUMENT: ${doc.fileName} (${doc.detectedType})\n`
@@ -159,7 +159,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
         })
         
         enhancedContext += `=== EINDE SCHOOLDOCUMENTEN ===\n\n`
-        enhancedContext += `KRITIEKE INSTRUCTIE: Gebruik deze schooldocumenten ALTIJD om specifieke, gepersonaliseerde antwoorden te geven. Verwijs naar concrete passages uit de documenten en help de student verbanden te leggen tussen theorie en hun specifieke schoolsituatie. Citeer letterlijk uit de documenten waar relevant.`
+        enhancedContext += `KRITIEKE INSTRUCTIE: Gebruik deze schooldocumenten ALTIJD om specifieke, gepersonaliseerde antwoorden te geven. Verwijs naar concrete passages uit de documenten en help de gebruiker verbanden te leggen tussen theorie en hun specifieke schoolsituatie. Citeer letterlijk uit de documenten waar relevant. Spreek de gebruiker aan als "je" of "jij".`
       }
 
       if (conversationHistory) {
