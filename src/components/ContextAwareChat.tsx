@@ -73,18 +73,18 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       }
       setMessages([welcomeMessage])
       
-      // Add initial question from analysis as the FIRST question
+      // Add initial question from analysis as the FIRST question in chat
       if (initialQuestion && !hasAskedInitialQuestion) {
         setTimeout(() => {
           const questionMessage: ChatMessage = {
             id: 'initial-question-' + Date.now(),
             role: 'assistant',
-            content: `🤔 **${initialQuestion}**`,
+            content: initialQuestion,
             timestamp: new Date()
           }
           setMessages(prev => [...prev, questionMessage])
           setHasAskedInitialQuestion(true)
-        }, 1000) // Shorter delay
+        }, 500) // Shorter delay
       }
     } else if (selectedDocuments.length === 0 && messages.length === 0) {
       const welcomeMessage: ChatMessage = {

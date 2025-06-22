@@ -248,7 +248,7 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
   if (autoStartChat && availableDocuments.length > 0 && selectedOpdracht) {
     return (
       <div className="space-y-4">
-        {/* SINGLE CONSOLIDATED BLOCK - Document Info + AI Analysis + Status */}
+        {/* SIMPLIFIED DOCUMENT INFO - NO ANALYSIS TEXT */}
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -281,7 +281,7 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
             )}
           </div>
 
-          {/* AI Analysis Status/Result - ECHTE INHOUDELIJKE ANALYSE */}
+          {/* SIMPLIFIED STATUS - NO ANALYSIS TEXT */}
           {isAnalyzing ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
               <div className="flex items-center space-x-3 mb-3">
@@ -298,16 +298,9 @@ ${documents.map(doc => `• **${doc.fileName}** (${doc.detectedType}) - ${doc.wo
                 <p className="text-white text-xs">⏱️ Dit duurt ongeveer 10-15 seconden...</p>
               </div>
             </div>
-          ) : documentAnalysis ? (
-            <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <h4 className="font-semibold text-white mb-3">📋 Inhoudelijke Analyse:</h4>
-              <div className="text-white text-sm leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">
-                {documentAnalysis}
-              </div>
-            </div>
           ) : (
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <p className="text-white text-sm">✅ Documenten geladen en klaar voor AI-begeleiding</p>
+              <p className="text-white text-sm">✅ Documenten geanalyseerd - de openingsvraag staat in de chat hieronder!</p>
             </div>
           )}
         </div>
