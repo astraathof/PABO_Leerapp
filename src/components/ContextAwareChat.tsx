@@ -167,7 +167,14 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       })
 
       if (!response.ok) {
-        throw new Error('Er is een fout opgetreden')
+        const errorData = await response.json().catch(() => ({}))
+        
+        // Handle specific API key error
+        if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
+          throw new Error('🔑 **API Key Configuratie Probleem**\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\n**Voor ontwikkelaars:**\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
+        }
+        
+        throw new Error(`Server error: ${response.status} - ${errorData.error || 'Onbekende fout'}`)
       }
 
       // Handle streaming response
@@ -205,9 +212,21 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
                     ? { ...msg, content: fullResponse }
                     : msg
                 ))
+              } else if (parsed.error) {
+                throw new Error(parsed.error)
               }
             } catch (e) {
-              // Ignore parsing errors for partial chunks
+              // Ignore parsing errors for partial chunks, but handle error objects
+              if (data.includes('"error"')) {
+                try {
+                  const errorObj = JSON.parse(data)
+                  if (errorObj.error) {
+                    throw new Error(errorObj.error)
+                  }
+                } catch (parseError) {
+                  // Continue if we can't parse the error
+                }
+              }
             }
           }
         }
@@ -219,13 +238,28 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
 
     } catch (error) {
       console.error('Chat error:', error)
-      const errorMessage: ChatMessage = {
+      
+      let errorMessage = 'Sorry, er is een fout opgetreden. Probeer het opnieuw.'
+      
+      if (error instanceof Error) {
+        if (error.message.includes('API Key Configuratie')) {
+          errorMessage = error.message
+        } else if (error.message.includes('GEMINI_API_KEY')) {
+          errorMessage = '🔑 **API Configuratie Vereist**\n\nDe Gemini API key is niet ingesteld. Neem contact op met de beheerder om dit op te lossen.\n\n**Tijdelijke oplossing:** Probeer de pagina te verversen en opnieuw te proberen.'
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = '🌐 **Verbindingsprobleem**\n\nKan geen verbinding maken met de AI-service. Controleer je internetverbinding en probeer het opnieuw.'
+        } else if (error.message.includes('Server error: 500')) {
+          errorMessage = '⚙️ **Server Configuratie Probleem**\n\nEr is een probleem met de server configuratie. Dit is meestal een API key probleem. Neem contact op met de beheerder.'
+        }
+      }
+      
+      const errorChatMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, er is een fout opgetreden. Probeer het opnieuw.',
+        content: errorMessage,
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorMessage])
+      setMessages(prev => [...prev, errorChatMessage])
     } finally {
       setIsLoading(false)
     }
