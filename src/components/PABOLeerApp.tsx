@@ -12,6 +12,7 @@ import KerndoelenProgressieTracker from './KerndoelenProgressieTracker'
 import OntwikkelingsStadiaTimeline from './OntwikkelingsStadiaTimeline'
 import SELCompetentieRadar from './SELCompetentieRadar'
 import InspectionFrameworkViewer from './InspectionFrameworkViewer'
+import MRWMSViewer from './MRWMSViewer'
 import PersistentDocumentPanel from './PersistentDocumentPanel'
 
 interface Module {
@@ -207,6 +208,24 @@ const modules: Module[] = [
       'Kwaliteitszorg cyclisch organiseren'
     ],
     learningPath: 'leider'
+  },
+  {
+    id: 'module11',
+    title: 'MR & WMS voor Schoolleiders',
+    description: 'Complete gids voor Medezeggenschapsraad en Wet Medezeggenschap Scholen',
+    icon: '🏛️',
+    difficulty: 'Advanced',
+    duration: '3-4 uur',
+    category: 'Leiderschap',
+    components: ['MR Bevoegdheden', 'WMS Procedures', 'Praktijktips', 'Sjablonen & Checklists'],
+    learningGoals: [
+      'Alle MR-rechten en -plichten beheersen',
+      'WMS-procedures correct toepassen',
+      'Effectief samenwerken met MR',
+      'Geschillen voorkomen en oplossen',
+      'Borgingsmechanismen implementeren'
+    ],
+    learningPath: 'leider'
   }
 ]
 
@@ -280,6 +299,13 @@ const opdrachten = [
     type: "analyse" as const,
     startVraag: "Hoe ga je je school voorbereiden op het komende inspectiebezoek en welke standaarden vereisen extra aandacht?",
     context: "Je school krijgt binnenkort inspectiebezoek en je wilt alle standaarden grondig voorbereiden met je team."
+  },
+  {
+    titel: "MR Samenwerking Optimaliseren",
+    beschrijving: "Verbeter de samenwerking met je Medezeggenschapsraad",
+    type: "reflectie" as const,
+    startVraag: "Hoe verloopt de samenwerking met je MR momenteel en welke verbeterpunten zie je?",
+    context: "Als schoolleider wil je de samenwerking met de MR professionaliseren en effectiever maken."
   }
 ]
 
@@ -431,6 +457,14 @@ export default function PABOLeerApp() {
         return <InspectionFrameworkViewer />
       case 'Voorbereiding Checklist':
         return <InspectionFrameworkViewer />
+      case 'MR Bevoegdheden':
+        return <MRWMSViewer />
+      case 'WMS Procedures':
+        return <MRWMSViewer />
+      case 'Praktijktips':
+        return <MRWMSViewer />
+      case 'Sjablonen & Checklists':
+        return <MRWMSViewer />
       case 'Klikbare Theorie':
         return <ClickableTheoryViewer moduleId={activeModule} />
       case 'AI Begeleiding':
@@ -658,6 +692,7 @@ export default function PABOLeerApp() {
                        component.includes('Competentie') ? '🎯' :
                        component.includes('Cito') ? '📊' :
                        component.includes('Inspectie') ? '🔍' :
+                       component.includes('MR') || component.includes('WMS') ? '🏛️' :
                        component.includes('Theorie') ? '🔗' :
                        component.includes('AI') ? '🤖' : '📖'}
                     </span>
@@ -671,6 +706,10 @@ export default function PABOLeerApp() {
                      component.includes('Competentie') ? 'Visualiseer SEL-competenties per leeftijd' :
                      component.includes('Cito') ? 'Complete gids voor Cito-monitoring' :
                      component.includes('Inspectie') ? 'Onderzoekskader 2021 met praktijktips' :
+                     component.includes('MR') ? 'MR-bevoegdheden en procedures' :
+                     component.includes('WMS') ? 'Wet Medezeggenschap Scholen uitleg' :
+                     component.includes('Praktijktips') ? 'Praktische tips voor MR-samenwerking' :
+                     component.includes('Sjablonen') ? 'Templates en checklists voor MR' :
                      component.includes('Theorie') ? 'Klikbare theorie met verdieping' :
                      'Leermateriaal'}
                   </p>
@@ -846,6 +885,7 @@ export default function PABOLeerApp() {
                     <div>🏛️ Burgerschap & Diversiteit</div>
                     <div>📈 Cito & Monitoring</div>
                     <div>🔍 Inspectie Onderzoekskader</div>
+                    <div>🏛️ MR & WMS</div>
                   </div>
                 </div>
               </div>
