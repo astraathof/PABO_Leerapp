@@ -50,21 +50,28 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
 
   // Save documents to localStorage whenever documents change
   useEffect(() => {
-    if (documents.length >= 0) { // Changed from > 0 to >= 0 to handle deletions
-      try {
+    try {
+      if (documents.length > 0) {
         localStorage.setItem('pabo-documents', JSON.stringify(documents))
-        onDocumentsChange?.(documents)
         console.log('DocumentManager: Saved documents to localStorage:', documents)
-        
-        // Dispatch custom event to notify other components
-        const event = new CustomEvent('documentUploaded', { 
-          detail: { documents, count: documents.length } 
-        })
-        window.dispatchEvent(event)
-        console.log('DocumentManager: Dispatched documentUploaded event')
-      } catch (error) {
-        console.error('Error saving documents:', error)
+      } else {
+        // If no documents, remove from localStorage
+        localStorage.removeItem('pabo-documents')
+        console.log('DocumentManager: Removed documents from localStorage (empty)')
       }
+      
+      onDocumentsChange?.(documents)
+      
+      // Dispatch custom event to notify other components
+      const event = new CustomEvent('documentUploaded', { 
+        detail: { documents, count: documents.length } 
+      })
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(event)
+      }
+      console.log('DocumentManager: Dispatched documentUploaded event')
+    } catch (error) {
+      console.error('Error saving documents:', error)
     }
   }, [documents, onDocumentsChange])
 
@@ -136,11 +143,10 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const deleteDocument = (documentId: string) => {
     const docToDelete = documents.find(doc => doc.id === documentId)
     if (confirm(`Weet je zeker dat je "${docToDelete?.fileName}" wilt verwijderen?`)) {
+      console.log('Deleting document:', documentId)
       setDocuments(prev => {
         const updated = prev.filter(doc => doc.id !== documentId)
-        if (updated.length === 0) {
-          localStorage.removeItem('pabo-documents')
-        }
+        console.log('Documents after deletion:', updated)
         return updated
       })
       if (selectedDocument?.id === documentId) {
@@ -161,7 +167,9 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const startAIChat = () => {
     console.log('Starting AI Chat with documents:', documents)
     // Navigate to main page and trigger chat
-    window.location.href = '/#start-chat'
+    if (typeof window !== 'undefined') {
+      window.location.href = '/#start-chat'
+    }
   }
 
   return (
@@ -337,7 +345,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <p className="text-sm text-blue-700">
                         <strong>💡 AI Tip:</strong> Dit document is nu beschikbaar in alle modules met AI-begeleiding. 
-                        Klik op "Start AI Chat\" om direct te beginnen met vragen over dit document!
+                        Klik op "Start AI Chat" om direct te beginnen met vragen over dit document!
                       </p>
                     </div>
                   </div>
@@ -363,7 +371,11 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
               💬 Start AI Chat Nu
             </button>
             <button
-              onClick={() => window.location.href = '/'}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/'
+                }
+              }}
               className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
             >
               📚 Bekijk Alle Modules

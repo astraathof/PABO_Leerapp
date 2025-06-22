@@ -257,7 +257,7 @@ export default function PABOLeerApp() {
   // Check URL hash for direct navigation and handle document upload flow
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash
+      const hash = typeof window !== 'undefined' ? window.location.hash : ''
       console.log('Hash changed to:', hash)
       
       if (hash === '#start-chat') {
@@ -283,8 +283,8 @@ export default function PABOLeerApp() {
     // Handle initial hash
     handleHashChange()
 
-    // Listen for hash changes
     if (typeof window !== 'undefined') {
+      // Listen for hash changes
       window.addEventListener('hashchange', handleHashChange)
 
       // Listen for document upload events
@@ -335,6 +335,15 @@ export default function PABOLeerApp() {
       case 'gevorderd': return 'border-blue-500 bg-blue-50'
       case 'leider': return 'border-purple-500 bg-purple-50'
       default: return 'border-gray-200'
+    }
+  }
+
+  const getLearningPathInfo = (path: string) => {
+    switch (path) {
+      case 'beginnend': return { icon: '🌱', title: 'Beginnend PABO-student', desc: 'Start met de basis: kerndoelen en ontwikkelingspsychologie' }
+      case 'gevorderd': return { icon: '🎯', title: 'Gevorderd PABO-student', desc: 'Verdiep je in differentiatie en data-gedreven werken' }
+      case 'leider': return { icon: '👑', title: 'Aanstaand Schoolleider', desc: 'Focus op leiderschap en schoolontwikkeling' }
+      default: return { icon: '📚', title: 'Alle modules', desc: 'Bekijk alle beschikbare modules' }
     }
   }
 
@@ -841,16 +850,32 @@ export default function PABOLeerApp() {
         ) : (
           <div className="mb-8">
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                {selectedLearningPath === 'beginnend' ? '🌱 Beginnend PABO-student Leerpad' :
-                 selectedLearningPath === 'gevorderd' ? '🎯 Gevorderd PABO-student Leerpad' :
-                 '👑 Aanstaand Schoolleider Leerpad'}
-              </h2>
-              <p className="text-gray-600">
-                {selectedLearningPath === 'beginnend' ? 'Start met de fundamenten van het onderwijs' :
-                 selectedLearningPath === 'gevorderd' ? 'Verdiep je kennis en vaardigheden' :
-                 'Ontwikkel je leiderschapscompetenties'}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800 mb-2">
+                    {getLearningPathInfo(selectedLearningPath).icon} {getLearningPathInfo(selectedLearningPath).title}
+                  </h2>
+                  <p className="text-gray-600">
+                    {getLearningPathInfo(selectedLearningPath).desc}
+                  </p>
+                </div>
+                {/* Learning Path Navigation Buttons */}
+                <div className="flex items-center space-x-2">
+                  {['beginnend', 'gevorderd', 'leider'].map((path) => (
+                    <button
+                      key={path}
+                      onClick={() => setSelectedLearningPath(path)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        selectedLearningPath === path
+                          ? 'bg-indigo-600 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                      }`}
+                    >
+                      {getLearningPathInfo(path).icon} {getLearningPathInfo(path).title.split(' ')[0]}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
