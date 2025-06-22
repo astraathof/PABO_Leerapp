@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import ContextAwareChat from './ContextAwareChat'
-import MultiModalUpload from './MultiModalUpload'
 
 interface Opdracht {
   titel: string
@@ -22,15 +21,6 @@ interface UploadedDocument {
   uploadDate: Date
 }
 
-interface UploadedFile {
-  id: string
-  file: File
-  type: 'image' | 'audio' | 'document' | 'video'
-  preview?: string
-  transcription?: string
-  analysis?: string
-}
-
 interface SocraticChatBotProps {
   module: string
   opdrachten: Opdracht[]
@@ -41,22 +31,17 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [studentLevel, setStudentLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
   const [availableDocuments, setAvailableDocuments] = useState<UploadedDocument[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
-  const [useDocuments, setUseDocuments] = useState(true)
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-  const [useMultiModal, setUseMultiModal] = useState(true)
-  const [showDirectChat, setShowDirectChat] = useState(false)
   const [autoStartChat, setAutoStartChat] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [documentAnalysis, setDocumentAnalysis] = useState<string>('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [initialQuestion, setInitialQuestion] = useState<string>('')
 
-  // Load documents from localStorage with better error handling
+  // Load documents from localStorage
   useEffect(() => {
     const loadDocuments = () => {
       try {
         const savedDocs = localStorage.getItem('pabo-documents')
-        console.log('SocraticChatBot: Loading documents from localStorage:', savedDocs)
         
         if (savedDocs) {
           const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
@@ -64,28 +49,22 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
             uploadDate: new Date(doc.uploadDate)
           }))
           
-          console.log('SocraticChatBot: Parsed documents:', parsedDocs)
           setAvailableDocuments(parsedDocs)
           
           // Auto-select all documents
           const docIds = parsedDocs.map((doc: any) => doc.id)
           setSelectedDocuments(docIds)
-          console.log('SocraticChatBot: Auto-selected document IDs:', docIds)
           
           // AUTO-START CHAT if documents are available
           if (parsedDocs.length > 0) {
-            console.log('SocraticChatBot: Documents found, auto-starting chat...')
             setAutoStartChat(true)
-            // Start chat immediately with analysis
             setTimeout(() => {
               startDirectChatWithAnalysis(parsedDocs)
             }, 100)
           }
-        } else {
-          console.log('SocraticChatBot: No documents found in localStorage')
         }
       } catch (error) {
-        console.error('SocraticChatBot: Error loading documents:', error)
+        console.error('Error loading documents:', error)
         localStorage.removeItem('pabo-documents')
       } finally {
         setIsLoading(false)
@@ -95,22 +74,17 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     loadDocuments()
 
     if (typeof window !== 'undefined') {
-      // Listen for storage changes (when documents are uploaded)
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'pabo-documents') {
-          console.log('SocraticChatBot: Storage changed, reloading documents...')
-          loadDocuments()
+          setTimeout(loadDocuments, 500)
         }
       }
 
-      window.addEventListener('storage', handleStorageChange)
-      
-      // Also listen for custom events from document upload
       const handleDocumentUpload = (event: any) => {
-        console.log('SocraticChatBot: Document upload event detected, reloading...', event.detail)
-        setTimeout(loadDocuments, 500) // Small delay to ensure localStorage is updated
+        setTimeout(loadDocuments, 500)
       }
 
+      window.addEventListener('storage', handleStorageChange)
       window.addEventListener('documentUploaded', handleDocumentUpload)
 
       return () => {
@@ -123,7 +97,6 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const analyzeDocumentsForModule = async (documents: UploadedDocument[], moduleTitle: string) => {
     setIsAnalyzing(true)
     try {
-      // Create analysis prompt based on module
       const moduleGoals = getModuleGoals(moduleTitle)
       const documentTexts = documents.map(doc => `${doc.fileName}: ${doc.text.substring(0, 2000)}`).join('\n\n')
       
@@ -168,7 +141,6 @@ Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages u
         if (questionMatch) {
           setInitialQuestion(questionMatch[1].trim())
         } else {
-          // Fallback question if extraction fails
           setInitialQuestion(`Hoe sluit wat je ziet in je schooldocumenten aan bij de doelen van de module "${moduleTitle}"?`)
         }
       }
@@ -215,9 +187,6 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
 
   const startDirectChatWithAnalysis = async (docs?: UploadedDocument[]) => {
     const documents = docs || availableDocuments
-    console.log('SocraticChatBot: Starting direct chat with analysis for documents:', documents)
-    
-    setShowDirectChat(true)
     
     // Start document analysis
     if (documents.length > 0) {
@@ -235,7 +204,6 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
 
   const resetChat = () => {
     setSelectedOpdracht(null)
-    setShowDirectChat(false)
     setAutoStartChat(false)
     setDocumentAnalysis('')
     setInitialQuestion('')
@@ -340,7 +308,6 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
               <button
                 key={index}
                 onClick={() => {
-                  // This would trigger sending the question - we'll implement this in ContextAwareChat
                   const event = new CustomEvent('sendMessage', { detail: vraag })
                   if (typeof window !== 'undefined') {
                     window.dispatchEvent(event)
@@ -432,28 +399,7 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
           </div>
         </div>
 
-        {/* Multi-Modal Upload - STANDAARD ACTIEF */}
-        <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-purple-800">🎭 Multi-Modal Learning</h3>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-purple-700">Actief</span>
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <p className="text-purple-700 text-sm">
-              Upload afbeeldingen, audio, video's en documenten voor rijkere AI-interacties:
-            </p>
-            <MultiModalUpload
-              onFilesChange={setUploadedFiles}
-              maxFiles={5}
-            />
-          </div>
-        </div>
-
-        {/* Document Integration - STANDAARD ACTIEF */}
+        {/* Document Integration */}
         {availableDocuments.length > 0 && (
           <div className="bg-green-50 rounded-lg p-4 border border-green-200">
             <div className="flex items-center justify-between mb-3">
@@ -532,50 +478,10 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
                         <span>{selectedDocuments.length} docs</span>
                       </div>
                     )}
-                    {uploadedFiles.length > 0 && (
-                      <div className="flex items-center text-purple-600">
-                        <span className="mr-1">🎭</span>
-                        <span>{uploadedFiles.length} files</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Enhanced Info Box */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
-          <h3 className="font-semibold text-purple-800 mb-2">🧠 Geavanceerde AI-begeleiding</h3>
-          <p className="text-purple-700 text-sm mb-3">
-            Deze AI-mentor gebruikt de socratische methode en is uitgerust met geavanceerde features:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600">🎙️</span>
-              <span className="text-purple-700">Spraakherkenning voor hands-free interactie</span>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600">⚡</span>
-              <span className="text-purple-700">Real-time feedback tijdens het typen</span>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600">🧠</span>
-              <span className="text-purple-700">Context-bewuste responses</span>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600">🎭</span>
-              <span className="text-purple-700">Multi-modal learning (tekst, audio, video)</span>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600">📚</span>
-              <span className="text-purple-700">Automatische integratie schooldocumenten</span>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600">🔍</span>
-              <span className="text-purple-700">Automatische document analyse per module</span>
-            </div>
           </div>
         </div>
       </div>
@@ -590,14 +496,11 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
           <div>
             <h3 className="font-semibold">🤖 Geavanceerde AI Socratische Begeleiding</h3>
             <p className="text-blue-100 text-sm">
-              {showDirectChat ? 'Chat met je Schooldocumenten' : `Opdracht: ${selectedOpdracht.titel}`}
+              Opdracht: {selectedOpdracht.titel}
             </p>
             <div className="flex items-center space-x-3 mt-1">
               {selectedDocuments.length > 0 && (
                 <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
-              )}
-              {uploadedFiles.length > 0 && (
-                <p className="text-blue-100 text-xs">🎭 Met {uploadedFiles.length} multi-modal bestand(en)</p>
               )}
             </div>
           </div>
@@ -612,7 +515,7 @@ ${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
               onClick={resetChat}
               className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
             >
-              {showDirectChat ? 'Terug naar opties' : 'Nieuwe opdracht'}
+              Nieuwe opdracht
             </button>
           </div>
         </div>

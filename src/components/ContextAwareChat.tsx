@@ -84,10 +84,9 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
           }
           setMessages(prev => [...prev, questionMessage])
           setHasAskedInitialQuestion(true)
-        }, 1500) // Delay to let welcome message be read first
+        }, 1500)
       }
     } else if (selectedDocuments.length === 0 && messages.length === 0) {
-      // Welcome message without documents
       const welcomeMessage: ChatMessage = {
         id: 'welcome-no-docs-' + Date.now(),
         role: 'assistant',
@@ -142,7 +141,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
 
     try {
       // Prepare enhanced context with conversation history
-      const recentMessages = messages.slice(-5) // Last 5 messages for context
+      const recentMessages = messages.slice(-5)
       const conversationHistory = recentMessages.map(msg => 
         `${msg.role}: ${msg.content}`
       ).join('\n')
@@ -184,7 +183,6 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         
-        // Handle specific API key error
         if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
           throw new Error('🔑 **API Key Configuratie Probleem**\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\n**Voor ontwikkelaars:**\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
         }
@@ -231,7 +229,6 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
                 throw new Error(parsed.error)
               }
             } catch (e) {
-              // Ignore parsing errors for partial chunks, but handle error objects
               if (data.includes('"error"')) {
                 try {
                   const errorObj = JSON.parse(data)
@@ -249,7 +246,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
 
       // Update conversation context
       const topics = extractTopics(textToSend, fullResponse)
-      setConversationContext(prev => [...prev, ...topics].slice(-10)) // Keep last 10 topics
+      setConversationContext(prev => [...prev, ...topics].slice(-10))
 
     } catch (error) {
       console.error('Chat error:', error)
@@ -284,7 +281,6 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
     const topics: string[] = []
     const text = (userMessage + ' ' + assistantResponse).toLowerCase()
     
-    // Extract key educational topics
     const educationalKeywords = [
       'differentiatie', 'scaffolding', 'kerndoelen', 'leerlijn', 'sel', 'burgerschap',
       'observatie', 'feedback', 'data', 'cito', 'lvs', 'schoolplan', 'visie', 'missie'
@@ -304,7 +300,6 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
   }
 
   const handleSuggestion = (suggestion: string) => {
-    // Extract the actual suggestion text (remove emoji and "Probeer...")
     const cleanSuggestion = suggestion.replace(/^[^\w]*/, '').replace(/^(Probeer|Kun je|Overweeg|Wat).*?:?\s*/, '')
     setInputMessage(prev => prev + ' ' + cleanSuggestion)
   }
@@ -451,41 +446,6 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>💡 Tip: Gebruik spraak voor hands-free interactie</span>
           <span>{inputMessage.length}/1000</span>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <p className="text-sm font-medium text-gray-700 mb-3">🚀 Snelle acties:</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {selectedDocuments.length > 0 ? [
-            "Wat staat er in ons schoolplan over dit onderwerp?",
-            "Hoe kan ik dit toepassen in mijn klas?",
-            "Vergelijk dit met onze schoolvisie",
-            "Geef concrete voorbeelden uit onze context",
-            "Wat zijn de volgende stappen voor onze school?",
-            "Hoe monitoren we dit volgens ons beleid?",
-            "Koppel dit aan onze leerdoelen",
-            "Maak dit concreet voor onze leerlingen"
-          ] : [
-            "Leg dit uit met een voorbeeld",
-            "Hoe pas ik dit toe in de praktijk?",
-            "Wat zijn de volgende stappen?",
-            "Geef me een reflectievraag",
-            "Wat zegt de theorie hierover?",
-            "Hoe observeer ik dit bij leerlingen?",
-            "Maak dit concreet voor mijn groep",
-            "Koppel dit aan de kerndoelen"
-          ].map((action, index) => (
-            <button
-              key={index}
-              onClick={() => sendMessage(action)}
-              disabled={isLoading}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 text-left"
-            >
-              {action}
-            </button>
-          ))}
         </div>
       </div>
     </div>

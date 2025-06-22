@@ -291,14 +291,12 @@ export default function PABOLeerApp() {
   const [showDirectChat, setShowDirectChat] = useState(false)
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
 
-  // Check URL hash for direct navigation and handle document upload flow
+  // Check URL hash for direct navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = typeof window !== 'undefined' ? window.location.hash : ''
-      console.log('Hash changed to:', hash)
       
       if (hash === '#start-chat') {
-        console.log('Starting direct chat from hash')
         setShowDirectChat(true)
         setShowDocumentManager(false)
         setActiveModule(null)
@@ -307,11 +305,6 @@ export default function PABOLeerApp() {
         if (typeof window !== 'undefined') {
           window.history.replaceState(null, '', window.location.pathname)
         }
-      } else if (hash === '#burgerschap-chat') {
-        setActiveModule('module8')
-        setActiveComponent('AI Begeleiding')
-      } else if (hash === '#modules') {
-        // Stay on homepage
       } else if (hash === '#documents') {
         setShowDocumentManager(true)
       }
@@ -321,28 +314,8 @@ export default function PABOLeerApp() {
     handleHashChange()
 
     if (typeof window !== 'undefined') {
-      // Listen for hash changes
       window.addEventListener('hashchange', handleHashChange)
-
-      // Listen for document upload events
-      const handleDocumentUpload = (event: any) => {
-        console.log('Document upload event received:', event.detail)
-        if (event.detail && event.detail.documents && event.detail.documents.length > 0) {
-          console.log('Documents uploaded, starting chat...')
-          // Small delay to ensure state is updated
-          setTimeout(() => {
-            setShowDirectChat(true)
-            setShowDocumentManager(false)
-          }, 500)
-        }
-      }
-
-      window.addEventListener('documentUploaded', handleDocumentUpload)
-
-      return () => {
-        window.removeEventListener('hashchange', handleHashChange)
-        window.removeEventListener('documentUploaded', handleDocumentUpload)
-      }
+      return () => window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 
@@ -392,7 +365,6 @@ export default function PABOLeerApp() {
     if (showDirectChat) {
       return (
         <div className="space-y-4">
-          {/* Chat Header */}
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-4 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -413,7 +385,6 @@ export default function PABOLeerApp() {
             </div>
           </div>
 
-          {/* Direct Chat */}
           <SocraticChatBot 
             module="Algemeen" 
             opdrachten={[{
@@ -468,20 +439,8 @@ export default function PABOLeerApp() {
           return index === moduleIndex
         })
         return <SocraticChatBot module={moduleData.title} opdrachten={moduleOpdrachten} />
-      // Fallback components for missing ones
-      case 'Differentiatie Strategieën':
-      case 'Inclusief Onderwijs':
-      case 'Data Analyse':
-      case 'Formatieve Evaluatie':
-      case '21e-eeuwse Vaardigheden':
-      case 'Computational Thinking':
-      case 'Pedagogisch Leiderschap':
-      case 'Verandermanagement':
-      case 'Burgerschapsonderwijs':
-      case 'Interculturele Competentie':
-        return <ClickableTheoryViewer moduleId={activeModule} />
       default:
-        return <div className="text-center py-12 text-gray-500">Component wordt geladen...</div>
+        return <ClickableTheoryViewer moduleId={activeModule} />
     }
   }
 
@@ -494,7 +453,6 @@ export default function PABOLeerApp() {
   if (showDocumentManager) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -516,7 +474,6 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <DocumentManager />
         </div>
@@ -528,7 +485,6 @@ export default function PABOLeerApp() {
   if (showDirectChat) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -555,7 +511,6 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
-        {/* Persistent Document Panel */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PersistentDocumentPanel 
             onDocumentsChange={setDocuments}
@@ -563,7 +518,6 @@ export default function PABOLeerApp() {
           />
         </div>
 
-        {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {renderComponent()}
         </div>
@@ -575,7 +529,6 @@ export default function PABOLeerApp() {
     const moduleData = modules.find(m => m.id === activeModule)
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -584,7 +537,6 @@ export default function PABOLeerApp() {
                   onClick={() => {
                     setActiveComponent(null)
                     setActiveModule(null)
-                    // Clear hash
                     if (typeof window !== 'undefined') {
                       window.location.hash = ''
                     }
@@ -606,7 +558,6 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
-        {/* Persistent Document Panel */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PersistentDocumentPanel 
             onDocumentsChange={setDocuments}
@@ -614,7 +565,6 @@ export default function PABOLeerApp() {
           />
         </div>
 
-        {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {renderComponent()}
         </div>
@@ -628,7 +578,6 @@ export default function PABOLeerApp() {
 
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -647,7 +596,6 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
-        {/* Persistent Document Panel */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <PersistentDocumentPanel 
             onDocumentsChange={setDocuments}
@@ -655,9 +603,7 @@ export default function PABOLeerApp() {
           />
         </div>
 
-        {/* Module Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {/* Module Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-8 text-white mb-8">
             <div className="flex items-center space-x-4 mb-4">
               <span className="text-4xl">{moduleData.icon}</span>
@@ -681,7 +627,6 @@ export default function PABOLeerApp() {
             </div>
           </div>
 
-          {/* Learning Goals */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200">
             <h2 className="text-xl font-bold text-gray-800 mb-4">🎯 Leerdoelen</h2>
             <div className="grid md:grid-cols-2 gap-4">
@@ -694,12 +639,10 @@ export default function PABOLeerApp() {
             </div>
           </div>
 
-          {/* Components */}
           <div className="grid gap-6">
             <h2 className="text-2xl font-bold text-gray-800">📚 Module Onderdelen</h2>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Always show these core components */}
               {moduleData.components.map((component, index) => (
                 <div
                   key={index}
@@ -728,11 +671,8 @@ export default function PABOLeerApp() {
                      component.includes('Competentie') ? 'Visualiseer SEL-competenties per leeftijd' :
                      component.includes('Cito') ? 'Complete gids voor Cito-monitoring' :
                      component.includes('Inspectie') ? 'Onderzoekskader 2021 met praktijktips' :
-                     component.includes('Zelfevaluatie') ? 'Tools voor systematische zelfevaluatie' :
-                     component.includes('Praktijkvoorbeelden') ? 'Concrete voorbeelden uit het veld' :
-                     component.includes('Voorbereiding') ? 'Checklist voor inspectiebezoek' :
                      component.includes('Theorie') ? 'Klikbare theorie met verdieping' :
-                     component.includes('AI') ? 'Socratische AI-begeleiding' : 'Leermateriaal'}
+                     'Leermateriaal'}
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">Klik om te openen</span>
@@ -741,7 +681,6 @@ export default function PABOLeerApp() {
                 </div>
               ))}
 
-              {/* AI Begeleiding - always available */}
               <div
                 onClick={() => setActiveComponent('AI Begeleiding')}
                 className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 text-white"
@@ -750,17 +689,9 @@ export default function PABOLeerApp() {
                   <span className="text-2xl">🤖</span>
                   <h3 className="font-semibold">AI Begeleiding</h3>
                 </div>
-                <div className="bg-purple-100 rounded-lg p-4 mb-4 text-purple-800">
-                  <h4 className="font-semibold mb-2">🎯 Wat kun je met AI-begeleiding?</h4>
-                  <ul className="text-sm space-y-1">
-                    <li>• 📚 Upload je eigen schooldocumenten (schoolplan, beleid, etc.)</li>
-                    <li>• 🤝 Vergelijk theorie met jouw schoolpraktijk</li>
-                    <li>• 💬 Socratische gesprekken voor dieper begrip</li>
-                    <li>• 🎙️ Spraakherkenning voor hands-free interactie</li>
-                    <li>• 📊 Real-time feedback tijdens het typen</li>
-                    <li>• 🧠 Context-bewuste responses op basis van jouw documenten</li>
-                  </ul>
-                </div>
+                <p className="text-purple-100 text-sm mb-4">
+                  Socratische AI-begeleiding met automatische analyse van je schooldocumenten
+                </p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-purple-100">Gepersonaliseerde begeleiding</span>
                   <span className="text-xl">🔗</span>
@@ -776,7 +707,6 @@ export default function PABOLeerApp() {
   // Homepage
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -808,7 +738,6 @@ export default function PABOLeerApp() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Persistent Document Panel */}
         <div className="mb-8">
           <PersistentDocumentPanel 
             onDocumentsChange={setDocuments}
@@ -816,7 +745,6 @@ export default function PABOLeerApp() {
           />
         </div>
 
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Welkom bij de PABO Leerapp
@@ -827,7 +755,6 @@ export default function PABOLeerApp() {
           </p>
         </div>
 
-        {/* AI Features Highlight */}
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 mb-12 text-white">
           <h2 className="text-2xl font-bold mb-6 text-center">
             🤖 Geavanceerde AI-begeleiding met jouw eigen documenten
@@ -860,9 +787,6 @@ export default function PABOLeerApp() {
           </div>
 
           <div className="text-center">
-            <p className="text-purple-100 text-sm mb-4">
-              ✨ Spraakherkenning • 📊 Real-time feedback • 🧠 Context-bewuste responses • 🎭 Multi-modal learning
-            </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => setShowDocumentManager(true)}
@@ -874,10 +798,8 @@ export default function PABOLeerApp() {
           </div>
         </div>
 
-        {/* Learning Path Selection or Modules */}
         {!selectedLearningPath ? (
           <>
-            {/* Quick Start Section */}
             <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-200">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
                 🚀 Kies je leerpad
@@ -945,7 +867,6 @@ export default function PABOLeerApp() {
                     {getLearningPathInfo(selectedLearningPath).desc}
                   </p>
                 </div>
-                {/* Learning Path Navigation Buttons */}
                 <div className="flex items-center space-x-2">
                   {['beginnend', 'gevorderd', 'leider'].map((path) => (
                     <button
@@ -966,7 +887,6 @@ export default function PABOLeerApp() {
           </div>
         )}
 
-        {/* Modules Grid */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             {selectedLearningPath ? 'Jouw Modules' : '📚 Alle Modules'}
