@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 
 interface InspectionStandard {
@@ -7,6 +5,7 @@ interface InspectionStandard {
   nummer: string
   titel: string
   beschrijving: string
+  afkorting: string
   indicatoren: string[]
   bronnen: string[]
   kwaliteitsniveau: 'basis' | 'goed' | 'excellent'
@@ -26,6 +25,7 @@ const inspectieStandaarden: InspectionStandard[] = [
     id: 'onderwijsproces',
     nummer: '1',
     titel: 'Onderwijsproces',
+    afkorting: 'OP1',
     beschrijving: 'De school biedt een samenhangend onderwijsaanbod dat uitdaagt tot leren en bijdraagt aan de brede vorming van leerlingen.',
     indicatoren: [
       'Het onderwijsaanbod sluit aan bij de onderwijsbehoeften van leerlingen',
@@ -91,6 +91,7 @@ const inspectieStandaarden: InspectionStandard[] = [
     id: 'leeropbrengsten',
     nummer: '2',
     titel: 'Leeropbrengsten',
+    afkorting: 'OP2',
     beschrijving: 'De leerlingen behalen resultaten die passen bij hun mogelijkheden en de school realiseert haar eigen doelen.',
     indicatoren: [
       'De leerresultaten zijn in overeenstemming met de mogelijkheden van leerlingen',
@@ -157,6 +158,7 @@ const inspectieStandaarden: InspectionStandard[] = [
     id: 'schoolklimaat',
     nummer: '3',
     titel: 'Schoolklimaat',
+    afkorting: 'OP3',
     beschrijving: 'De school biedt een veilige en stimulerende omgeving waarin leerlingen zich kunnen ontwikkelen.',
     indicatoren: [
       'De school biedt een veilige omgeving',
@@ -223,6 +225,7 @@ const inspectieStandaarden: InspectionStandard[] = [
     id: 'schoolorganisatie',
     nummer: '4',
     titel: 'Schoolorganisatie',
+    afkorting: 'OP4',
     beschrijving: 'De schoolorganisatie is ingericht op het realiseren van de onderwijsdoelen en het bieden van een veilige omgeving.',
     indicatoren: [
       'De organisatie is gericht op het realiseren van de onderwijsdoelen',
@@ -289,6 +292,7 @@ const inspectieStandaarden: InspectionStandard[] = [
     id: 'kwaliteitszorg',
     nummer: '5',
     titel: 'Kwaliteitszorg',
+    afkorting: 'OP5',
     beschrijving: 'De school werkt systematisch aan de bewaking en verbetering van de kwaliteit van het onderwijs.',
     indicatoren: [
       'De school evalueert systematisch de kwaliteit van het onderwijs',
@@ -355,12 +359,13 @@ const inspectieStandaarden: InspectionStandard[] = [
 
 export default function InspectionFrameworkViewer() {
   const [selectedStandard, setSelectedStandard] = useState<InspectionStandard | null>(null)
-  const [activeTab, setActiveTab] = useState<'overzicht' | 'zelfevaluatie' | 'praktijk' | 'voorbereiding'>('overzicht')
+  const [activeTab, setActiveTab] = useState<'overzicht' | 'zelfevaluatie' | 'praktijk' | 'voorbereiding' | 'afkortingen'>('overzicht')
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredStandards = inspectieStandaarden.filter(standard =>
     standard.titel.toLowerCase().includes(searchTerm.toLowerCase()) ||
     standard.beschrijving.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    standard.afkorting.toLowerCase().includes(searchTerm.toLowerCase()) ||
     standard.indicatoren.some(indicator => indicator.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
@@ -392,7 +397,7 @@ export default function InspectionFrameworkViewer() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Zoek op standaard, indicator of trefwoord..."
+          placeholder="Zoek op standaard, afkorting, indicator of trefwoord..."
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         />
       </div>
@@ -402,6 +407,7 @@ export default function InspectionFrameworkViewer() {
         <div className="flex border-b border-gray-200 overflow-x-auto">
           {[
             { id: 'overzicht', label: '📋 Standaarden Overzicht', icon: '📋' },
+            { id: 'afkortingen', label: '🔤 Afkortingen & Codes', icon: '🔤' },
             { id: 'zelfevaluatie', label: '🔍 Zelfevaluatie Tools', icon: '🔍' },
             { id: 'praktijk', label: '💼 Praktijkvoorbeelden', icon: '💼' },
             { id: 'voorbereiding', label: '📝 Inspectie Voorbereiding', icon: '📝' }
@@ -421,13 +427,132 @@ export default function InspectionFrameworkViewer() {
         </div>
 
         <div className="p-6">
+          {/* Afkortingen Tab */}
+          {activeTab === 'afkortingen' && (
+            <div className="space-y-6">
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h3 className="font-semibold text-blue-800 mb-2">🔤 Inspectie Afkortingen & Codes</h3>
+                <p className="text-blue-700 text-sm">
+                  De inspectie gebruikt specifieke afkortingen en codes in rapporten en communicatie. 
+                  Hieronder vind je de belangrijkste codes die je moet kennen.
+                </p>
+              </div>
+
+              {/* Standaard Afkortingen */}
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-800">📊 Onderwijsproces Standaarden (OP)</h4>
+                </div>
+                <div className="p-4">
+                  <div className="grid gap-4">
+                    {inspectieStandaarden.map((standard) => (
+                      <div key={standard.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                          {standard.afkorting}
+                        </div>
+                        <div className="flex-1">
+                          <h5 className="font-semibold text-gray-800">{standard.titel}</h5>
+                          <p className="text-gray-600 text-sm mt-1">{standard.beschrijving}</p>
+                          <div className="mt-2 flex items-center space-x-2">
+                            <span className="text-xs text-gray-500">Standaard {standard.nummer}</span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getKwaliteitColor(standard.kwaliteitsniveau)}`}>
+                              {standard.kwaliteitsniveau}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Andere Afkortingen */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <h4 className="font-semibold text-gray-800">🎯 Kwaliteitsoordelen</h4>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {[
+                      { code: 'V', betekenis: 'Voldoende', beschrijving: 'Standaard wordt voldoende gerealiseerd' },
+                      { code: 'O', betekenis: 'Onvoldoende', beschrijving: 'Standaard wordt onvoldoende gerealiseerd' },
+                      { code: 'G', betekenis: 'Goed', beschrijving: 'Standaard wordt goed gerealiseerd' },
+                      { code: 'Z', betekenis: 'Zeer Zwak', beschrijving: 'Standaard wordt zeer zwak gerealiseerd' }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {item.code}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">{item.betekenis}</p>
+                          <p className="text-gray-600 text-sm">{item.beschrijving}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <h4 className="font-semibold text-gray-800">📋 Overige Codes</h4>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {[
+                      { code: 'LVS', betekenis: 'Leerling Volg Systeem', beschrijving: 'Systeem voor monitoring leerlingvoortgang' },
+                      { code: 'VO', betekenis: 'Voortgezet Onderwijs', beschrijving: 'Vervolgonderwijs na basisschool' },
+                      { code: 'PO', betekenis: 'Primair Onderwijs', beschrijving: 'Basisonderwijs groep 1-8' },
+                      { code: 'IB', betekenis: 'Intern Begeleider', beschrijving: 'Zorgcoördinator van de school' },
+                      { code: 'RT', betekenis: 'Remedial Teaching', beschrijving: 'Extra ondersteuning voor leerlingen' },
+                      { code: 'SEL', betekenis: 'Sociaal Emotioneel Leren', beschrijving: 'Ontwikkeling sociale vaardigheden' }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div className="px-2 py-1 bg-green-600 rounded text-white font-bold text-xs min-w-fit">
+                          {item.code}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">{item.betekenis}</p>
+                          <p className="text-gray-600 text-sm">{item.beschrijving}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Inspectie Proces Codes */}
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-800">🔍 Inspectieproces Afkortingen</h4>
+                </div>
+                <div className="p-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {[
+                      { code: 'VTI', betekenis: 'Vierjaarlijks Toezicht Inspectie', beschrijving: 'Regulier inspectiebezoek elke 4 jaar' },
+                      { code: 'TGO', betekenis: 'Toezicht op Grond van Onderzoek', beschrijving: 'Extra toezicht bij zorgen' },
+                      { code: 'HTO', betekenis: 'Herstelopdracht Toezicht', beschrijving: 'Intensief toezicht bij tekortkomingen' },
+                      { code: 'BTO', betekenis: 'Bestuurlijk Toezicht', beschrijving: 'Toezicht op bestuursniveau' },
+                      { code: 'RTC', betekenis: 'Risico Toezicht Cyclus', beschrijving: 'Risicogerichte toezichtaanpak' },
+                      { code: 'KTO', betekenis: 'Kwaliteits Toezicht Onderzoek', beschrijving: 'Onderzoek naar onderwijskwaliteit' }
+                    ].map((item, index) => (
+                      <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                        <div className="font-bold text-indigo-600 mb-1">{item.code}</div>
+                        <div className="font-medium text-gray-800 text-sm">{item.betekenis}</div>
+                        <div className="text-gray-600 text-xs mt-1">{item.beschrijving}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Standaarden Overzicht */}
           {activeTab === 'overzicht' && (
             <div className="space-y-6">
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                 <h3 className="font-semibold text-blue-800 mb-2">📚 Onderzoekskader Primair Onderwijs 2021</h3>
                 <p className="text-blue-700 text-sm">
-                  Het onderzoekskader bestaat uit 5 standaarden die samen de kwaliteit van het onderwijs bepalen. 
+                  Het onderzoekskader bestaat uit 5 standaarden (OP1-OP5) die samen de kwaliteit van het onderwijs bepalen. 
                   Elke standaard heeft specifieke indicatoren waarop de inspectie beoordeelt.
                 </p>
               </div>
@@ -446,8 +571,11 @@ export default function InspectionFrameworkViewer() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                          <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
                             {standard.nummer}
+                          </div>
+                          <div className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-bold">
+                            {standard.afkorting}
                           </div>
                           <h3 className="text-xl font-bold text-gray-800">{standard.titel}</h3>
                         </div>
@@ -516,7 +644,7 @@ export default function InspectionFrameworkViewer() {
               {inspectieStandaarden.map((standard) => (
                 <div key={standard.id} className="bg-white rounded-lg border border-gray-200 p-6">
                   <h4 className="text-lg font-bold text-gray-800 mb-4">
-                    {standard.nummer}. {standard.titel}
+                    {standard.afkorting} - {standard.titel}
                   </h4>
 
                   <div className="grid md:grid-cols-2 gap-6">
@@ -566,7 +694,7 @@ export default function InspectionFrameworkViewer() {
               {inspectieStandaarden.map((standard) => (
                 <div key={standard.id} className="bg-white rounded-lg border border-gray-200 p-6">
                   <h4 className="text-lg font-bold text-gray-800 mb-4">
-                    {standard.nummer}. {standard.titel}
+                    {standard.afkorting} - {standard.titel}
                   </h4>
 
                   <div className="space-y-6">
@@ -758,6 +886,7 @@ export default function InspectionFrameworkViewer() {
               <div className="w-8 h-8 bg-yellow-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2">
                 {standard.nummer}
               </div>
+              <div className="text-xs font-bold text-yellow-600 mb-1">{standard.afkorting}</div>
               <h4 className="font-medium text-yellow-800 text-sm">{standard.titel}</h4>
             </div>
           ))}
