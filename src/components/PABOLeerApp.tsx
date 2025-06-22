@@ -11,6 +11,7 @@ import SocraticChatBot from './SocraticChatBot'
 import KerndoelenProgressieTracker from './KerndoelenProgressieTracker'
 import OntwikkelingsStadiaTimeline from './OntwikkelingsStadiaTimeline'
 import SELCompetentieRadar from './SELCompetentieRadar'
+import InspectionFrameworkViewer from './InspectionFrameworkViewer'
 
 interface Module {
   id: string
@@ -178,6 +179,23 @@ const modules: Module[] = [
       'Data-gedreven schoolverbetering'
     ],
     learningPath: 'leider'
+  },
+  {
+    id: 'module10',
+    title: 'Inspectie Onderzoekskader',
+    description: 'Complete voorbereiding op inspectiebezoek met alle standaarden en praktijktips',
+    icon: '🔍',
+    difficulty: 'Advanced',
+    duration: '4-5 uur',
+    category: 'Leiderschap',
+    components: ['Inspectie Framework', 'Zelfevaluatie Tools', 'Praktijkvoorbeelden', 'Voorbereiding Checklist'],
+    learningGoals: [
+      'Alle 5 inspectiestandaarden beheersen',
+      'Zelfevaluatie systematisch uitvoeren',
+      'Inspectiebezoek professioneel voorbereiden',
+      'Kwaliteitszorg cyclisch organiseren'
+    ],
+    learningPath: 'leider'
   }
 ]
 
@@ -244,6 +262,13 @@ const opdrachten = [
     type: "analyse" as const,
     startVraag: "Wat zie je in de Cito-trends en welke interventies ga je inzetten?",
     context: "Als schoolleider of coördinator analyseer je Cito-resultaten om de onderwijskwaliteit te verbeteren."
+  },
+  {
+    titel: "Inspectie Voorbereiding",
+    beschrijving: "Bereid je school systematisch voor op een inspectiebezoek",
+    type: "analyse" as const,
+    startVraag: "Hoe ga je je school voorbereiden op het komende inspectiebezoek en welke standaarden vereisen extra aandacht?",
+    context: "Je school krijgt binnenkort inspectiebezoek en je wilt alle standaarden grondig voorbereiden met je team."
   }
 ]
 
@@ -416,6 +441,14 @@ export default function PABOLeerApp() {
         return <CitoMonitoringViewer />
       case 'Data Doorstroom':
         return <CitoMonitoringViewer />
+      case 'Inspectie Framework':
+        return <InspectionFrameworkViewer />
+      case 'Zelfevaluatie Tools':
+        return <InspectionFrameworkViewer />
+      case 'Praktijkvoorbeelden':
+        return <InspectionFrameworkViewer />
+      case 'Voorbereiding Checklist':
+        return <InspectionFrameworkViewer />
       case 'Klikbare Theorie':
         return <ClickableTheoryViewer moduleId={activeModule} />
       case 'AI Begeleiding':
@@ -646,6 +679,7 @@ export default function PABOLeerApp() {
                        component.includes('SEL') ? '❤️' :
                        component.includes('Competentie') ? '🎯' :
                        component.includes('Cito') ? '📊' :
+                       component.includes('Inspectie') ? '🔍' :
                        component.includes('Theorie') ? '🔗' :
                        component.includes('AI') ? '🤖' : '📖'}
                     </span>
@@ -658,6 +692,10 @@ export default function PABOLeerApp() {
                      component.includes('SEL') && component.includes('Methodieken') ? 'Vergelijk verschillende SEL-methodieken' :
                      component.includes('Competentie') ? 'Visualiseer SEL-competenties per leeftijd' :
                      component.includes('Cito') ? 'Complete gids voor Cito-monitoring' :
+                     component.includes('Inspectie') ? 'Onderzoekskader 2021 met praktijktips' :
+                     component.includes('Zelfevaluatie') ? 'Tools voor systematische zelfevaluatie' :
+                     component.includes('Praktijkvoorbeelden') ? 'Concrete voorbeelden uit het veld' :
+                     component.includes('Voorbereiding') ? 'Checklist voor inspectiebezoek' :
                      component.includes('Theorie') ? 'Klikbare theorie met verdieping' :
                      component.includes('AI') ? 'Socratische AI-begeleiding' : 'Leermateriaal'}
                   </p>
@@ -909,6 +947,7 @@ export default function PABOLeerApp() {
                     <div>👑 Schoolleiderschap</div>
                     <div>🏛️ Burgerschap & Diversiteit</div>
                     <div>📈 Cito & Monitoring</div>
+                    <div>🔍 Inspectie Onderzoekskader</div>
                   </div>
                 </div>
               </div>
