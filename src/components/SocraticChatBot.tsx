@@ -134,13 +134,13 @@ ${moduleGoals}
 SCHOOLDOCUMENTEN:
 ${documentTexts}
 
-Geef een korte analyse (max 250 woorden) waarin je:
-1. Benoemt wat je ziet in de documenten dat relevant is voor deze module
-2. Koppelt aan de module doelen  
-3. Geeft concrete voorbeelden uit de documenten
-4. Eindigt met 2-3 socratische vragen om het gesprek te starten
+Geef een korte analyse (max 300 woorden) waarin je:
+1. **Welkom heet** de student en benoemt welke documenten je hebt ontvangen
+2. **Koppelt** wat je ziet in de documenten aan de module doelen  
+3. **Concrete voorbeelden** geeft uit de documenten die relevant zijn
+4. **Eindigt** met 2-3 socratische vragen om het gesprek te starten
 
-Wees specifiek en verwijs naar concrete passages uit de documenten. Gebruik een vriendelijke, bemoedigende toon.`
+Gebruik een vriendelijke, bemoedigende toon en verwijs specifiek naar passages uit de documenten. Begin met een persoonlijke begroeting.`
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -161,9 +161,12 @@ Wees specifiek en verwijs naar concrete passages uit de documenten. Gebruik een 
       }
     } catch (error) {
       console.error('Document analysis error:', error)
-      setDocumentAnalysis(`🔍 **Welkom bij de AI-analyse!**
+      setDocumentAnalysis(`🎉 **Welkom! Je documenten zijn succesvol geüpload**
 
-Ik heb je schooldocument(en) bekeken en ben klaar om je te helpen met de module "${module}".
+Ik heb je schooldocument(en) ontvangen en ben klaar om je te helpen met de module "${module}".
+
+**📚 Wat ik heb ontvangen:**
+${documents.map(doc => `• ${doc.fileName} (${doc.detectedType})`).join('\n')}
 
 **💡 Wat kun je me vragen?**
 • Hoe sluit ons schoolbeleid aan bij deze module?
