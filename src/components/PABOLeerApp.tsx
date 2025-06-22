@@ -267,7 +267,9 @@ export default function PABOLeerApp() {
         setActiveModule(null)
         setActiveComponent(null)
         // Clear the hash
-        window.history.replaceState(null, '', window.location.pathname)
+        if (typeof window !== 'undefined') {
+          window.history.replaceState(null, '', window.location.pathname)
+        }
       } else if (hash === '#burgerschap-chat') {
         setActiveModule('module8')
         setActiveComponent('AI Begeleiding')
@@ -282,26 +284,28 @@ export default function PABOLeerApp() {
     handleHashChange()
 
     // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('hashchange', handleHashChange)
 
-    // Listen for document upload events
-    const handleDocumentUpload = (event: any) => {
-      console.log('Document upload event received:', event.detail)
-      if (event.detail && event.detail.documents && event.detail.documents.length > 0) {
-        console.log('Documents uploaded, starting chat...')
-        // Small delay to ensure state is updated
-        setTimeout(() => {
-          setShowDirectChat(true)
-          setShowDocumentManager(false)
-        }, 500)
+      // Listen for document upload events
+      const handleDocumentUpload = (event: any) => {
+        console.log('Document upload event received:', event.detail)
+        if (event.detail && event.detail.documents && event.detail.documents.length > 0) {
+          console.log('Documents uploaded, starting chat...')
+          // Small delay to ensure state is updated
+          setTimeout(() => {
+            setShowDirectChat(true)
+            setShowDocumentManager(false)
+          }, 500)
+        }
       }
-    }
 
-    window.addEventListener('documentUploaded', handleDocumentUpload)
+      window.addEventListener('documentUploaded', handleDocumentUpload)
 
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange)
-      window.removeEventListener('documentUploaded', handleDocumentUpload)
+      return () => {
+        window.removeEventListener('hashchange', handleHashChange)
+        window.removeEventListener('documentUploaded', handleDocumentUpload)
+      }
     }
   }, [])
 
@@ -352,7 +356,9 @@ export default function PABOLeerApp() {
               <button
                 onClick={() => {
                   setShowDirectChat(false)
-                  window.location.hash = ''
+                  if (typeof window !== 'undefined') {
+                    window.location.hash = ''
+                  }
                 }}
                 className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
               >
@@ -476,7 +482,9 @@ export default function PABOLeerApp() {
                 <button
                   onClick={() => {
                     setShowDirectChat(false)
-                    window.location.hash = ''
+                    if (typeof window !== 'undefined') {
+                      window.location.hash = ''
+                    }
                   }}
                   className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
@@ -515,7 +523,9 @@ export default function PABOLeerApp() {
                     setActiveComponent(null)
                     setActiveModule(null)
                     // Clear hash
-                    window.location.hash = ''
+                    if (typeof window !== 'undefined') {
+                      window.location.hash = ''
+                    }
                   }}
                   className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
@@ -782,7 +792,7 @@ export default function PABOLeerApp() {
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <div 
                   onClick={() => setSelectedLearningPath('beginnend')}
-                  className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 cursor-pointer hover:shadow-lg transition-all"
+                  className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 cursor-pointer hover:shadow-lg transition-all hover:scale-105"
                 >
                   <div className="text-4xl mb-3">🌱</div>
                   <h3 className="font-semibold text-green-800 mb-2">Beginnend PABO-student</h3>
@@ -796,7 +806,7 @@ export default function PABOLeerApp() {
 
                 <div 
                   onClick={() => setSelectedLearningPath('gevorderd')}
-                  className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200 cursor-pointer hover:shadow-lg transition-all"
+                  className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200 cursor-pointer hover:shadow-lg transition-all hover:scale-105"
                 >
                   <div className="text-4xl mb-3">🎯</div>
                   <h3 className="font-semibold text-blue-800 mb-2">Gevorderd PABO-student</h3>
@@ -810,7 +820,7 @@ export default function PABOLeerApp() {
 
                 <div 
                   onClick={() => setSelectedLearningPath('leider')}
-                  className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 cursor-pointer hover:shadow-lg transition-all"
+                  className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 cursor-pointer hover:shadow-lg transition-all hover:scale-105"
                 >
                   <div className="text-4xl mb-3">👑</div>
                   <h3 className="font-semibold text-purple-800 mb-2">Aanstaand Schoolleider</h3>

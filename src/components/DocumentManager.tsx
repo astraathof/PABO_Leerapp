@@ -50,7 +50,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
 
   // Save documents to localStorage whenever documents change
   useEffect(() => {
-    if (documents.length > 0) {
+    if (documents.length >= 0) { // Changed from > 0 to >= 0 to handle deletions
       try {
         localStorage.setItem('pabo-documents', JSON.stringify(documents))
         onDocumentsChange?.(documents)

@@ -41,12 +41,14 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [studentLevel, setStudentLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
   const [availableDocuments, setAvailableDocuments] = useState<UploadedDocument[]>([])
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
-  const [useDocuments, setUseDocuments] = useState(true) // STANDAARD AAN
+  const [useDocuments, setUseDocuments] = useState(true)
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-  const [useMultiModal, setUseMultiModal] = useState(true) // STANDAARD AAN
+  const [useMultiModal, setUseMultiModal] = useState(true)
   const [showDirectChat, setShowDirectChat] = useState(false)
   const [autoStartChat, setAutoStartChat] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [documentAnalysis, setDocumentAnalysis] = useState<string>('')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   // Load documents from localStorage with better error handling
   useEffect(() => {
@@ -73,9 +75,9 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           if (parsedDocs.length > 0) {
             console.log('SocraticChatBot: Documents found, auto-starting chat...')
             setAutoStartChat(true)
-            // Start chat immediately
+            // Start chat immediately with analysis
             setTimeout(() => {
-              startDirectChat(parsedDocs)
+              startDirectChatWithAnalysis(parsedDocs)
             }, 100)
           }
         } else {
@@ -99,31 +101,100 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
       }
     }
 
-    window.addEventListener('storage', handleStorageChange)
-    
-    // Also listen for custom events from document upload
-    const handleDocumentUpload = (event: any) => {
-      console.log('SocraticChatBot: Document upload event detected, reloading...', event.detail)
-      setTimeout(loadDocuments, 500) // Small delay to ensure localStorage is updated
-    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange)
+      
+      // Also listen for custom events from document upload
+      const handleDocumentUpload = (event: any) => {
+        console.log('SocraticChatBot: Document upload event detected, reloading...', event.detail)
+        setTimeout(loadDocuments, 500) // Small delay to ensure localStorage is updated
+      }
 
-    window.addEventListener('documentUploaded', handleDocumentUpload)
+      window.addEventListener('documentUploaded', handleDocumentUpload)
 
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('documentUploaded', handleDocumentUpload)
+      return () => {
+        window.removeEventListener('storage', handleStorageChange)
+        window.removeEventListener('documentUploaded', handleDocumentUpload)
+      }
     }
   }, [])
+
+  const analyzeDocumentsForModule = async (documents: UploadedDocument[], moduleTitle: string) => {
+    setIsAnalyzing(true)
+    try {
+      // Create analysis prompt based on module
+      const moduleGoals = getModuleGoals(moduleTitle)
+      const documentTexts = documents.map(doc => `${doc.fileName}: ${doc.text.substring(0, 2000)}`).join('\n\n')
+      
+      const analysisPrompt = `Analyseer deze schooldocumenten in relatie tot de module "${moduleTitle}".
+
+MODULE DOELEN:
+${moduleGoals}
+
+SCHOOLDOCUMENTEN:
+${documentTexts}
+
+Geef een korte analyse (max 200 woorden) waarin je:
+1. Benoemt wat je ziet in de documenten dat relevant is voor deze module
+2. Koppelt aan de module doelen
+3. Eindigt met 2-3 socratische vragen om het gesprek te starten
+
+Wees specifiek en verwijs naar concrete passages uit de documenten.`
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: analysisPrompt,
+          context: `Je bent een PABO-docent die documenten analyseert voor de module ${moduleTitle}`,
+          module: moduleTitle,
+          studentLevel: studentLevel
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setDocumentAnalysis(result.response)
+      }
+    } catch (error) {
+      console.error('Document analysis error:', error)
+      setDocumentAnalysis('Ik heb je documenten bekeken en ben klaar om je te helpen met vragen over je schoolpraktijk!')
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  const getModuleGoals = (moduleTitle: string): string => {
+    const moduleGoalsMap: { [key: string]: string } = {
+      'Curriculum & Kerndoelen': '• Alle 58 kerndoelen beheersen\n• Kerndoelen vertalen naar lesdoelen\n• Progressie monitoren per groep\n• Curriculum mapping toepassen',
+      'Ontwikkelingspsychologie': '• Ontwikkelingsstadia herkennen\n• Theorie koppelen aan praktijk\n• Leeftijdsadequaat onderwijs geven\n• Individuele verschillen begrijpen',
+      'SEL & Klassenmanagement': '• SEL-methodieken vergelijken\n• Klassenklimaat verbeteren\n• Sociale vaardigheden ontwikkelen\n• Conflicten constructief oplossen',
+      'Differentiatie & Inclusie': '• Differentiatie strategieën toepassen\n• Inclusief onderwijs vormgeven\n• Adaptief onderwijs implementeren\n• Alle leerlingen laten slagen',
+      'Data & Evaluatie': '• Data interpreteren en gebruiken\n• Formatieve evaluatie toepassen\n• Evidence-based werken\n• Leerresultaten verbeteren',
+      'Schoolleiderschap': '• Pedagogisch leiderschap ontwikkelen\n• Veranderprocessen leiden\n• Teamontwikkeling faciliteren\n• Schoolcultuur vormgeven',
+      'Burgerschap & Diversiteit': '• Burgerschapsonderwijs vormgeven\n• Democratische waarden overdragen\n• Diversiteit waarderen\n• Sociale cohesie bevorderen',
+      'Cito & Monitoring': '• Cito A-E en I-V niveaus begrijpen\n• Monitoring groep 1-8 organiseren\n• Coördinatorrollen effectief invullen\n• Data-gedreven schoolverbetering'
+    }
+    return moduleGoalsMap[moduleTitle] || 'Algemene PABO-competenties ontwikkelen'
+  }
 
   const startOpdracht = (opdracht: Opdracht) => {
     setSelectedOpdracht(opdracht)
   }
 
-  const startDirectChat = (docs?: UploadedDocument[]) => {
+  const startDirectChatWithAnalysis = async (docs?: UploadedDocument[]) => {
     const documents = docs || availableDocuments
-    console.log('SocraticChatBot: Starting direct chat with documents:', documents)
+    console.log('SocraticChatBot: Starting direct chat with analysis for documents:', documents)
     
     setShowDirectChat(true)
+    
+    // Start document analysis
+    if (documents.length > 0) {
+      await analyzeDocumentsForModule(documents, module)
+    }
+    
     setSelectedOpdracht({
       titel: "Chat met je Schooldocumenten",
       beschrijving: "Chat direct met de AI over je geüploade schooldocumenten en PABO-onderwerpen",
@@ -137,6 +208,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
     setSelectedOpdracht(null)
     setShowDirectChat(false)
     setAutoStartChat(false)
+    setDocumentAnalysis('')
   }
 
   const toggleDocumentSelection = (docId: string) => {
@@ -198,6 +270,21 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           </div>
         </div>
 
+        {/* Document Analysis */}
+        {(isAnalyzing || documentAnalysis) && (
+          <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+            <h4 className="font-semibold text-blue-800 mb-3">🔍 AI Analyse van je Documenten</h4>
+            {isAnalyzing ? (
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <span className="text-blue-700">Ik analyseer je documenten in relatie tot de module "{module}"...</span>
+              </div>
+            ) : (
+              <div className="text-blue-800 whitespace-pre-wrap">{documentAnalysis}</div>
+            )}
+          </div>
+        )}
+
         {/* Direct Chat Interface */}
         <ContextAwareChat
           module={module}
@@ -224,7 +311,9 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
                 onClick={() => {
                   // This would trigger sending the question - we'll implement this in ContextAwareChat
                   const event = new CustomEvent('sendMessage', { detail: vraag })
-                  window.dispatchEvent(event)
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(event)
+                  }
                 }}
                 className="text-left p-3 bg-white border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-50 transition-colors"
               >
@@ -252,7 +341,9 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
             <button
               onClick={() => {
                 // Navigate to document manager
-                window.location.href = '#documents'
+                if (typeof window !== 'undefined') {
+                  window.location.href = '#documents'
+                }
               }}
               className="px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
@@ -284,7 +375,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
                 </div>
               </div>
               <button
-                onClick={() => startDirectChat()}
+                onClick={() => startDirectChatWithAnalysis()}
                 className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg"
               >
                 💬 Start Chat
@@ -459,8 +550,8 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
               <span className="text-purple-700">Automatische integratie schooldocumenten</span>
             </div>
             <div className="flex items-start space-x-2">
-              <span className="text-green-600">🌊</span>
-              <span className="text-purple-700">Streaming responses voor real-time ervaring</span>
+              <span className="text-green-600">🔍</span>
+              <span className="text-purple-700">Automatische document analyse per module</span>
             </div>
           </div>
         </div>
@@ -503,6 +594,21 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
           </div>
         </div>
       </div>
+
+      {/* Document Analysis */}
+      {(isAnalyzing || documentAnalysis) && (
+        <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+          <h4 className="font-semibold text-blue-800 mb-3">🔍 AI Analyse van je Documenten</h4>
+          {isAnalyzing ? (
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <span className="text-blue-700">Ik analyseer je documenten in relatie tot de module "{module}"...</span>
+            </div>
+          ) : (
+            <div className="text-blue-800 whitespace-pre-wrap">{documentAnalysis}</div>
+          )}
+        </div>
+      )}
 
       {/* Context-Aware Chat Component */}
       <ContextAwareChat
