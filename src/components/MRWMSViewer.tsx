@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 interface MRBevoegdheid {
   id: string
@@ -311,7 +311,7 @@ const mrBevoegdheden: MRBevoegdheid[] = [
         'MR-advies',
         'Bestuursbesluit met motivatie'
       ]
-    ],
+    },
     borgingsmechanismen: [
       'Externe advisering mogelijk',
       'Hoger beroep bij geschillencommissie',
