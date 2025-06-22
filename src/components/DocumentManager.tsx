@@ -345,7 +345,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <p className="text-sm text-blue-700">
                         <strong>💡 AI Tip:</strong> Dit document is nu beschikbaar in alle modules met AI-begeleiding. 
-                        Klik op "Start AI Chat" om direct te beginnen met vragen over dit document!
+                        Klik op "Start AI Chat\" om direct te beginnen met vragen over dit document!
                       </p>
                     </div>
                   </div>
