@@ -1,8 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
 
-// Remove PDF.js completely for now to fix uploads
-// We'll implement a simpler text extraction or use a different approach
+// Simple PDF text extraction function using a different approach
+async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  try {
+    // Convert buffer to string and try to extract readable text
+    const pdfString = buffer.toString('binary')
+    
+    // Look for text content between stream markers
+    const textMatches = pdfString.match(/stream\s*(.*?)\s*endstream/gs)
+    let extractedText = ''
+    
+    if (textMatches) {
+      textMatches.forEach(match => {
+        // Remove stream markers and try to extract readable text
+        const content = match.replace(/^stream\s*/, '').replace(/\s*endstream$/, '')
+        // Look for readable text patterns
+        const readableText = content.match(/[a-zA-Z\s]{3,}/g)
+        if (readableText) {
+          extractedText += readableText.join(' ') + ' '
+        }
+      })
+    }
+    
+    // If no text found with stream method, try alternative approach
+    if (!extractedText.trim()) {
+      // Look for text objects in PDF
+      const textObjects = pdfString.match(/\(([^)]+)\)/g)
+      if (textObjects) {
+        extractedText = textObjects
+          .map(match => match.replace(/[()]/g, ''))
+          .filter(text => text.length > 2 && /[a-zA-Z]/.test(text))
+          .join(' ')
+      }
+    }
+    
+    // If still no text, try to find any readable content
+    if (!extractedText.trim()) {
+      const allText = pdfString.match(/[a-zA-Z][a-zA-Z\s]{10,}/g)
+      if (allText) {
+        extractedText = allText.join(' ')
+      }
+    }
+    
+    // Clean up the extracted text
+    extractedText = extractedText
+      .replace(/\s+/g, ' ')
+      .replace(/[^\w\s\.,!?;:()\-]/g, '')
+      .trim()
+    
+    // If we got some text, return it, otherwise return a descriptive placeholder
+    if (extractedText && extractedText.length > 50) {
+      return extractedText
+    } else {
+      // Return a more helpful placeholder that can still be analyzed
+      return `PDF Document: ${extractedText || 'Tekstextractie beperkt beschikbaar'}
+
+Dit PDF document is succesvol geüpload en kan worden gebruikt in de AI-chat. 
+Hoewel de automatische tekstextractie beperkt is, kun je de AI vertellen wat voor document dit is 
+en wat de belangrijkste inhoud is, zodat de AI je kan helpen met relevante vragen en analyse.
+
+Tip: Beschrijf kort wat er in dit document staat (bijvoorbeeld: "Dit is ons schoolplan met onze visie en missie" 
+of "Dit bevat ons veiligheidsbeleid en procedures") en de AI zal je helpen met gerichte vragen.`
+    }
+  } catch (error) {
+    console.error('PDF extraction error:', error)
+    throw new Error('Kon PDF niet verwerken')
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,19 +87,7 @@ export async function POST(request: NextRequest) {
 
     // Bepaal bestandstype en extraheer tekst
     if (file.name.toLowerCase().endsWith('.pdf')) {
-      // For now, return a placeholder for PDF files until we fix PDF.js
-      extractedText = `[PDF Document: ${file.name}]
-
-Dit is een PDF document dat is geüpload. De volledige tekstextractie wordt momenteel geoptimaliseerd.
-
-Voor nu kun je dit document gebruiken in de AI-chat door te beschrijven wat erin staat, en de AI zal je helpen met vragen en analyse op basis van je beschrijving.
-
-Bestandsnaam: ${file.name}
-Bestandsgrootte: ${Math.round(file.size / 1024)} KB
-Upload datum: ${new Date().toLocaleDateString('nl-NL')}
-
-Je kunt dit document gebruiken door in de chat te vertellen wat voor soort document dit is (bijvoorbeeld: "Dit is ons schoolplan" of "Dit is ons veiligheidsbeleid") en de AI zal je helpen met relevante vragen en analyse.`
-      
+      extractedText = await extractTextFromPDF(buffer)
       documentType = 'PDF'
     } else if (file.name.toLowerCase().endsWith('.docx')) {
       const result = await mammoth.extractRawText({ buffer })
@@ -50,10 +103,12 @@ Je kunt dit document gebruiken door in de chat te vertellen wat voor soort docum
       )
     }
 
-    // Analyseer document type op basis van inhoud
+    // Analyseer document type op basis van inhoud en bestandsnaam
     const content = extractedText.toLowerCase()
+    const fileName = file.name.toLowerCase()
     let detectedDocumentType = 'Algemeen document'
     
+    // Eerst proberen op basis van inhoud
     if (content.includes('schoolplan') || content.includes('schoolgids') || content.includes('visie') || content.includes('missie')) {
       detectedDocumentType = 'Schoolplan/Schoolgids'
     } else if (content.includes('kerndoel') || content.includes('leerlijn') || content.includes('curriculum')) {
@@ -64,17 +119,28 @@ Je kunt dit document gebruiken door in de chat te vertellen wat voor soort docum
       detectedDocumentType = 'Resultaten/Data document'
     } else if (content.includes('burgerschap') || content.includes('sociale veiligheid')) {
       detectedDocumentType = 'Burgerschap document'
-    } else if (file.name.toLowerCase().includes('pdf')) {
-      // For PDF files, try to detect type from filename
-      if (file.name.toLowerCase().includes('schoolplan')) {
-        detectedDocumentType = 'Schoolplan/Schoolgids'
-      } else if (file.name.toLowerCase().includes('beleid')) {
-        detectedDocumentType = 'Beleidsdocument'
-      } else if (file.name.toLowerCase().includes('jaarplan')) {
-        detectedDocumentType = 'Jaarplan document'
-      } else {
-        detectedDocumentType = 'PDF Document'
-      }
+    } else if (content.includes('jaarplan') || content.includes('werkplan')) {
+      detectedDocumentType = 'Jaarplan document'
+    } else if (content.includes('beleid') || content.includes('protocol')) {
+      detectedDocumentType = 'Beleidsdocument'
+    } 
+    // Als inhoud niet duidelijk is, proberen op basis van bestandsnaam
+    else if (fileName.includes('schoolplan') || fileName.includes('schoolgids')) {
+      detectedDocumentType = 'Schoolplan/Schoolgids'
+    } else if (fileName.includes('jaarplan') || fileName.includes('werkplan')) {
+      detectedDocumentType = 'Jaarplan document'
+    } else if (fileName.includes('beleid') || fileName.includes('protocol')) {
+      detectedDocumentType = 'Beleidsdocument'
+    } else if (fileName.includes('curriculum') || fileName.includes('kerndoel')) {
+      detectedDocumentType = 'Curriculum document'
+    } else if (fileName.includes('cito') || fileName.includes('resultaten')) {
+      detectedDocumentType = 'Resultaten/Data document'
+    } else if (fileName.includes('observatie') || fileName.includes('evaluatie')) {
+      detectedDocumentType = 'Observatie/Evaluatie document'
+    } else if (fileName.includes('burgerschap') || fileName.includes('veiligheid')) {
+      detectedDocumentType = 'Burgerschap document'
+    } else if (fileName.includes('edi') || fileName.includes('kijkwijzer')) {
+      detectedDocumentType = 'EDI/Diversiteit document'
     }
 
     return NextResponse.json({
