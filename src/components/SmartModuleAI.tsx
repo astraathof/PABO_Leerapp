@@ -328,20 +328,83 @@ ${openingQuestion}`,
     switch (moduleId) {
       case 'module1':
         return [
-          'Alle 58 kerndoelen beheersen',
-          'Kerndoelen vertalen naar lesdoelen',
+          'Alle 58 kerndoelen kennen en begrijpen',
+          'Kerndoelen vertalen naar concrete lesdoelen',
           'Progressie monitoren per groep',
           'Curriculum mapping toepassen'
         ]
       case 'module2':
         return [
-          'Ontwikkelingsstadia herkennen',
-          'Theorie koppelen aan praktijk',
-          'Leeftijdsadequaat onderwijs geven',
-          'Individuele verschillen begrijpen'
+          'Ontwikkelingsstadia herkennen en begrijpen',
+          'Theorie koppelen aan onderwijspraktijk',
+          'Leeftijdsadequaat onderwijs vormgeven',
+          'Individuele verschillen in ontwikkeling begrijpen'
+        ]
+      case 'module3':
+        return [
+          'SEL-competenties begrijpen en ontwikkelen',
+          'Positief klassenklimaat creëren',
+          'Gedragsmanagement strategieën toepassen',
+          'Sociale vaardigheden stimuleren'
+        ]
+      case 'module4':
+        return [
+          'Differentiatie strategieën toepassen',
+          'Inclusief onderwijs vormgeven',
+          'Adaptief onderwijs implementeren',
+          'Individuele leerbehoeften herkennen'
+        ]
+      case 'module5':
+        return [
+          'Data verzamelen en analyseren',
+          'Evaluatie-instrumenten inzetten',
+          'Formatieve en summatieve evaluatie',
+          'Data-gedreven beslissingen nemen'
+        ]
+      case 'module6':
+        return [
+          '21e-eeuwse vaardigheden herkennen',
+          'Kritisch denken stimuleren',
+          'Creativiteit en innovatie bevorderen',
+          'Digitale geletterdheid ontwikkelen'
+        ]
+      case 'module7':
+        return [
+          'Leiderschapsstijlen begrijpen',
+          'Teamontwikkeling faciliteren',
+          'Verandermanagement toepassen',
+          'Visie en strategie ontwikkelen'
+        ]
+      case 'module8':
+        return [
+          'Burgerschapscompetenties ontwikkelen',
+          'Diversiteit waarderen en benutten',
+          'Interculturele competentie opbouwen',
+          'Democratische waarden overdragen'
+        ]
+      case 'module9':
+        return [
+          'Cito-systeem volledig begrijpen',
+          'A-E en I-V niveaus interpreteren',
+          'Monitoring strategieën toepassen',
+          'Data gebruiken voor interventies'
+        ]
+      case 'module10':
+        return [
+          'Onderzoekskader 2021 beheersen',
+          'Inspectie voorbereiding organiseren',
+          'Kwaliteitszorg implementeren',
+          'Zelfevaluatie uitvoeren'
+        ]
+      case 'module11':
+        return [
+          'WMS wetgeving begrijpen',
+          'MR-taken en bevoegdheden kennen',
+          'Participatie organiseren',
+          'Democratische processen faciliteren'
         ]
       default:
-        return ['Leerdoelen voor deze module']
+        return ['Leerdoelen voor deze module worden geladen...']
     }
   }
 
@@ -359,8 +422,62 @@ ${openingQuestion}`,
           'Interpersoonlijke bekwaamheid',
           'Reflectieve bekwaamheid'
         ]
+      case 'module3':
+        return [
+          'Pedagogische bekwaamheid',
+          'Interpersoonlijke bekwaamheid',
+          'Communicatieve bekwaamheid'
+        ]
+      case 'module4':
+        return [
+          'Didactische bekwaamheid',
+          'Pedagogische bekwaamheid',
+          'Organisatorische bekwaamheid'
+        ]
+      case 'module5':
+        return [
+          'Analytische bekwaamheid',
+          'Reflectieve bekwaamheid',
+          'Organisatorische bekwaamheid'
+        ]
+      case 'module6':
+        return [
+          'Innovatieve bekwaamheid',
+          'Didactische bekwaamheid',
+          'Technologische bekwaamheid'
+        ]
+      case 'module7':
+        return [
+          'Leiderschapsbekwaamheid',
+          'Communicatieve bekwaamheid',
+          'Organisatorische bekwaamheid'
+        ]
+      case 'module8':
+        return [
+          'Interculturele bekwaamheid',
+          'Pedagogische bekwaamheid',
+          'Communicatieve bekwaamheid'
+        ]
+      case 'module9':
+        return [
+          'Analytische bekwaamheid',
+          'Didactische bekwaamheid',
+          'Organisatorische bekwaamheid'
+        ]
+      case 'module10':
+        return [
+          'Kwaliteitsbekwaamheid',
+          'Organisatorische bekwaamheid',
+          'Reflectieve bekwaamheid'
+        ]
+      case 'module11':
+        return [
+          'Juridische bekwaamheid',
+          'Communicatieve bekwaamheid',
+          'Organisatorische bekwaamheid'
+        ]
       default:
-        return ['Competenties voor deze module']
+        return ['Competenties voor deze module worden geladen...']
     }
   }
 
