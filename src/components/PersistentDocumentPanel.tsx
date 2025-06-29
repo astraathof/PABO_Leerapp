@@ -163,7 +163,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       {/* Header - Always Visible */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <span className="text-xl">📚</span>

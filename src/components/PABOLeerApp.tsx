@@ -1058,48 +1058,46 @@ export default function PABOLeerApp() {
 
       {/* Leerlijnen Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-gray-900 mb-4">Kies je leerlijn</h3>
-          <p className="text-lg text-gray-600">
-            Filter modules op basis van je interessegebied
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          {leerlijnen.map((leerlijn) => (
-            <div key={leerlijn.id} className="group relative">
-              <button
-                onClick={() => setSelectedLeerlijn(selectedLeerlijn === leerlijn.id ? 'alle' : leerlijn.id)}
-                className={`w-full p-8 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
-                  selectedLeerlijn === leerlijn.id
-                    ? `bg-gradient-to-br ${leerlijn.kleur} text-white shadow-2xl`
-                    : 'bg-white text-gray-700 shadow-lg hover:shadow-xl border border-gray-200'
-                }`}
-              >
-                <div className="text-4xl mb-4">{leerlijn.icon}</div>
-                <h4 className="text-xl font-bold mb-3">{leerlijn.titel}</h4>
-                <p className={`text-sm ${
-                  selectedLeerlijn === leerlijn.id ? 'text-white/90' : 'text-gray-600'
-                }`}>
-                  {leerlijn.beschrijving}
-                </p>
-                <div className="mt-4">
-                  <span className={`text-xs px-3 py-1 rounded-full ${
-                    selectedLeerlijn === leerlijn.id 
-                      ? 'bg-white/20 text-white' 
-                      : 'bg-gray-100 text-gray-600'
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-16">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+            🎓 Kies je leerlijn
+          </h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            {leerlijnen.map((leerlijn) => (
+              <div key={leerlijn.id} className="group relative">
+                <button
+                  onClick={() => setSelectedLeerlijn(selectedLeerlijn === leerlijn.id ? 'alle' : leerlijn.id)}
+                  className={`w-full p-8 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                    selectedLeerlijn === leerlijn.id
+                      ? `bg-gradient-to-br ${leerlijn.kleur} text-white shadow-2xl`
+                      : 'bg-white text-gray-700 shadow-lg hover:shadow-xl border border-gray-200'
+                  }`}
+                >
+                  <div className="text-4xl mb-4">{leerlijn.icon}</div>
+                  <h4 className="text-xl font-bold mb-3">{leerlijn.titel}</h4>
+                  <p className={`text-sm ${
+                    selectedLeerlijn === leerlijn.id ? 'text-white/90' : 'text-gray-600'
                   }`}>
-                    {modules.filter(m => m.leerlijn === leerlijn.id).length} modules
-                  </span>
+                    {leerlijn.beschrijving}
+                  </p>
+                  <div className="mt-4">
+                    <span className={`text-xs px-3 py-1 rounded-full ${
+                      selectedLeerlijn === leerlijn.id 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {modules.filter(m => m.leerlijn === leerlijn.id).length} modules
+                    </span>
+                  </div>
+                </button>
+                
+                {/* Tooltip */}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                  Klik om te filteren op {leerlijn.titel.toLowerCase()}
                 </div>
-              </button>
-              
-              {/* Tooltip */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                Klik om te filteren op {leerlijn.titel.toLowerCase()}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Filter Reset */}

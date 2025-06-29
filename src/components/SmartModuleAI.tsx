@@ -48,6 +48,10 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [analysisVisible, setAnalysisVisible] = useState(true)
+  const [selectedPersonalityInfo, setSelectedPersonalityInfo] = useState<{
+    description: string;
+    icon: string;
+  } | null>(null)
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -58,6 +62,12 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
     if (documents.length > 0) {
       performQuickscan()
     }
+    
+    // Set initial personality info
+    setSelectedPersonalityInfo({
+      description: getPersonalityDescription('mentor'),
+      icon: getPersonalityIcon('mentor')
+    })
   }, [documents, moduleTitle])
 
   const performQuickscan = async () => {
@@ -361,6 +371,14 @@ ${openingQuestion}`,
     }
   }
 
+  const handlePersonalityChange = (personality: 'tutor' | 'coach' | 'mentor' | 'teammate' | 'tool' | 'simulator' | 'student') => {
+    setAiPersonality(personality)
+    setSelectedPersonalityInfo({
+      description: getPersonalityDescription(personality),
+      icon: getPersonalityIcon(personality)
+    })
+  }
+
   if (documents.length === 0) {
     return (
       <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
@@ -631,11 +649,11 @@ ${openingQuestion}`,
       <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
         <h3 className="text-xl font-bold mb-4">🤖 Deel 2: Slimme Chatbot per Module</h3>
         
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* AI Personality Selector */}
           <div>
             <h4 className="font-semibold mb-3">Kies je AI-begeleider:</h4>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-7 gap-2">
               {[
                 { id: 'tutor', label: 'AI-Tutor', tooltip: 'Stap-voor-stap uitleg en begeleiding' },
                 { id: 'coach', label: 'AI-Coach', tooltip: 'Motiverende ondersteuning en feedback' },
@@ -647,14 +665,17 @@ ${openingQuestion}`,
               ].map((personality) => (
                 <div key={personality.id} className="group relative">
                   <button
-                    onClick={() => setAiPersonality(personality.id as any)}
+                    onClick={() => handlePersonalityChange(personality.id as any)}
                     className={`w-full p-2 rounded-lg text-sm transition-all ${
                       aiPersonality === personality.id
                         ? 'bg-white text-blue-600 font-semibold shadow-md'
                         : 'bg-white bg-opacity-20 hover:bg-opacity-30'
                     }`}
                   >
-                    {getPersonalityIcon(personality.id)} {personality.label}
+                    <div className="flex flex-col items-center">
+                      <span className="text-lg">{getPersonalityIcon(personality.id)}</span>
+                      <span className="text-xs mt-1">{personality.label.split('-')[1]}</span>
+                    </div>
                   </button>
                   
                   {/* Tooltip */}
@@ -666,32 +687,33 @@ ${openingQuestion}`,
             </div>
           </div>
 
-          {/* Selected Personality Info */}
-          <div className="bg-white bg-opacity-20 rounded-lg p-4">
-            <h4 className="font-semibold mb-2">
-              {getPersonalityIcon(aiPersonality)} {aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}
-            </h4>
-            <p className="text-blue-100 text-sm">
-              {getPersonalityDescription(aiPersonality)}
-            </p>
+          {/* Selected Personality Info & Start Chat Button */}
+          <div className="flex items-center justify-between bg-white bg-opacity-10 rounded-lg p-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl">
+                {selectedPersonalityInfo?.icon}
+              </div>
+              <div>
+                <h4 className="font-semibold">AI-{aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}</h4>
+                <p className="text-blue-100 text-sm">{selectedPersonalityInfo?.description}</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={startChat}
+              disabled={!quickscanResult}
+              className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-105"
+            >
+              🚀 Start Chat
+            </button>
           </div>
         </div>
 
-        {/* Start Chat Button */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={startChat}
-            disabled={!quickscanResult}
-            className="px-8 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-105"
-          >
-            🚀 Start Slimme Chat
-          </button>
-          {!quickscanResult && (
-            <p className="text-blue-100 text-sm mt-2">
-              Wacht tot de quickscan voltooid is...
-            </p>
-          )}
-        </div>
+        {!quickscanResult && (
+          <p className="text-blue-100 text-sm mt-2 text-center">
+            Wacht tot de quickscan voltooid is...
+          </p>
+        )}
       </div>
     </div>
   )
