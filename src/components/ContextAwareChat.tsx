@@ -140,6 +140,7 @@ Nu kan ik gepersonaliseerde begeleiding geven op basis van jouw specifieke schoo
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
     setIsLoading(true)
+    setIsListening(false) // Stop listening when sending message
 
     try {
       // Prepare enhanced context with conversation history
@@ -276,7 +277,6 @@ Nu kan ik gepersonaliseerde begeleiding geven op basis van jouw specifieke schoo
       setMessages(prev => [...prev, errorChatMessage])
     } finally {
       setIsLoading(false)
-      setIsListening(false) // Stop listening after sending message
     }
   }
 
@@ -299,12 +299,12 @@ Nu kan ik gepersonaliseerde begeleiding geven op basis van jouw specifieke schoo
   }
 
   const handleVoiceTranscript = (transcript: string) => {
-    setInputMessage(prev => prev + ' ' + transcript)
+    setInputMessage(prev => prev + (prev ? ' ' : '') + transcript)
   }
 
   const handleSuggestion = (suggestion: string) => {
     const cleanSuggestion = suggestion.replace(/^[^\w]*/, '').replace(/^(Probeer|Kun je|Overweeg|Wat).*?:?\s*/, '')
-    setInputMessage(prev => prev + ' ' + cleanSuggestion)
+    setInputMessage(prev => prev + (prev ? ' ' : '') + cleanSuggestion)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

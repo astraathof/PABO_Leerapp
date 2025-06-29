@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import ContextAwareChat from './ContextAwareChat'
+import VoiceInput from './VoiceInput'
 
 interface Opdracht {
   titel: string
@@ -40,6 +41,8 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [analysisComplete, setAnalysisComplete] = useState(false)
   const [returnToModule, setReturnToModule] = useState<boolean>(true)
   const [analysisVisible, setAnalysisVisible] = useState(true)
+  const [isListening, setIsListening] = useState(false)
+  const [inputMessage, setInputMessage] = useState('')
 
   // Load documents from localStorage
   useEffect(() => {
@@ -235,6 +238,10 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
     setDocumentAnalysis('')
     setInitialQuestion('')
     setAnalysisComplete(false)
+  }
+
+  const handleVoiceTranscript = (transcript: string) => {
+    setInputMessage(prev => prev + (prev ? ' ' : '') + transcript)
   }
 
   // Show loading state
@@ -448,6 +455,35 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
                 <div className="text-xs opacity-80">{level.desc}</div>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Voice Input Demo */}
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">🎙️ Spraakherkenning</h3>
+          <p className="text-gray-600 mb-4">
+            Test de spraakherkenning functie die beschikbaar is in alle chatbots:
+          </p>
+          
+          <div className="flex items-center space-x-4">
+            <VoiceInput
+              onTranscript={handleVoiceTranscript}
+              isListening={isListening}
+              onToggleListening={() => setIsListening(!isListening)}
+              disabled={false}
+            />
+            
+            {inputMessage && (
+              <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <p className="text-gray-700">{inputMessage}</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700">
+              <strong>💡 Tip:</strong> Spraakherkenning is beschikbaar in alle chatbots. Klik op de microfoon om hands-free te chatten!
+            </p>
           </div>
         </div>
 

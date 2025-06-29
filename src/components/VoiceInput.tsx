@@ -45,6 +45,7 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
           
           if (finalTranscript) {
             onTranscript(finalTranscript)
+            setTranscript('') // Clear after sending
           }
         }
 
@@ -66,7 +67,11 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
 
         recognition.onend = () => {
           if (isListening) {
-            recognition.start() // Restart if still supposed to be listening
+            try {
+              recognition.start() // Restart if still supposed to be listening
+            } catch (error) {
+              console.error('Failed to restart recognition:', error)
+            }
           }
         }
       }
@@ -74,7 +79,11 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop()
+        try {
+          recognitionRef.current.stop()
+        } catch (error) {
+          console.error('Failed to stop recognition:', error)
+        }
       }
     }
   }, [isListening, onTranscript, onToggleListening])
@@ -103,59 +112,61 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
 
   if (!isSupported) {
     return (
-      <div className="flex items-center space-x-2 bg-yellow-50 rounded-lg p-2 border border-yellow-200">
-        <span className="text-yellow-600">🎤</span>
-        <span className="text-sm text-yellow-700">Spraakherkenning wordt niet ondersteund in deze browser. Probeer Chrome of Edge.</span>
+      <div className="flex items-center space-x-2 bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+        <span className="text-yellow-600 text-lg">⚠️</span>
+        <span className="text-sm text-yellow-700">
+          Spraakherkenning wordt niet ondersteund in deze browser. Probeer Chrome of Edge.
+        </span>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col space-y-2">
-      <div className="flex items-center space-x-3">
-        <button
-          onClick={onToggleListening}
-          disabled={disabled}
-          className={`p-3 rounded-full transition-all flex items-center justify-center ${
-            isListening
-              ? 'bg-red-500 text-white animate-pulse'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-          title={isListening ? 'Stop opname' : 'Start spraakherkenning'}
-          aria-label={isListening ? 'Stop spraakherkenning' : 'Start spraakherkenning'}
-        >
-          <span className="text-lg">{isListening ? '🛑' : '🎤'}</span>
-        </button>
-        
+    <div className="flex items-center space-x-3">
+      <button
+        onClick={onToggleListening}
+        disabled={disabled}
+        className={`p-3 rounded-full transition-all flex items-center justify-center shadow-lg ${
+          isListening
+            ? 'bg-red-500 text-white animate-pulse scale-110'
+            : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        title={isListening ? 'Stop opname' : 'Start spraakherkenning'}
+        aria-label={isListening ? 'Stop spraakherkenning' : 'Start spraakherkenning'}
+      >
+        <span className="text-xl">{isListening ? '🛑' : '🎤'}</span>
+      </button>
+      
+      <div className="flex-1">
         {isListening && (
-          <div className="text-sm text-blue-600 flex items-center">
-            <span className="mr-2">Luisteren...</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-blue-600 font-medium">Luisteren...</span>
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
             </div>
           </div>
         )}
         
-        {!isListening && !disabled && (
+        {transcript && (
+          <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
+            <p className="text-sm text-blue-800">
+              🎙️ "{transcript}"
+            </p>
+          </div>
+        )}
+        
+        {errorMessage && (
+          <div className="bg-red-50 rounded-lg p-2 border border-red-200">
+            <p className="text-sm text-red-700">{errorMessage}</p>
+          </div>
+        )}
+        
+        {!isListening && !transcript && !errorMessage && !disabled && (
           <span className="text-sm text-gray-500">Klik op de microfoon om te spreken</span>
         )}
       </div>
-      
-      {transcript && (
-        <div className="flex-1 bg-blue-50 rounded-lg p-3 border border-blue-200">
-          <p className="text-sm text-blue-800">
-            🎙️ "{transcript}"
-          </p>
-        </div>
-      )}
-      
-      {errorMessage && (
-        <div className="bg-red-50 rounded-lg p-2 border border-red-200">
-          <p className="text-sm text-red-700">{errorMessage}</p>
-        </div>
-      )}
     </div>
   )
 }

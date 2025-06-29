@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import VoiceInput from './VoiceInput'
 
 interface UploadedDocument {
   id: string
@@ -46,6 +47,7 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [analysisVisible, setAnalysisVisible] = useState(true)
   const [selectedPersonalityInfo, setSelectedPersonalityInfo] = useState<{
@@ -186,6 +188,7 @@ ${openingQuestion}`,
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
     setIsLoading(true)
+    setIsListening(false) // Stop listening when sending message
 
     try {
       const response = await fetch('/api/smart-chat', {
@@ -283,6 +286,10 @@ ${openingQuestion}`,
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleVoiceTranscript = (transcript: string) => {
+    setInputMessage(prev => prev + (prev ? ' ' : '') + transcript)
   }
 
   const getPersonalityDescription = (personality: string) => {
@@ -611,6 +618,14 @@ ${openingQuestion}`,
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Voice Input */}
+        <VoiceInput
+          onTranscript={handleVoiceTranscript}
+          isListening={isListening}
+          onToggleListening={() => setIsListening(!isListening)}
+          disabled={isLoading}
+        />
+
         {/* Chat Input */}
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex space-x-3">
@@ -630,6 +645,10 @@ ${openingQuestion}`,
             >
               {isLoading ? '⏳' : '🚀'}
             </button>
+          </div>
+          
+          <div className="mt-2 text-xs text-gray-500 text-center">
+            💡 Tip: Gebruik de microfoon voor hands-free chatten
           </div>
         </div>
       </div>
