@@ -194,7 +194,8 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
       })
 
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(`Server error: ${response.status} - ${errorData.error || 'Unknown error'}`)
       }
 
       // Handle streaming response
@@ -232,9 +233,22 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
                     ? { ...msg, content: fullResponse }
                     : msg
                 ))
+              } else if (parsed.error) {
+                // Handle error in stream
+                if (parsed.fallbackResponse) {
+                  fullResponse = parsed.fallbackResponse
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: fullResponse }
+                      : msg
+                  ))
+                } else {
+                  throw new Error(parsed.error)
+                }
               }
             } catch (e) {
               // Continue if we can't parse
+              console.log('Error parsing stream chunk:', e)
             }
           }
         }
@@ -245,7 +259,9 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, er is een fout opgetreden. Probeer het opnieuw.',
+        content: error instanceof Error && error.message.includes('API Key') 
+          ? '🔑 **API Key Probleem**\n\nEr is een probleem met de Gemini API key. Controleer of deze correct is ingesteld in je environment variables.'
+          : 'Sorry, er is een fout opgetreden. Probeer het opnieuw of stel een andere vraag.',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
