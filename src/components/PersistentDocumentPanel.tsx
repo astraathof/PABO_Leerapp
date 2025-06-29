@@ -10,6 +10,7 @@ interface UploadedDocument {
   text: string
   wordCount: number
   uploadDate: Date
+  mimeType?: string
 }
 
 interface PersistentDocumentPanelProps {
@@ -108,7 +109,8 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
         detectedType: result.detectedType,
         text: result.text,
         wordCount: result.wordCount,
-        uploadDate: new Date()
+        uploadDate: new Date(),
+        mimeType: result.mimeType
       }
 
       setDocuments(prev => [...prev, newDocument])
@@ -141,12 +143,14 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     }
   }
 
-  const getDocumentIcon = (detectedType: string) => {
+  const getDocumentIcon = (detectedType: string, mimeType?: string) => {
+    if (mimeType?.startsWith('image/')) return '🖼️'
     if (detectedType.includes('Schoolplan') || detectedType.includes('Schoolgids')) return '🏫'
     if (detectedType.includes('Curriculum')) return '📚'
     if (detectedType.includes('Observatie')) return '👁️'
     if (detectedType.includes('Resultaten')) return '📊'
     if (detectedType.includes('Burgerschap')) return '🤝'
+    if (detectedType.includes('Visueel')) return '🖼️'
     return '📄'
   }
 
@@ -160,7 +164,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
             <div>
               <h3 className="font-semibold text-gray-800">Mijn Schooldocumenten</h3>
               <p className="text-sm text-gray-600">
-                {documents.length > 0 ? `${documents.length} document(en) beschikbaar` : 'Geen documenten geüpload'}
+                {documents.length > 0 ? `${documents.length} document(en) inhoudelijk geanalyseerd` : 'Geen documenten geüpload'}
                 {currentModule && documents.length > 0 && (
                   <span className="text-green-600 ml-2">• Actief voor {currentModule}</span>
                 )}
@@ -205,11 +209,11 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                 Sleep document hier of klik om te uploaden
               </p>
               <p className="text-xs text-gray-500">
-                PDF, DOCX, TXT • Max 10MB
+                PDF, DOCX, TXT, JPG, PNG, GIF, WebP • Max 10MB
               </p>
               <input
                 type="file"
-                accept=".pdf,.docx,.txt"
+                accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
                 onChange={handleFileUpload}
                 disabled={isUploading}
                 className="hidden"
@@ -223,7 +227,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
-                {isUploading ? 'Uploaden...' : '📤 Selecteer Bestand'}
+                {isUploading ? 'Uploaden & Analyseren...' : '📤 Selecteer Bestand'}
               </label>
             </div>
           </div>
@@ -239,10 +243,15 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
               {documents.slice(0, 2).map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <span className="text-lg">{getDocumentIcon(doc.detectedType)}</span>
+                    <span className="text-lg">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-800 text-sm truncate">{doc.fileName}</p>
-                      <p className="text-xs text-gray-500">{doc.detectedType}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-xs text-gray-500">{doc.detectedType}</p>
+                        {doc.mimeType?.startsWith('image/') && (
+                          <span className="text-xs text-purple-600">🔍 AI Vision</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button
@@ -274,7 +283,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                 <div key={doc.id} className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <span className="text-2xl">{getDocumentIcon(doc.detectedType)}</span>
+                      <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-800 truncate">{doc.fileName}</h4>
                         <div className="flex items-center space-x-3 text-sm text-gray-500 mt-1">
@@ -282,12 +291,15 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                           <span>🎯 {doc.detectedType}</span>
                           <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
                           <span>📅 {doc.uploadDate.toLocaleDateString()}</span>
+                          {doc.mimeType?.startsWith('image/') && (
+                            <span className="text-purple-600">🔍 AI Vision</span>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        ✅ Actief
+                        ✅ Geanalyseerd
                       </span>
                       <button
                         onClick={(e) => {
@@ -309,8 +321,13 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
           {currentModule && documents.length > 0 && (
             <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700">
-                <strong>💡 AI-analyse actief:</strong> Je documenten worden automatisch geanalyseerd voor de module "{currentModule}" 
+                <strong>💡 AI-analyse actief:</strong> Je documenten zijn inhoudelijk geanalyseerd en worden gebruikt voor de module "{currentModule}" 
                 om gepersonaliseerde begeleiding te geven.
+                {documents.some(doc => doc.mimeType?.startsWith('image/')) && (
+                  <span className="block mt-1">
+                    <strong>🔍 AI Vision:</strong> Afbeeldingen zijn geanalyseerd met Gemini Vision AI.
+                  </span>
+                )}
               </p>
             </div>
           )}
@@ -323,6 +340,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
           <div className="text-4xl mb-2">📚</div>
           <p className="text-gray-600 text-sm mb-3">
             Upload je schooldocumenten voor gepersonaliseerde AI-begeleiding
+          </p>
+          <p className="text-xs text-gray-500 mb-3">
+            Ondersteunt: PDF, Word, afbeeldingen en meer
           </p>
           <button
             onClick={() => setShowUploadArea(true)}

@@ -10,6 +10,7 @@ interface UploadedDocument {
   text: string
   wordCount: number
   uploadDate: Date
+  mimeType?: string
 }
 
 interface DocumentManagerProps {
@@ -80,7 +81,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     const file = event.target.files?.[0]
     if (!file) return
 
-    console.log('Starting file upload for:', file.name)
+    console.log('Starting file upload for:', file.name, 'Type:', file.type)
     setIsUploading(true)
     setUploadSuccess(false)
 
@@ -112,7 +113,8 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         detectedType: result.detectedType,
         text: result.text,
         wordCount: result.wordCount,
-        uploadDate: new Date()
+        uploadDate: new Date(),
+        mimeType: result.mimeType
       }
 
       console.log('Creating new document object:', newDocument)
@@ -186,12 +188,14 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     }
   }
 
-  const getDocumentIcon = (detectedType: string) => {
+  const getDocumentIcon = (detectedType: string, mimeType?: string) => {
+    if (mimeType?.startsWith('image/')) return '🖼️'
     if (detectedType.includes('Schoolplan') || detectedType.includes('Schoolgids')) return '🏫'
     if (detectedType.includes('Curriculum')) return '📚'
     if (detectedType.includes('Observatie')) return '👁️'
     if (detectedType.includes('Resultaten')) return '📊'
     if (detectedType.includes('Burgerschap')) return '🤝'
+    if (detectedType.includes('Visueel')) return '🖼️'
     return '📄'
   }
 
@@ -219,7 +223,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
             <div>
               <h3 className="text-xl font-bold mb-2">🎉 Document succesvol geüpload!</h3>
               <p className="text-green-100 mb-3">
-                Je document is verwerkt en toegevoegd aan je bibliotheek. Je kunt het nu gebruiken in alle modules.
+                Je document is inhoudelijk geanalyseerd en toegevoegd aan je bibliotheek. Je kunt het nu gebruiken in alle modules.
               </p>
               <div className="bg-white bg-opacity-20 rounded-lg p-3 mb-4">
                 <p className="text-sm">
@@ -260,7 +264,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">📚 Mijn Schooldocumenten</h2>
         <p className="text-gray-600 mb-6">
-          Upload en beheer hier alle documenten van jouw school. Deze kun je dan gebruiken in alle modules voor gepersonaliseerd leren.
+          Upload en beheer hier alle documenten van jouw school. Deze worden inhoudelijk geanalyseerd en kun je gebruiken in alle modules voor gepersonaliseerd leren.
         </p>
         
         <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
@@ -271,11 +275,11 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 Sleep je document hier of klik om te uploaden
               </p>
               <p className="text-sm text-gray-500 mb-4">
-                Ondersteunde formaten: PDF, DOCX, TXT (max 10MB)
+                Ondersteunde formaten: PDF, DOCX, TXT, JPG, PNG, GIF, WebP (max 10MB)
               </p>
               <input
                 type="file"
-                accept=".pdf,.docx,.txt"
+                accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
                 onChange={handleFileUpload}
                 disabled={isUploading}
                 className="hidden"
@@ -292,7 +296,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 {isUploading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Uploaden...
+                    Uploaden & Analyseren...
                   </>
                 ) : (
                   <>📤 Selecteer Document</>
@@ -303,14 +307,15 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         </div>
 
         {/* Document Types Info */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
           {[
             { icon: '🏫', title: 'Schoolplan', desc: 'Visie & missie' },
             { icon: '📖', title: 'Schoolgids', desc: 'Praktische info' },
             { icon: '📋', title: 'Beleid', desc: 'Procedures' },
             { icon: '📊', title: 'Resultaten', desc: 'Cito & LVS' },
             { icon: '🎯', title: 'Jaarplan', desc: 'Curriculum' },
-            { icon: '👥', title: 'Observatie', desc: 'Feedback' }
+            { icon: '👥', title: 'Observatie', desc: 'Feedback' },
+            { icon: '🖼️', title: 'Afbeeldingen', desc: 'Visuele docs' }
           ].map((type, index) => (
             <div key={index} className="bg-blue-50 rounded-lg p-3 border border-blue-200 text-center">
               <div className="text-2xl mb-1">{type.icon}</div>
@@ -327,7 +332,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-xl font-bold text-gray-800">📂 Mijn Document Bibliotheek</h3>
-              <p className="text-gray-600 text-sm">{documents.length} document(en) • Klaar voor gebruik in modules</p>
+              <p className="text-gray-600 text-sm">{documents.length} document(en) • Inhoudelijk geanalyseerd • Klaar voor gebruik</p>
             </div>
             <div className="flex items-center space-x-3">
               {/* View Mode Toggle */}
@@ -373,10 +378,13 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-blue-50 hover:scale-105">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <span className="text-3xl">{getDocumentIcon(doc.detectedType)}</span>
+                      <span className="text-3xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-800 truncate">{doc.fileName}</h4>
                         <p className="text-xs text-gray-500">{doc.fileType}</p>
+                        {doc.mimeType?.startsWith('image/') && (
+                          <p className="text-xs text-purple-600">🔍 AI Vision Analyse</p>
+                        )}
                       </div>
                     </div>
                     <button
@@ -412,7 +420,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                   
                   <div className="flex items-center justify-between">
                     <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                      ✅ Beschikbaar
+                      ✅ Geanalyseerd
                     </span>
                     <button
                       onClick={(e) => {
@@ -436,7 +444,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 <div key={doc.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all bg-gradient-to-r from-green-50 to-blue-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4 flex-1">
-                      <span className="text-2xl">{getDocumentIcon(doc.detectedType)}</span>
+                      <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-800">{doc.fileName}</h4>
                         <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
@@ -445,12 +453,15 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                           <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
                           <span>📅 {doc.uploadDate.toLocaleDateString()}</span>
                           <span>💾 {getFileSize(doc.wordCount)}</span>
+                          {doc.mimeType?.startsWith('image/') && (
+                            <span className="text-purple-600">🔍 AI Vision</span>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        ✅ Beschikbaar
+                        ✅ Geanalyseerd
                       </span>
                       <button
                         onClick={(e) => {
@@ -497,8 +508,12 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
               </div>
               <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-700">
-                  <strong>💡 Gebruik in modules:</strong> Dit document is beschikbaar in alle modules met AI-begeleiding. 
-                  Ga naar een module om specifieke analyse te krijgen!
+                  <strong>💡 Gebruik in modules:</strong> Dit document is inhoudelijk geanalyseerd en beschikbaar in alle modules met AI-begeleiding. 
+                  {selectedDocument.mimeType?.startsWith('image/') && (
+                    <span className="block mt-1">
+                      <strong>🔍 AI Vision:</strong> Tekst en inhoud zijn geëxtraheerd uit de afbeelding met Gemini Vision AI.
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -511,7 +526,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
           <h3 className="text-xl font-bold mb-3">🚀 Klaar om te Leren met je Documenten!</h3>
           <p className="text-purple-100 mb-4">
-            Je hebt {documents.length} document(en) in je bibliotheek. Kies een module om specifieke AI-analyse te krijgen!
+            Je hebt {documents.length} document(en) in je bibliotheek die inhoudelijk zijn geanalyseerd. Kies een module om specifieke AI-analyse te krijgen!
           </p>
           <div className="flex flex-wrap gap-3">
             <button
@@ -541,21 +556,21 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">1️⃣</span>
-              <span className="text-green-700">Upload hier al je schooldocumenten (schoolplan, beleid, etc.)</span>
+              <span className="text-green-700">Upload hier al je schooldocumenten (PDF, Word, afbeeldingen, etc.)</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">2️⃣</span>
-              <span className="text-green-700">Ga naar een module die je wilt leren</span>
+              <span className="text-green-700">AI analyseert de inhoud automatisch (tekst + afbeeldingen)</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">3️⃣</span>
-              <span className="text-green-700">Start AI-begeleiding - documenten worden automatisch geanalyseerd</span>
+              <span className="text-green-700">Ga naar een module die je wilt leren</span>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">4️⃣</span>
-              <span className="text-green-700">Krijg gepersonaliseerde antwoorden op basis van jouw school</span>
+              <span className="text-green-700">Krijg slimme quickscan + rolgebaseerde AI chatbot</span>
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-green-600 mt-0.5">5️⃣</span>
@@ -570,7 +585,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
         
         <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-sm text-yellow-800">
-            <strong>🎯 Voorbeeld:</strong> Upload je schoolplan → Ga naar module "Burgerschap" → AI analyseert automatisch hoe jullie burgerschap vormgeven!
+            <strong>🎯 Nieuw:</strong> Upload ook afbeeldingen van documenten! AI Vision extraheert automatisch alle tekst en analyseert de inhoud.
           </p>
         </div>
       </div>
@@ -585,13 +600,15 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           </p>
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
             <h4 className="font-medium text-blue-800 mb-2">💡 Welke documenten kun je uploaden?</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-blue-700">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-blue-700">
               <div>🏫 Schoolplan</div>
               <div>📖 Schoolgids</div>
               <div>📋 Beleidsplannen</div>
               <div>📊 Cito-resultaten</div>
               <div>🎯 Jaarplannen</div>
               <div>👥 Observatieformulieren</div>
+              <div>🖼️ Afbeeldingen</div>
+              <div>📄 Alle documenten</div>
             </div>
           </div>
         </div>

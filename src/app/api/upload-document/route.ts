@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 // COMPLETELY REWRITTEN PDF extraction using multiple strategies
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
@@ -125,6 +128,73 @@ Stel gerust vragen over de inhoud van dit document.`
   }
 }
 
+// NEW: Extract text from images using Gemini Vision
+async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<string> {
+  try {
+    console.log('🖼️ Starting image text extraction with Gemini Vision...')
+    
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY not configured')
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    
+    const base64Image = buffer.toString('base64')
+    
+    const imagePart = {
+      inlineData: {
+        data: base64Image,
+        mimeType: mimeType
+      }
+    }
+
+    const prompt = `Analyseer deze afbeelding en extraheer alle tekst die je kunt zien. 
+
+Als dit een schooldocument is (zoals een schoolplan, beleid, observatieformulier, etc.), geef dan:
+
+1. ALLE ZICHTBARE TEKST (letterlijk wat er staat)
+2. TYPE DOCUMENT (wat voor soort document dit lijkt te zijn)
+3. HOOFDONDERWERPEN (welke onderwijsthema's worden behandeld)
+4. BELANGRIJKE INFORMATIE (kernpunten, doelen, procedures)
+
+Geef een gestructureerde output in het Nederlands. Als er geen tekst zichtbaar is, beschrijf dan wat je wel ziet.`
+
+    const result = await model.generateContent([prompt, imagePart])
+    const response = await result.response
+    const extractedText = response.text()
+
+    console.log('✅ Image text extraction completed successfully')
+
+    return `AFBEELDING DOCUMENT - TEKST GEËXTRAHEERD
+
+=== GEMINI VISION ANALYSE ===
+${extractedText}
+
+=== DOCUMENT INFO ===
+Bestandstype: Afbeelding (${mimeType})
+Extractie: Gemini Vision AI
+Geschikt voor: AI-analyse van visuele schooldocumenten
+
+Dit document kan worden gebruikt voor:
+- Analyse van visuele schoolmaterialen
+- Bespreking van beleidsdocumenten
+- Evaluatie van formulieren en procedures
+- Koppeling tussen visuele informatie en theorie`
+
+  } catch (error) {
+    console.error('Image text extraction error:', error)
+    return `AFBEELDING DOCUMENT - BESCHIKBAAR VOOR ANALYSE
+
+Deze afbeelding is geüpload en kan worden besproken in relatie tot:
+- Visuele schooldocumenten en materialen
+- Beleid en procedures in afbeeldingsvorm
+- Observatieformulieren en evaluaties
+- Onderwijskundige diagrammen en schema's
+
+De AI kan helpen bij het analyseren van de visuele inhoud.`
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -137,7 +207,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`📁 Processing file: ${file.name} (${file.size} bytes)`)
+    console.log(`📁 Processing file: ${file.name} (${file.size} bytes, ${file.type})`)
 
     const buffer = Buffer.from(await file.arrayBuffer())
     let extractedText = ''
@@ -171,9 +241,23 @@ export async function POST(request: NextRequest) {
       if (extractedText.length > 20) {
         extractedText += `\n\n=== DOCUMENT INFO ===\nBestandstype: Platte tekst\nExtractie: Volledig\nGeschikt voor: Volledige AI-analyse`
       }
+    } else if (file.type.startsWith('image/')) {
+      console.log('🖼️ Processing Image...')
+      // NEW: Handle image files
+      const supportedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+      
+      if (supportedImageTypes.includes(file.type)) {
+        extractedText = await extractTextFromImage(buffer, file.type)
+        documentType = 'Afbeelding'
+      } else {
+        return NextResponse.json(
+          { error: `Afbeeldingstype ${file.type} wordt niet ondersteund. Gebruik JPG, PNG, GIF of WebP.` },
+          { status: 400 }
+        )
+      }
     } else {
       return NextResponse.json(
-        { error: 'Bestandstype niet ondersteund. Gebruik PDF, DOCX of TXT bestanden.' },
+        { error: 'Bestandstype niet ondersteund. Gebruik PDF, DOCX, TXT of afbeeldingsbestanden (JPG, PNG, GIF, WebP).' },
         { status: 400 }
       )
     }
@@ -199,6 +283,10 @@ export async function POST(request: NextRequest) {
       detectedDocumentType = 'Zorgdocument'
     } else if (fileName.includes('notulen') || content.includes('notulen')) {
       detectedDocumentType = 'Notulen'
+    } else if (fileName.includes('observatie') || content.includes('observatie')) {
+      detectedDocumentType = 'Observatieformulier'
+    } else if (file.type.startsWith('image/')) {
+      detectedDocumentType = 'Visueel Schooldocument'
     }
 
     console.log(`✅ Successfully processed: ${detectedDocumentType} (${extractedText.length} characters)`)
@@ -209,7 +297,8 @@ export async function POST(request: NextRequest) {
       fileName: file.name,
       fileType: documentType,
       detectedType: detectedDocumentType,
-      wordCount: extractedText.split(/\s+/).filter(word => word.length > 0).length
+      wordCount: extractedText.split(/\s+/).filter(word => word.length > 0).length,
+      mimeType: file.type
     })
 
   } catch (error) {
