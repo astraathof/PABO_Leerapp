@@ -276,6 +276,7 @@ Nu kan ik gepersonaliseerde begeleiding geven op basis van jouw specifieke schoo
       setMessages(prev => [...prev, errorChatMessage])
     } finally {
       setIsLoading(false)
+      setIsListening(false) // Stop listening after sending message
     }
   }
 

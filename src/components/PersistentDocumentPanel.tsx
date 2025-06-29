@@ -167,32 +167,40 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-      {/* Header with clear document management options */}
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      {/* Header with improved document management options */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <span className="text-xl">📚</span>
+            <div className="text-2xl">📚</div>
             <div>
               <h3 className="font-semibold text-gray-800">Mijn Schooldocumenten</h3>
-              <p className="text-sm text-gray-600">
-                {documents.length > 0 ? `${documents.length} document(en) geanalyseerd` : 'Geen documenten geüpload'}
+              <div className="flex items-center text-sm">
+                <span className="text-gray-600 mr-2">
+                  {documents.length} document{documents.length !== 1 ? 'en' : ''} geanalyseerd
+                </span>
                 {currentModule && documents.length > 0 && (
-                  <span className="text-green-600 ml-2">• Actief voor {currentModule}</span>
+                  <span className="text-green-600 flex items-center">
+                    • <span className="inline-flex items-center ml-1">Actief voor {currentModule}</span>
+                  </span>
                 )}
-              </p>
+              </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
             {/* Document Management Buttons */}
-            <button
-              onClick={navigateToDocuments}
+            <a
+              href="/documenten"
+              onClick={(e) => {
+                e.preventDefault();
+                navigateToDocuments();
+              }}
               className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm flex items-center space-x-1"
             >
-              <span>📂</span>
+              <span className="text-blue-700">📂</span>
               <span>Beheer</span>
-            </button>
+            </a>
             
             {/* Upload Button - Clearly a button */}
             <button
@@ -213,9 +221,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm flex items-center space-x-1"
+                aria-label={isExpanded ? "Compact weergave" : "Uitgebreide weergave"}
               >
                 <span>{isExpanded ? '🔼' : '🔽'}</span>
-                <span>{isExpanded ? 'Compact' : 'Uitgebreid'}</span>
               </button>
             )}
           </div>
@@ -286,7 +294,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-800">{doc.fileName}</h4>
+                        <h4 className="font-medium text-gray-800 truncate">{doc.fileName}</h4>
                         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mt-1">
                           <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">📄 {doc.fileType}</span>
                           <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">🎯 {doc.detectedType}</span>
@@ -308,6 +316,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                           deleteDocument(doc.id)
                         }}
                         className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                        aria-label="Verwijder document"
                       >
                         🗑️ Verwijder
                       </button>
@@ -348,6 +357,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                     }}
                     className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                     title="Verwijder document"
+                    aria-label="Verwijder document"
                   >
                     🗑️
                   </button>
@@ -388,13 +398,17 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
             Upload je schooldocumenten voor gepersonaliseerde AI-begeleiding
           </p>
           <div className="flex justify-center space-x-3">
-            <button
-              onClick={navigateToDocuments}
+            <a
+              href="/documenten"
+              onClick={(e) => {
+                e.preventDefault();
+                navigateToDocuments();
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-1"
             >
               <span>📂</span>
               <span>Beheer Documenten</span>
-            </button>
+            </a>
             <button
               onClick={() => setShowUploadArea(true)}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center space-x-1"

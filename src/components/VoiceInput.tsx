@@ -12,6 +12,7 @@ interface VoiceInputProps {
 export default function VoiceInput({ onTranscript, isListening, onToggleListening, disabled }: VoiceInputProps) {
   const [isSupported, setIsSupported] = useState(false)
   const [transcript, setTranscript] = useState('')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
@@ -49,6 +50,18 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
 
         recognition.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error)
+          if (event.error === 'not-allowed') {
+            setErrorMessage('Microfoon toegang geweigerd. Controleer je browser instellingen.')
+          } else if (event.error === 'network') {
+            setErrorMessage('Netwerkprobleem. Controleer je internetverbinding.')
+          } else {
+            setErrorMessage(`Fout: ${event.error}`)
+          }
+          
+          // Auto-stop on error
+          if (isListening) {
+            onToggleListening()
+          }
         }
 
         recognition.onend = () => {
@@ -64,47 +77,83 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
         recognitionRef.current.stop()
       }
     }
-  }, [isListening, onTranscript])
+  }, [isListening, onTranscript, onToggleListening])
 
   useEffect(() => {
     if (recognitionRef.current) {
       if (isListening && !disabled) {
-        recognitionRef.current.start()
+        try {
+          recognitionRef.current.start()
+          setErrorMessage(null)
+        } catch (error) {
+          console.error('Failed to start speech recognition:', error)
+          setErrorMessage('Kon spraakherkenning niet starten. Probeer de pagina te verversen.')
+          onToggleListening() // Turn off listening state
+        }
       } else {
-        recognitionRef.current.stop()
+        try {
+          recognitionRef.current.stop()
+        } catch (error) {
+          console.error('Failed to stop speech recognition:', error)
+        }
         setTranscript('')
       }
     }
-  }, [isListening, disabled])
+  }, [isListening, disabled, onToggleListening])
 
   if (!isSupported) {
     return (
-      <div className="text-sm text-gray-500 text-center p-2">
-        🎤 Spraakherkenning niet ondersteund in deze browser
+      <div className="flex items-center space-x-2 bg-yellow-50 rounded-lg p-2 border border-yellow-200">
+        <span className="text-yellow-600">🎤</span>
+        <span className="text-sm text-yellow-700">Spraakherkenning wordt niet ondersteund in deze browser. Probeer Chrome of Edge.</span>
       </div>
     )
   }
 
   return (
-    <div className="flex items-center space-x-3">
-      <button
-        onClick={onToggleListening}
-        disabled={disabled}
-        className={`p-3 rounded-full transition-all ${
-          isListening
-            ? 'bg-red-500 text-white animate-pulse'
-            : 'bg-blue-500 text-white hover:bg-blue-600'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        title={isListening ? 'Stop opname' : 'Start spraakherkenning'}
-      >
-        {isListening ? '🛑' : '🎤'}
-      </button>
+    <div className="flex flex-col space-y-2">
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={onToggleListening}
+          disabled={disabled}
+          className={`p-3 rounded-full transition-all flex items-center justify-center ${
+            isListening
+              ? 'bg-red-500 text-white animate-pulse'
+              : 'bg-blue-500 text-white hover:bg-blue-600'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          title={isListening ? 'Stop opname' : 'Start spraakherkenning'}
+          aria-label={isListening ? 'Stop spraakherkenning' : 'Start spraakherkenning'}
+        >
+          <span className="text-lg">{isListening ? '🛑' : '🎤'}</span>
+        </button>
+        
+        {isListening && (
+          <div className="text-sm text-blue-600 flex items-center">
+            <span className="mr-2">Luisteren...</span>
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+            </div>
+          </div>
+        )}
+        
+        {!isListening && !disabled && (
+          <span className="text-sm text-gray-500">Klik op de microfoon om te spreken</span>
+        )}
+      </div>
       
       {transcript && (
-        <div className="flex-1 bg-blue-50 rounded-lg p-2 border border-blue-200">
+        <div className="flex-1 bg-blue-50 rounded-lg p-3 border border-blue-200">
           <p className="text-sm text-blue-800">
             🎙️ "{transcript}"
           </p>
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="bg-red-50 rounded-lg p-2 border border-red-200">
+          <p className="text-sm text-red-700">{errorMessage}</p>
         </div>
       )}
     </div>

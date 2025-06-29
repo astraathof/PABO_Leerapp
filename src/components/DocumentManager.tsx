@@ -25,6 +25,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list') // Default to list view
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -137,6 +138,57 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       setShowSuccessMessage(true)
       
       console.log('Upload process completed successfully')
+      
+    } catch (error) {
+      console.error('Upload error:', error)
+      setUploadError(error instanceof Error ? error.message : 'Onbekende fout bij uploaden')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDragging(false)
+    
+    const file = e.dataTransfer.files?.[0]
+    if (!file) return
+    
+    setIsUploading(true)
+    setUploadSuccess(false)
+    setUploadError(null)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const response = await fetch('/api/upload-document', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        setUploadError(errorData.error || 'Upload failed')
+        throw new Error(errorData.error || 'Upload failed')
+      }
+      
+      const result = await response.json()
+      
+      const newDocument: UploadedDocument = {
+        id: Date.now().toString(),
+        fileName: result.fileName,
+        fileType: result.fileType,
+        detectedType: result.detectedType,
+        text: result.text,
+        wordCount: result.wordCount,
+        uploadDate: new Date(),
+        mimeType: result.mimeType
+      }
+      
+      setDocuments(prev => [...prev, newDocument])
+      setUploadSuccess(true)
+      setShowSuccessMessage(true)
       
     } catch (error) {
       console.error('Upload error:', error)
@@ -270,12 +322,20 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
           Upload en beheer hier alle documenten van jouw school. Deze worden inhoudelijk geanalyseerd en kun je gebruiken in alle modules voor gepersonaliseerd leren.
         </p>
         
-        <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+        <div 
+          className={`border-2 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-dashed border-blue-300'} rounded-lg p-8 text-center hover:border-blue-400 transition-colors`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+        >
           <div className="space-y-4">
-            <div className="text-4xl">📁</div>
+            <div className="text-4xl">{isDragging ? '📥' : '📁'}</div>
             <div>
               <p className="text-lg font-medium text-gray-700 mb-2">
-                Sleep je document hier of klik om te uploaden
+                {isDragging ? 'Laat los om te uploaden' : 'Sleep je document hier of klik om te uploaden'}
               </p>
               <p className="text-sm text-gray-500 mb-4">
                 Ondersteunde formaten: PDF, DOCX, TXT, JPG, PNG, GIF, WebP (max 10MB)
@@ -352,6 +412,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                   className={`px-3 py-1 rounded-md text-sm transition-colors ${
                     viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                   }`}
+                  aria-label="Grid weergave"
                 >
                   ⊞ Grid
                 </button>
@@ -360,6 +421,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                   className={`px-3 py-1 rounded-md text-sm transition-colors ${
                     viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                   }`}
+                  aria-label="Lijst weergave"
                 >
                   ☰ Lijst
                 </button>
@@ -404,6 +466,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                       }}
                       className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                       title="Verwijder document"
+                      aria-label="Verwijder document"
                     >
                       🗑️
                     </button>
@@ -506,6 +569,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 <button
                   onClick={() => setSelectedDocument(null)}
                   className="text-gray-400 hover:text-gray-600"
+                  aria-label="Sluit preview"
                 >
                   ✕
                 </button>
