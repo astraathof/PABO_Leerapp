@@ -687,24 +687,14 @@ ${openingQuestion}`,
             </div>
           </div>
 
-          {/* Selected Personality Info & Start Chat Button */}
-          <div className="flex items-center justify-between bg-white bg-opacity-10 rounded-lg p-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl">
-                {selectedPersonalityInfo?.icon}
-              </div>
-              <div>
-                <h4 className="font-semibold">AI-{aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}</h4>
-                <p className="text-blue-100 text-sm">{selectedPersonalityInfo?.description}</p>
-              </div>
-            </div>
-            
+          {/* Start Chat Button */}
+          <div className="flex justify-center">
             <button
               onClick={startChat}
               disabled={!quickscanResult}
               className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-105"
             >
-              🚀 Start Chat
+              🚀 Start Slimme Chat
             </button>
           </div>
         </div>
