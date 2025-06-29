@@ -72,9 +72,9 @@ Geef de volledige tekstinhoud terug zonder samenvatting.`
 
     console.log('🤖 Sending PDF to Gemini 2.5 Flash for text extraction...')
 
-    // Create a timeout promise (30 seconds)
+    // Create a timeout promise (60 seconds)
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('PDF processing timeout after 30 seconds')), 30000)
+      setTimeout(() => reject(new Error('PDF processing timeout after 60 seconds')), 60000)
     })
 
     // Race between API call and timeout
