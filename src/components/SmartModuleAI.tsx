@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface UploadedDocument {
   id: string
@@ -10,6 +10,7 @@ interface UploadedDocument {
   text: string
   wordCount: number
   uploadDate: Date
+  mimeType?: string
 }
 
 interface SmartModuleAIProps {
@@ -45,6 +46,12 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   useEffect(() => {
     if (documents.length > 0) {
@@ -178,8 +185,8 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
           aiRole: aiPersonality,
           moduleInfo: {
             titel: moduleTitle,
-            leerdoelen: [`Leerdoelen voor ${moduleTitle}`],
-            competenties: [`Competenties voor ${moduleTitle}`]
+            leerdoelen: getModuleLeerdoelen(moduleId),
+            competenties: getModuleCompetenties(moduleId)
           },
           quickscanResult: quickscanResult?.analysis || '',
           documentContext: documents.map(doc => `${doc.fileName}: ${doc.text.substring(0, 500)}...`).join('\n\n'),
@@ -288,6 +295,50 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
     }
   }
 
+  const getModuleLeerdoelen = (moduleId: string): string[] => {
+    // Hier zou je normaal gesproken de leerdoelen ophalen uit een database of API
+    // Voor nu gebruiken we hardcoded leerdoelen per module
+    switch (moduleId) {
+      case 'module1':
+        return [
+          'Alle 58 kerndoelen beheersen',
+          'Kerndoelen vertalen naar lesdoelen',
+          'Progressie monitoren per groep',
+          'Curriculum mapping toepassen'
+        ]
+      case 'module2':
+        return [
+          'Ontwikkelingsstadia herkennen',
+          'Theorie koppelen aan praktijk',
+          'Leeftijdsadequaat onderwijs geven',
+          'Individuele verschillen begrijpen'
+        ]
+      default:
+        return ['Leerdoelen voor deze module']
+    }
+  }
+
+  const getModuleCompetenties = (moduleId: string): string[] => {
+    // Hier zou je normaal gesproken de competenties ophalen uit een database of API
+    // Voor nu gebruiken we hardcoded competenties per module
+    switch (moduleId) {
+      case 'module1':
+        return [
+          'Vakinhoudelijke bekwaamheid',
+          'Didactische bekwaamheid',
+          'Organisatorische bekwaamheid'
+        ]
+      case 'module2':
+        return [
+          'Pedagogische bekwaamheid',
+          'Interpersoonlijke bekwaamheid',
+          'Reflectieve bekwaamheid'
+        ]
+      default:
+        return ['Competenties voor deze module']
+    }
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -363,6 +414,8 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
               </div>
             </div>
           )}
+          
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Chat Input */}

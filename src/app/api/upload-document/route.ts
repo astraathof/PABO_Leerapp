@@ -109,7 +109,7 @@ Dit PDF-document is geüpload maar de automatische tekstextractie is niet volled
 === WAT KUN JE DOEN ===
 • Upload het document als afbeelding (JPG/PNG) voor betere tekstherkenning
 • Converteer het PDF naar Word-formaat en upload opnieuw
-• Gebruik de AI-chat om specifieke vragen te stellen over dit document
+• Gebruik de AI-chat om specifieke vragen te stellen over dit type document
 
 De AI kan nog steeds helpen met algemene vragen over dit type document.`
   }
