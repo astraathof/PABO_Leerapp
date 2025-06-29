@@ -127,12 +127,12 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
         
         console.log(`📋 Using ${content.length} characters for ${doc.fileName}`)
         
-        return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType})
+        return `DOCUMENT: ${doc.fileName} (${doc.detectedType})
 
-**INHOUD:**
+INHOUD:
 ${content}
 
-**EINDE DOCUMENT**`
+EINDE DOCUMENT`
       }).join('\n\n')
       
       console.log(`📊 Total content for AI: ${documentTexts.length} characters`)
@@ -160,9 +160,7 @@ ${content}
         setDocumentAnalysis(analysisText)
         
         // Extract the initial question from the analysis
-        const questionMatch = analysisText.match(/\*\*❓.*?\*\*\s*(.+?)(?:\n|$)/i) ||
-                             analysisText.match(/Openingsvraag.*?:\s*(.+?)(?:\n|$)/i) ||
-                             analysisText.match(/\*\*Openingsvraag\*\*\s*(.+?)(?:\n|$)/i)
+        const questionMatch = analysisText.match(/Openingsvraag(?:.*?):\s*(.+?)(?:\n|$)/i)
         
         if (questionMatch) {
           const question = questionMatch[1].trim()
@@ -183,20 +181,20 @@ ${content}
       console.error('❌ Document analysis error:', error)
       
       // Fallback analysis
-      const fallbackAnalysis = `**📚 Documenten ontvangen**
+      const fallbackAnalysis = `Documenten ontvangen
 Je hebt ${documents.length} schooldocument(en) geüpload: ${documents.map(doc => doc.fileName).join(', ')}.
 
-**💪 Pluspunten t.o.v. module doelen**
+Pluspunten t.o.v. module doelen
 • Je documenten bieden concrete schoolcontext voor de module "${module}"
 • Ze maken het mogelijk om theorie te koppelen aan jullie specifieke praktijk
 • Er is materiaal beschikbaar om praktische verbeteringen te identificeren
 
-**🔧 Ontwikkelkansen**
+Ontwikkelkansen
 • We kunnen samen onderzoeken hoe jullie aanpak zich verhoudt tot de module doelen
 • Er zijn mogelijkheden om concrete implementatiestrategieën te ontwikkelen
 • We kunnen verbanden leggen tussen theorie en jullie schoolsituatie
 
-**❓ Openingsvraag**
+Openingsvraag
 Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`
       
       setDocumentAnalysis(fallbackAnalysis)

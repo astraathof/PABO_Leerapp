@@ -58,19 +58,19 @@ export default function ContextAwareChat({
       const welcomeMessage: ChatMessage = {
         id: 'welcome-' + Date.now(),
         role: 'assistant',
-        content: `🎉 **Welkom! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:**
+        content: `🎉 Welkom! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:
 
-${selectedDocs.map(doc => `${doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'} **${doc.fileName}** (${doc.detectedType})`).join('\n')}
+${selectedDocs.map(doc => `${doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'} ${doc.fileName} (${doc.detectedType})`).join('\n')}
 
-Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke schoolsituatie! 
+Nu kan ik gepersonaliseerde begeleiding geven op basis van jouw specifieke schoolsituatie! 
 
-💡 **Wat kun je me vragen?**
+💡 Wat kun je me vragen?
 • "Wat staat er in ons schoolplan over [onderwerp]?"
 • "Hoe kan ik de visie van onze school toepassen in mijn lessen?"
 • "Vergelijk onze aanpak met de theorie die ik geleerd heb"
 • "Geef concrete voorbeelden uit onze schoolcontext"
 
-🎙️ **Tip:** Gebruik spraakherkenning door op de microfoon te klikken voor hands-free chatten!`,
+🎙️ Tip: Gebruik spraakherkenning door op de microfoon te klikken voor hands-free chatten!`,
         timestamp: new Date()
       }
       setMessages([welcomeMessage])
@@ -81,7 +81,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
           const questionMessage: ChatMessage = {
             id: 'initial-question-' + Date.now(),
             role: 'assistant',
-            content: `🤔 **${initialQuestion}**`,
+            content: `🤔 ${initialQuestion}`,
             timestamp: new Date()
           }
           setMessages(prev => [...prev, questionMessage])
@@ -92,17 +92,17 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       const welcomeMessage: ChatMessage = {
         id: 'welcome-no-docs-' + Date.now(),
         role: 'assistant',
-        content: `👋 **Welkom bij je AI-mentor!** Ik ben hier om je te helpen met je professionele ontwikkeling.
+        content: `👋 Welkom bij je AI-mentor! Ik ben hier om je te helpen met je professionele ontwikkeling.
 
-🤔 **Hoe kan ik je helpen?**
+🤔 Hoe kan ik je helpen?
 • Stel vragen over onderwijstheorie
 • Vraag om praktijkvoorbeelden
 • Bespreek uitdagingen in de klas
 • Reflecteer op je leerervaringen
 
-💡 **Tip:** Voor nog betere begeleiding kun je je schooldocumenten uploaden via het documentenpaneel bovenaan. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
+💡 Tip: Voor nog betere begeleiding kun je je schooldocumenten uploaden via het documentenpaneel bovenaan. Dan kan ik specifiek advies geven op basis van jouw schoolsituatie!
 
-🎙️ **Gebruik spraak:** Klik op de microfoon voor hands-free chatten!`,
+🎙️ Gebruik spraak: Klik op de microfoon voor hands-free chatten!`,
         timestamp: new Date()
       }
       setMessages([welcomeMessage])
@@ -186,7 +186,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
         const errorData = await response.json().catch(() => ({}))
         
         if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
-          throw new Error('🔑 **API Key Configuratie Probleem**\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\n**Voor ontwikkelaars:**\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
+          throw new Error('🔑 API Key Configuratie Probleem\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\nVoor ontwikkelaars:\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
         }
         
         throw new Error(`Server error: ${response.status} - ${errorData.error || 'Onbekende fout'}`)
@@ -259,11 +259,11 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
         if (error.message.includes('API Key Configuratie')) {
           errorMessage = error.message
         } else if (error.message.includes('GEMINI_API_KEY')) {
-          errorMessage = '🔑 **API Configuratie Vereist**\n\nDe Gemini API key is niet ingesteld. Neem contact op met de beheerder om dit op te lossen.\n\n**Tijdelijke oplossing:** Probeer de pagina te verversen en opnieuw te proberen.'
+          errorMessage = '🔑 API Configuratie Vereist\n\nDe Gemini API key is niet ingesteld. Neem contact op met de beheerder om dit op te lossen.\n\nTijdelijke oplossing: Probeer de pagina te verversen en opnieuw te proberen.'
         } else if (error.message.includes('Failed to fetch')) {
-          errorMessage = '🌐 **Verbindingsprobleem**\n\nKan geen verbinding maken met de AI-service. Controleer je internetverbinding en probeer het opnieuw.'
+          errorMessage = '🌐 Verbindingsprobleem\n\nKan geen verbinding maken met de AI-service. Controleer je internetverbinding en probeer het opnieuw.'
         } else if (error.message.includes('Server error: 500')) {
-          errorMessage = '⚙️ **Server Configuratie Probleem**\n\nEr is een probleem met de server configuratie. Dit is meestal een API key probleem. Neem contact op met de beheerder.'
+          errorMessage = '⚙️ Server Configuratie Probleem\n\nEr is een probleem met de server configuratie. Dit is meestal een API key probleem. Neem contact op met de beheerder.'
         }
       }
       

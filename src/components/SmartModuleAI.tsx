@@ -85,7 +85,7 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
         const errorData = await response.json().catch(() => ({ error: 'Network error' }))
         
         if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
-          throw new Error('🔑 **API Key Configuratie Probleem**\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\n**Voor ontwikkelaars:**\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
+          throw new Error('🔑 API Key Configuratie Probleem\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\nVoor ontwikkelaars:\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
         }
         
         throw new Error(`Server error: ${response.status} - ${errorData.error || 'Onbekende fout'}`)
@@ -110,19 +110,19 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
       // Create fallback result instead of failing completely
       setQuickscanResult({
         success: false,
-        analysis: `**⚠️ Analyse niet beschikbaar**
+        analysis: `⚠️ Analyse niet beschikbaar
 
 Er is een probleem opgetreden bij het analyseren van je documenten. 
 
-**📚 Documenten beschikbaar**
+Documenten beschikbaar
 Je hebt ${documents.length} document(en) geüpload die we kunnen bespreken.
 
-**💡 Wat kun je doen?**
+Wat kun je doen?
 • Start een gesprek over je documenten
 • Stel specifieke vragen over de module "${moduleTitle}"
 • Gebruik de AI-begeleiding voor praktische tips
 
-**🤖 AI-begeleiding beschikbaar**
+AI-begeleiding beschikbaar
 Ook zonder automatische analyse kan de AI je helpen met vragen over je documenten en de module.`,
         analysisType: 'error-fallback',
         documentsAnalyzed: documents.length,
@@ -141,8 +141,7 @@ Ook zonder automatische analyse kan de AI je helpen met vragen over je documente
     let openingQuestion = `Hoe kan ik je helpen met de module "${moduleTitle}"?`
     
     if (quickscanResult?.analysis) {
-      const questionMatch = quickscanResult.analysis.match(/\*\*❓.*?\*\*\s*(.+?)(?:\n|$)/i) ||
-                           quickscanResult.analysis.match(/Openingsvraag.*?:\s*(.+?)(?:\n|$)/i)
+      const questionMatch = quickscanResult.analysis.match(/Openingsvraag(?:.*?):\s*(.+?)(?:\n|$)/i)
       
       if (questionMatch) {
         openingQuestion = questionMatch[1].trim()
@@ -157,10 +156,7 @@ Ook zonder automatische analyse kan de AI je helpen met vragen over je documente
       role: 'assistant',
       content: `${personalityIntro}
 
-**📋 Quickscan samenvatting:**
-${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je documenten zijn beschikbaar voor bespreking.'}
-
-**🤔 ${openingQuestion}**`,
+${openingQuestion}`,
       timestamp: new Date()
     }
 
@@ -269,7 +265,7 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: error instanceof Error && error.message.includes('API Key') 
-          ? '🔑 **API Key Probleem**\n\nEr is een probleem met de Gemini API key. Controleer of deze correct is ingesteld in je environment variables.'
+          ? '🔑 API Key Probleem\n\nEr is een probleem met de Gemini API key. Controleer of deze correct is ingesteld in je environment variables.'
           : 'Sorry, er is een fout opgetreden. Probeer het opnieuw of stel een andere vraag.',
         timestamp: new Date()
       }
@@ -307,14 +303,14 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
 
   const getPersonalityIntro = (personality: string) => {
     switch (personality) {
-      case 'tutor': return `👨‍🏫 **Hallo! Ik ben je AI-Tutor voor ${moduleTitle}**\n\nIk ga je stap voor stap begeleiden door de leerstof. Laten we samen de concepten ontdekken!`
-      case 'coach': return `💪 **Hey! Ik ben je AI-Coach voor ${moduleTitle}**\n\nIk help je je doelen te bereiken en je vaardigheden te ontwikkelen. Laten we aan de slag gaan!`
-      case 'mentor': return `🧙‍♂️ **Welkom! Ik ben je AI-Mentor voor ${moduleTitle}**\n\nIk begeleid je professionele ontwikkeling met wijsheid en ervaring. Laten we samen reflecteren.`
-      case 'teammate': return `🤝 **Hi! Ik ben je AI-Teammate voor ${moduleTitle}**\n\nLaten we samenwerken aan je leerproces. Ik sta naast je, niet boven je!`
-      case 'tool': return `🔧 **AI-Tool voor ${moduleTitle} geactiveerd**\n\nIk geef je directe, praktische antwoorden en oplossingen. Wat heb je nodig?`
-      case 'simulator': return `🎭 **Welkom in de ${moduleTitle} Simulator**\n\nIk creëer realistische scenario's waarin je kunt oefenen. Klaar voor de uitdaging?`
-      case 'student': return `🎓 **Hoi! Ik ben je AI-Student voor ${moduleTitle}**\n\nIk stel vragen zodat jij kunt uitleggen en onderwijzen. Maak mij wijzer!`
-      default: return `🤖 **AI-Begeleider voor ${moduleTitle}**\n\nIk help je met al je vragen over deze module.`
+      case 'tutor': return `👨‍🏫 Hallo! Ik ben je AI-Tutor voor ${moduleTitle}\n\nIk ga je stap voor stap begeleiden door de leerstof. Laten we samen de concepten ontdekken!`
+      case 'coach': return `💪 Hey! Ik ben je AI-Coach voor ${moduleTitle}\n\nIk help je je doelen te bereiken en je vaardigheden te ontwikkelen. Laten we aan de slag gaan!`
+      case 'mentor': return `🧙‍♂️ Welkom! Ik ben je AI-Mentor voor ${moduleTitle}\n\nIk begeleid je professionele ontwikkeling met wijsheid en ervaring. Laten we samen reflecteren.`
+      case 'teammate': return `🤝 Hi! Ik ben je AI-Teammate voor ${moduleTitle}\n\nLaten we samenwerken aan je leerproces. Ik sta naast je, niet boven je!`
+      case 'tool': return `🔧 AI-Tool voor ${moduleTitle} geactiveerd\n\nIk geef je directe, praktische antwoorden en oplossingen. Wat heb je nodig?`
+      case 'simulator': return `🎭 Welkom in de ${moduleTitle} Simulator\n\nIk creëer realistische scenario's waarin je kunt oefenen. Klaar voor de uitdaging?`
+      case 'student': return `🎓 Hoi! Ik ben je AI-Student voor ${moduleTitle}\n\nIk stel vragen zodat jij kunt uitleggen en onderwijzen. Maak mij wijzer!`
+      default: return `🤖 AI-Begeleider voor ${moduleTitle}\n\nIk help je met al je vragen over deze module.`
     }
   }
 
@@ -613,6 +609,7 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
                       ? 'bg-white text-blue-600 font-semibold'
                       : 'bg-white bg-opacity-20 hover:bg-opacity-30'
                   }`}
+                  title={getPersonalityDescription(personality.id)}
                 >
                   {getPersonalityIcon(personality.id)} {personality.label}
                 </button>

@@ -23,24 +23,24 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    // Create focused analysis prompt
-    const analysisPrompt = `Je bent een ervaren PABO-docent. Analyseer deze schooldocumenten voor de module "${module}".
+    // Create focused analysis prompt with neutral language
+    const analysisPrompt = `Je bent een ervaren onderwijsprofessional. Analyseer deze schooldocumenten voor de module "${module}".
 
 SCHOOLDOCUMENTEN:
 ${documentText}
 
-Geef een BEKNOPTE analyse (max 250 woorden) met deze structuur:
+Geef een beknopte analyse (max 250 woorden) met deze structuur:
 
-**📚 Documenten ontvangen**
+Documenten ontvangen
 Benoem kort welke documenten je hebt geanalyseerd.
 
-**💪 Pluspunten t.o.v. module doelen**
+Pluspunten t.o.v. module doelen
 Identificeer 2-3 sterke punten die aansluiten bij de module "${module}".
 
-**🔧 Ontwikkelkansen**
+Ontwikkelkansen
 Benoem 2-3 concrete verbeterpunten gerelateerd aan de module.
 
-**❓ Openingsvraag**
+Openingsvraag
 Stel een concrete vraag gebaseerd op de documenten en module.
 
 VEREISTEN:
@@ -48,7 +48,9 @@ VEREISTEN:
 - Wees specifiek en praktisch
 - Verwijs naar aspecten uit de documenten
 - Houd het beknopt en to-the-point
-- Focus op de koppeling tussen documenten en module doelen`
+- Focus op de koppeling tussen documenten en module doelen
+- Schrijf op B1 niveau (eenvoudig Nederlands)
+- Vermijd overbodige leestekens zoals **`
 
     console.log('🤖 Starting AI document analysis...')
 
@@ -68,20 +70,20 @@ VEREISTEN:
     console.error('Document analysis error:', error)
     
     // Return a structured fallback response
-    const fallbackAnalysis = `**📚 Documenten ontvangen**
+    const fallbackAnalysis = `Documenten ontvangen
 Je hebt schooldocumenten geüpload die relevant zijn voor de module "${module}".
 
-**💪 Pluspunten t.o.v. module doelen**
+Pluspunten t.o.v. module doelen
 • Je documenten bieden concrete schoolcontext voor praktijkgerichte leerervaring
 • Ze maken het mogelijk om theorie direct te koppelen aan jullie specifieke situatie
 • Er is materiaal beschikbaar om realistische verbeteringen te identificeren
 
-**🔧 Ontwikkelkansen**
+Ontwikkelkansen
 • We kunnen samen onderzoeken hoe jullie huidige aanpak zich verhoudt tot de module doelen
 • Er zijn mogelijkheden om concrete implementatiestrategieën te ontwikkelen
-• We kunnen praktische verbanden leggen tussen PABO-theorie en jullie schoolsituatie
+• We kunnen praktische verbanden leggen tussen theorie en jullie schoolsituatie
 
-**❓ Openingsvraag**
+Openingsvraag
 Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`
 
     return NextResponse.json({

@@ -86,42 +86,44 @@ export async function POST(request: NextRequest) {
         content = meaningfulSections || content.substring(0, 2500)
       }
       
-      return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType || 'Schooldocument'})
+      return `DOCUMENT: ${doc.fileName} (${doc.detectedType || 'Schooldocument'})
 
-**INHOUD:**
+INHOUD:
 ${content}
 
-**EINDE DOCUMENT**`
+EINDE DOCUMENT`
     }).join('\n\n')
 
-    // Professional analysis prompt - exactly like what works in Gemini
-    const analysisPrompt = `Je bent een ervaren PABO-docent en expert in schoolanalyse. Analyseer deze schooldocumenten voor de module "${module}".
+    // Professional analysis prompt with neutral language and B1 level
+    const analysisPrompt = `Je bent een ervaren onderwijsprofessional. Analyseer deze schooldocumenten voor de module "${module}".
 
 SCHOOLDOCUMENTEN:
 ${documentTexts}
 
-Geef een PROFESSIONELE analyse (max 300 woorden) met deze exacte structuur:
+Geef een PROFESSIONELE analyse (max 300 woorden) met deze structuur:
 
-**📚 Documenten geanalyseerd**
+Documenten geanalyseerd
 Benoem welke documenten je hebt ontvangen en hun type.
 
-**💪 Sterke punten t.o.v. module "${module}"**
+Sterke punten t.o.v. module "${module}"
 Identificeer 2-3 concrete sterke punten die aansluiten bij deze module.
 
-**🔧 Ontwikkelkansen**
+Ontwikkelkansen
 Benoem 2-3 specifieke verbeterpunten gerelateerd aan de module.
 
-**🎯 Concrete aanbeveling**
+Concrete aanbeveling
 Geef één heldere, praktische aanbeveling voor de eerste stap.
 
-**❓ Openingsvraag voor gesprek**
+Openingsvraag voor gesprek
 Stel een concrete, inhoudelijke vraag gebaseerd op de documenten en module.
 
 VEREISTEN:
 - Spreek de gebruiker aan als "je"
 - Wees specifiek en verwijs naar concrete aspecten uit de documenten
 - Houd het praktisch en actionable
-- Focus op de directe koppeling tussen documenten en module doelen`
+- Focus op de directe koppeling tussen documenten en module doelen
+- Schrijf op B1 niveau (eenvoudig Nederlands)
+- Vermijd overbodige leestekens zoals **`
 
     console.log('🤖 Sending analysis request to Gemini 2.5 Flash...')
 
@@ -207,24 +209,24 @@ VEREISTEN:
       })
     }
     
-    // Return professional fallback response
-    const fallbackAnalysis = `**📚 Documenten geanalyseerd**
+    // Return professional fallback response with neutral language
+    const fallbackAnalysis = `Documenten geanalyseerd
 Je hebt ${documents?.length || 0} schooldocument(en) geüpload voor de module "${module}".
 
-**💪 Sterke punten t.o.v. module "${module}"**
+Sterke punten t.o.v. module "${module}"
 • Je documenten bieden concrete schoolcontext voor praktijkgerichte leerervaring
 • Ze maken het mogelijk om theorie direct te koppelen aan jullie specifieke situatie
 • Er is materiaal beschikbaar om realistische verbeteringen te identificeren
 
-**🔧 Ontwikkelkansen**
+Ontwikkelkansen
 • We kunnen samen onderzoeken hoe jullie huidige aanpak zich verhoudt tot de module doelen
 • Er zijn mogelijkheden om concrete implementatiestrategieën te ontwikkelen
-• We kunnen praktische verbanden leggen tussen PABO-theorie en jullie schoolsituatie
+• We kunnen praktische verbanden leggen tussen theorie en jullie schoolsituatie
 
-**🎯 Concrete aanbeveling**
+Concrete aanbeveling
 Start met het bespreken van één specifiek document dat het meest relevant is voor de module "${module}".
 
-**❓ Openingsvraag voor gesprek**
+Openingsvraag voor gesprek
 Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`
 
     return NextResponse.json({
