@@ -68,10 +68,6 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
     try {
       console.log(`🔍 Starting quickscan for ${documents.length} documents and module: ${moduleTitle}`)
       
-      // Add timeout and better error handling for fetch
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
-
       const response = await fetch('/api/module-quickscan', {
         method: 'POST',
         headers: {
@@ -82,48 +78,27 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
           module: moduleTitle,
           analysisType: 'module-quickscan'
         }),
-        signal: controller.signal
       })
 
-      clearTimeout(timeoutId)
-
-      const result = await response.json()
-
       if (!response.ok) {
-        if (result.type === 'configuration_error') {
-          throw new Error(`⚙️ Configuratie Probleem: ${result.details}`)
-        } else if (result.type === 'api_key_error') {
-          throw new Error(`🔑 API Key Probleem: ${result.details}`)
-        } else if (result.type === 'quota_error') {
-          throw new Error(`📊 Quota Probleem: ${result.details}`)
-        } else {
-          throw new Error(result.error || `Server error: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }))
+        
+        if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
+          throw new Error('🔑 **API Key Configuratie Probleem**\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\n**Voor ontwikkelaars:**\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
         }
+        
+        throw new Error(`Server error: ${response.status} - ${errorData.error || 'Onbekende fout'}`)
       }
 
+      const result = await response.json()
       console.log('✅ Quickscan completed successfully')
       setQuickscanResult(result)
       
     } catch (error) {
       console.error('Quickscan error:', error)
+      setError(error instanceof Error ? error.message : 'Er is een onbekende fout opgetreden')
       
-      let errorMessage = 'Er is een onbekende fout opgetreden'
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          errorMessage = '⏱️ Timeout: De analyse duurde te lang. Probeer het opnieuw met kleinere documenten.'
-        } else if (error.message === 'Failed to fetch') {
-          errorMessage = '🔌 Verbindingsprobleem: Kan geen verbinding maken met de server. Controleer of de ontwikkelserver draait op localhost:3000.'
-        } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
-          errorMessage = '🌐 Netwerkfout: Controleer je internetverbinding en probeer het opnieuw.'
-        } else {
-          errorMessage = error.message
-        }
-      }
-      
-      setError(errorMessage)
-      
-      // Provide fallback analysis even when API fails
+      // Create fallback result instead of failing completely
       setQuickscanResult({
         success: false,
         analysis: `**⚠️ Analyse niet beschikbaar**
@@ -139,10 +114,7 @@ Je hebt ${documents.length} document(en) geüpload die we kunnen bespreken.
 • Gebruik de AI-begeleiding voor praktische tips
 
 **🤖 AI-begeleiding beschikbaar**
-Ook zonder automatische analyse kan de AI je helpen met vragen over je documenten en de module.
-
-**🔧 Technische details**
-${errorMessage}`,
+Ook zonder automatische analyse kan de AI je helpen met vragen over je documenten en de module.`,
         analysisType: 'error-fallback',
         documentsAnalyzed: documents.length,
         module: moduleTitle,
@@ -201,10 +173,6 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
     setIsLoading(true)
 
     try {
-      // Add timeout and better error handling for chat API
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000)
-
       const response = await fetch('/api/smart-chat', {
         method: 'POST',
         headers: {
@@ -223,10 +191,7 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
           conversationHistory: messages.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n'),
           userLevel: userLevel
         }),
-        signal: controller.signal
       })
-
-      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`)
@@ -277,24 +242,13 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
 
     } catch (error) {
       console.error('Chat error:', error)
-      
-      let errorMessage = 'Sorry, er is een fout opgetreden. Probeer het opnieuw.'
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          errorMessage = 'De chat duurde te lang. Probeer een kortere vraag.'
-        } else if (error.message === 'Failed to fetch') {
-          errorMessage = 'Kan geen verbinding maken met de chat server. Controleer of de server draait.'
-        }
-      }
-      
-      const errorChatMessage: ChatMessage = {
+      const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: errorMessage,
+        content: 'Sorry, er is een fout opgetreden. Probeer het opnieuw.',
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorChatMessage])
+      setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }
@@ -340,8 +294,6 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
   }
 
   const getModuleLeerdoelen = (moduleId: string): string[] => {
-    // Hier zou je normaal gesproken de leerdoelen ophalen uit een database of API
-    // Voor nu gebruiken we hardcoded leerdoelen per module
     switch (moduleId) {
       case 'module1':
         return [
@@ -363,8 +315,6 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
   }
 
   const getModuleCompetenties = (moduleId: string): string[] => {
-    // Hier zou je normaal gesproken de competenties ophalen uit een database of API
-    // Voor nu gebruiken we hardcoded competenties per module
     switch (moduleId) {
       case 'module1':
         return [
@@ -526,14 +476,9 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
             <p className="text-red-100 text-sm mb-3">{error}</p>
             <div className="bg-white bg-opacity-20 rounded p-3">
               <p className="text-white text-sm">
-                <strong>💡 Mogelijke oplossingen:</strong>
+                <strong>💡 Oplossing:</strong> Controleer of de GEMINI_API_KEY correct is ingesteld in je environment variables. 
+                Voor lokale ontwikkeling: voeg toe aan .env.local. Voor deployment: configureer in je hosting platform.
               </p>
-              <ul className="text-white text-sm mt-2 space-y-1">
-                <li>• Controleer of de Next.js server draait (npm run dev)</li>
-                <li>• Herlaad de pagina en probeer opnieuw</li>
-                <li>• Controleer je internetverbinding</li>
-                <li>• Controleer of GEMINI_API_KEY is ingesteld in .env.local</li>
-              </ul>
             </div>
           </div>
         ) : quickscanResult ? (
