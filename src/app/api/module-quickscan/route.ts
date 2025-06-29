@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if GEMINI_API_KEY is configured
+    // CRITICAL: Check API key first - this is often the root cause
     if (!process.env.GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY not configured')
+      console.error('❌ GEMINI_API_KEY not configured')
       return NextResponse.json(
         { 
           error: 'GEMINI_API_KEY niet geconfigureerd',
@@ -13,6 +13,19 @@ export async function POST(request: NextRequest) {
           type: 'configuration_error'
         },
         { status: 500 }
+      )
+    }
+
+    // Validate API key format
+    if (!process.env.GEMINI_API_KEY.startsWith('AIza')) {
+      console.error('❌ Invalid GEMINI_API_KEY format')
+      return NextResponse.json(
+        { 
+          error: 'Ongeldige GEMINI_API_KEY format',
+          details: 'De Gemini API key moet beginnen met "AIza". Controleer je API key.',
+          type: 'api_key_error'
+        },
+        { status: 401 }
       )
     }
 
@@ -32,22 +45,48 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🔍 Starting quickscan for ${documents.length} documents and module: ${module}`)
+    console.log(`🔍 Starting professional quickscan for ${documents.length} documents and module: ${module}`)
 
-    // Initialize GoogleGenerativeAI after API key validation
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    // Initialize Gemini with proper error handling
+    let genAI, model
+    try {
+      genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+      model = genAI.getGenerativeModel({ 
+        model: 'gemini-2.5-flash',
+        generationConfig: {
+          maxOutputTokens: 4000,
+          temperature: 0.3,
+        }
+      })
+    } catch (initError) {
+      console.error('❌ Failed to initialize Gemini:', initError)
+      return NextResponse.json(
+        { 
+          error: 'Gemini initialisatie gefaald',
+          details: 'Kan geen verbinding maken met Gemini API. Controleer je API key.',
+          type: 'initialization_error'
+        },
+        { status: 500 }
+      )
+    }
 
-    // Prepare document content with truncation to prevent token limits
+    // Prepare document content with smart truncation
     const documentTexts = documents.map(doc => {
       let content = doc.text || ''
       
-      // Truncate to prevent token limit issues (max 2000 chars per document)
-      if (content.length > 2000) {
-        content = content.substring(0, 2000) + '...'
+      // Smart content extraction - take meaningful parts
+      if (content.length > 2500) {
+        // Try to extract key sections
+        const sections = content.split(/\n\n|\n===|\n---/)
+        const meaningfulSections = sections
+          .filter(section => section.trim().length > 50)
+          .slice(0, 3) // Take first 3 meaningful sections
+          .join('\n\n')
+        
+        content = meaningfulSections || content.substring(0, 2500)
       }
       
-      return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType || 'Onbekend type'})
+      return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType || 'Schooldocument'})
 
 **INHOUD:**
 ${content}
@@ -55,43 +94,96 @@ ${content}
 **EINDE DOCUMENT**`
     }).join('\n\n')
 
-    // Create focused analysis prompt
-    const analysisPrompt = `Je bent een ervaren PABO-docent. Analyseer deze schooldocumenten voor de module "${module}".
+    // Professional analysis prompt - exactly like what works in Gemini
+    const analysisPrompt = `Je bent een ervaren PABO-docent en expert in schoolanalyse. Analyseer deze schooldocumenten voor de module "${module}".
 
 SCHOOLDOCUMENTEN:
 ${documentTexts}
 
-Geef een BEKNOPTE analyse (max 250 woorden) met deze structuur:
+Geef een PROFESSIONELE analyse (max 300 woorden) met deze exacte structuur:
 
-**📚 Documenten ontvangen**
-Benoem kort welke documenten je hebt geanalyseerd.
+**📚 Documenten geanalyseerd**
+Benoem welke documenten je hebt ontvangen en hun type.
 
-**💪 Sterke punten t.o.v. module doelen**
-Identificeer 2-3 sterke punten die aansluiten bij de module "${module}".
+**💪 Sterke punten t.o.v. module "${module}"**
+Identificeer 2-3 concrete sterke punten die aansluiten bij deze module.
 
 **🔧 Ontwikkelkansen**
-Benoem 2-3 concrete verbeterpunten gerelateerd aan de module.
+Benoem 2-3 specifieke verbeterpunten gerelateerd aan de module.
 
-**🎯 Aanbeveling**
-Geef een concrete aanbeveling voor de eerste stap.
+**🎯 Concrete aanbeveling**
+Geef één heldere, praktische aanbeveling voor de eerste stap.
 
-**❓ Openingsvraag voor Chatbot**
-Stel een concrete vraag gebaseerd op de documenten en module.
+**❓ Openingsvraag voor gesprek**
+Stel een concrete, inhoudelijke vraag gebaseerd op de documenten en module.
 
 VEREISTEN:
 - Spreek de gebruiker aan als "je"
-- Wees specifiek en praktisch
-- Verwijs naar aspecten uit de documenten
-- Houd het beknopt en to-the-point
-- Focus op de koppeling tussen documenten en module doelen`
+- Wees specifiek en verwijs naar concrete aspecten uit de documenten
+- Houd het praktisch en actionable
+- Focus op de directe koppeling tussen documenten en module doelen`
 
-    console.log('🤖 Starting AI document analysis...')
+    console.log('🤖 Sending analysis request to Gemini 2.5 Flash...')
 
-    const result = await model.generateContent(analysisPrompt)
+    // Make the API call with proper error handling
+    let result
+    try {
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Gemini API timeout after 30 seconds')), 30000)
+      })
+
+      const apiPromise = model.generateContent(analysisPrompt)
+      result = await Promise.race([apiPromise, timeoutPromise])
+      
+    } catch (apiError: any) {
+      console.error('❌ Gemini API call failed:', apiError)
+      
+      // Specific error handling
+      if (apiError.message?.includes('timeout')) {
+        return NextResponse.json({
+          error: 'Gemini API timeout',
+          details: 'De analyse duurde te lang. Probeer met kleinere documenten.',
+          type: 'timeout_error'
+        }, { status: 408 })
+      }
+      
+      if (apiError.message?.includes('quota') || apiError.message?.includes('QUOTA_EXCEEDED')) {
+        return NextResponse.json({
+          error: 'API quota overschreden',
+          details: 'Je hebt je Gemini API quota overschreden. Controleer je Google Cloud billing.',
+          type: 'quota_error'
+        }, { status: 429 })
+      }
+      
+      if (apiError.message?.includes('API_KEY_INVALID') || apiError.message?.includes('401')) {
+        return NextResponse.json({
+          error: 'Ongeldige Gemini API key',
+          details: 'De Gemini API key is ongeldig. Controleer je API key in Google AI Studio.',
+          type: 'api_key_error'
+        }, { status: 401 })
+      }
+
+      if (apiError.message?.includes('SAFETY')) {
+        return NextResponse.json({
+          error: 'Content safety filter',
+          details: 'De inhoud werd geblokkeerd door Gemini safety filters. Probeer andere documenten.',
+          type: 'safety_error'
+        }, { status: 400 })
+      }
+      
+      // Generic API error
+      throw apiError
+    }
+
     const response = await result.response
     const analysis = response.text()
 
-    console.log('✅ AI analysis completed successfully')
+    if (!analysis || analysis.trim().length < 50) {
+      throw new Error('Gemini returned empty or too short response')
+    }
+
+    console.log('✅ Professional AI analysis completed successfully')
 
     return NextResponse.json({
       success: true,
@@ -101,33 +193,21 @@ VEREISTEN:
       module: module
     })
 
-  } catch (error) {
-    console.error('Module quickscan error:', error)
+  } catch (error: any) {
+    console.error('❌ Professional quickscan error:', error)
     
-    // Check for specific API key errors
-    if (error instanceof Error) {
-      if (error.message.includes('API_KEY_INVALID') || error.message.includes('API key')) {
-        return NextResponse.json({
-          error: 'Ongeldige Gemini API key',
-          details: 'De Gemini API key is ongeldig. Controleer je API key in de environment variables.',
-          type: 'api_key_error'
-        }, { status: 401 })
-      }
-      
-      if (error.message.includes('QUOTA_EXCEEDED')) {
-        return NextResponse.json({
-          error: 'API quota overschreden',
-          details: 'Je hebt je Gemini API quota overschreden. Probeer het later opnieuw.',
-          type: 'quota_error'
-        }, { status: 429 })
-      }
-    }
+    // Enhanced error logging for debugging
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
     
-    // Return a structured fallback response
-    const fallbackAnalysis = `**📚 Documenten ontvangen**
-Je hebt ${documents?.length || 0} schooldocument(en) geüpload die relevant zijn voor de module "${module}".
+    // Return professional fallback response
+    const fallbackAnalysis = `**📚 Documenten geanalyseerd**
+Je hebt ${documents?.length || 0} schooldocument(en) geüpload voor de module "${module}".
 
-**💪 Sterke punten t.o.v. module doelen**
+**💪 Sterke punten t.o.v. module "${module}"**
 • Je documenten bieden concrete schoolcontext voor praktijkgerichte leerervaring
 • Ze maken het mogelijk om theorie direct te koppelen aan jullie specifieke situatie
 • Er is materiaal beschikbaar om realistische verbeteringen te identificeren
@@ -137,19 +217,20 @@ Je hebt ${documents?.length || 0} schooldocument(en) geüpload die relevant zijn
 • Er zijn mogelijkheden om concrete implementatiestrategieën te ontwikkelen
 • We kunnen praktische verbanden leggen tussen PABO-theorie en jullie schoolsituatie
 
-**🎯 Aanbeveling**
+**🎯 Concrete aanbeveling**
 Start met het bespreken van één specifiek document dat het meest relevant is voor de module "${module}".
 
-**❓ Openingsvraag voor Chatbot**
+**❓ Openingsvraag voor gesprek**
 Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in relatie tot de module "${module}"?`
 
     return NextResponse.json({
       success: true,
       analysis: fallbackAnalysis,
-      analysisType: 'fallback',
-      error: 'AI analyse niet beschikbaar, fallback gebruikt',
+      analysisType: 'professional-fallback',
+      error: 'AI analyse tijdelijk niet beschikbaar - professionele fallback gebruikt',
       documentsAnalyzed: documents?.length || 0,
-      module: module
+      module: module,
+      errorDetails: error.message
     })
   }
 }
