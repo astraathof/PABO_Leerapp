@@ -28,7 +28,6 @@ interface QuickscanResult {
   module: string
   error?: string
   type?: string
-  action?: string
 }
 
 interface ChatMessage {
@@ -47,7 +46,6 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [analysisVisible, setAnalysisVisible] = useState(true)
   const [selectedPersonalityInfo, setSelectedPersonalityInfo] = useState<{
@@ -95,11 +93,6 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Network error' }))
-        
-        // Handle specific API key expired error
-        if (response.status === 401 && errorData.type === 'api_key_expired') {
-          throw new Error(`🔑 API Key Verlopen!\n\nJe Gemini API key is verlopen en moet vernieuwd worden.\n\n📋 Stappen om te herstellen:\n1. Ga naar: https://makersuite.google.com/app/apikey\n2. Maak een nieuwe API key aan\n3. Update je .env.local bestand met de nieuwe key\n4. Herstart je development server: npm run dev\n\nVoor deployment: update ook je Netlify environment variables!`)
-        }
         
         if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
           throw new Error('🔑 API Key Configuratie Probleem\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\nVoor ontwikkelaars:\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
@@ -289,12 +282,7 @@ ${openingQuestion}`,
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
-      setIsListening(false) // Stop listening after sending message
     }
-  }
-
-  const handleVoiceTranscript = (transcript: string) => {
-    setInputMessage(prev => prev + ' ' + transcript)
   }
 
   const getPersonalityDescription = (personality: string) => {
@@ -623,8 +611,8 @@ ${openingQuestion}`,
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input with Voice */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+        {/* Chat Input */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex space-x-3">
             <textarea
               value={inputMessage}
@@ -635,44 +623,13 @@ ${openingQuestion}`,
               rows={3}
               disabled={isLoading}
             />
-            <div className="flex flex-col space-y-2">
-              <button
-                onClick={sendMessage}
-                disabled={!inputMessage.trim() || isLoading}
-                className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? '⏳' : '🚀'}
-              </button>
-              
-              <button
-                onClick={() => setIsListening(!isListening)}
-                disabled={isLoading}
-                className={`px-4 py-3 rounded-lg transition-colors ${
-                  isListening 
-                    ? 'bg-red-500 text-white animate-pulse' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-                title={isListening ? 'Stop spraakherkenning' : 'Start spraakherkenning'}
-              >
-                {isListening ? '🛑' : '🎤'}
-              </button>
-            </div>
-          </div>
-          
-          {isListening && (
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 flex items-center">
-              <span className="text-blue-700 mr-2">🎙️ Luisteren...</span>
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>💡 Tip: Klik op de microfoon voor spraakherkenning</span>
-            <span>{inputMessage.length}/1000</span>
+            <button
+              onClick={sendMessage}
+              disabled={!inputMessage.trim() || isLoading}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? '⏳' : '🚀'}
+            </button>
           </div>
         </div>
       </div>
@@ -716,14 +673,13 @@ ${openingQuestion}`,
             <div className="flex items-center space-x-2 mb-2">
               <span className="text-red-100 font-medium">❌ Analyse Probleem</span>
             </div>
-            <div className="text-red-100 text-sm mb-3 whitespace-pre-wrap">{error}</div>
-            {error.includes('API Key Verlopen') && (
-              <div className="bg-white bg-opacity-20 rounded p-3 mt-3">
-                <p className="text-white text-sm">
-                  <strong>🔧 Snelle Fix:</strong> Ga naar <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-200">Google AI Studio</a> om een nieuwe API key aan te maken.
-                </p>
-              </div>
-            )}
+            <p className="text-red-100 text-sm mb-3">{error}</p>
+            <div className="bg-white bg-opacity-20 rounded p-3">
+              <p className="text-white text-sm">
+                <strong>💡 Oplossing:</strong> Controleer of de GEMINI_API_KEY correct is ingesteld in je environment variables. 
+                Voor lokale ontwikkeling: voeg toe aan .env.local. Voor deployment: configureer in je hosting platform.
+              </p>
+            </div>
           </div>
         ) : quickscanResult ? (
           <div className="bg-white bg-opacity-20 rounded-lg p-4">

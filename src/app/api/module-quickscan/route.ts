@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   // Declare variables at function scope to ensure they're available in catch block
-  let requestDocuments: any[] = []
+  let documents: any[] = []
   let module = ''
   let analysisType = ''
 
@@ -36,11 +36,11 @@ export async function POST(request: NextRequest) {
 
     // Parse request body and assign to function-scoped variables
     const requestData = await request.json()
-    requestDocuments = requestData.documents || []
+    documents = requestData.documents || []
     module = requestData.module || ''
     analysisType = requestData.analysisType || ''
 
-    if (!requestDocuments || !Array.isArray(requestDocuments) || requestDocuments.length === 0) {
+    if (!documents || !Array.isArray(documents) || documents.length === 0) {
       return NextResponse.json(
         { error: 'Geen documenten gevonden voor analyse' },
         { status: 400 }
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🔍 Starting professional quickscan for ${requestDocuments.length} documents and module: ${module}`)
-    
+    console.log(`🔍 Starting professional quickscan for ${documents.length} documents and module: ${module}`)
+
     // Initialize Gemini with proper error handling
     let genAI, model
     try {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare document content with smart truncation
-    const documentTexts = requestDocuments.map(doc => {
+    const documentTexts = documents.map(doc => {
       let content = doc.text || ''
       
       // Smart content extraction - take meaningful parts
@@ -150,17 +150,8 @@ VEREISTEN:
     } catch (apiError) {
       console.error('❌ Gemini API call failed:', apiError)
       
-      // Specific error handling for expired API key
+      // Specific error handling
       if (apiError instanceof Error) {
-        if (apiError.message?.includes('API key expired') || apiError.message?.includes('API_KEY_INVALID')) {
-          return NextResponse.json({
-            error: 'API key verlopen',
-            details: 'Je Gemini API key is verlopen. Ga naar https://makersuite.google.com/app/apikey om een nieuwe key aan te maken en update je environment variables.',
-            type: 'api_key_expired',
-            action: 'renew_api_key'
-          }, { status: 401 })
-        }
-        
         if (apiError.message?.includes('timeout')) {
           return NextResponse.json({
             error: 'Gemini API timeout',
@@ -177,7 +168,7 @@ VEREISTEN:
           }, { status: 429 })
         }
         
-        if (apiError.message?.includes('401')) {
+        if (apiError.message?.includes('API_KEY_INVALID') || apiError.message?.includes('401')) {
           return NextResponse.json({
             error: 'Ongeldige Gemini API key',
             details: 'De Gemini API key is ongeldig. Controleer je API key in Google AI Studio.',
@@ -206,7 +197,7 @@ VEREISTEN:
       console.warn('⚠️ Gemini returned empty or too short response, using fallback analysis')
       
       analysis = `Documenten geanalyseerd
-Je hebt ${requestDocuments.length} schooldocument(en) geüpload voor de module "${module}".
+Je hebt ${documents.length} schooldocument(en) geüpload voor de module "${module}".
 
 Sterke punten t.o.v. module "${module}"
 • Je documenten bieden concrete schoolcontext voor praktijkgerichte leerervaring
@@ -231,7 +222,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
       success: true,
       analysis: analysis,
       analysisType: analysisType || 'module-quickscan',
-      documentsAnalyzed: requestDocuments.length,
+      documentsAnalyzed: documents.length,
       module: module
     })
 
@@ -249,7 +240,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
     
     // Return professional fallback response with neutral language
     const fallbackAnalysis = `Documenten geanalyseerd
-Je hebt ${requestDocuments?.length || 0} schooldocument(en) geüpload voor de module "${module}".
+Je hebt ${documents?.length || 0} schooldocument(en) geüpload voor de module "${module}".
 
 Sterke punten t.o.v. module "${module}"
 • Je documenten bieden concrete schoolcontext voor praktijkgerichte leerervaring
@@ -272,7 +263,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
       analysis: fallbackAnalysis,
       analysisType: 'professional-fallback',
       error: 'AI analyse tijdelijk niet beschikbaar - professionele fallback gebruikt',
-      documentsAnalyzed: requestDocuments?.length || 0,
+      documentsAnalyzed: documents?.length || 0,
       module: module,
       errorDetails: error instanceof Error ? error.message : 'Unknown error'
     })

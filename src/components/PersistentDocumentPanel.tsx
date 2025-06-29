@@ -25,7 +25,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
   const [showUploadArea, setShowUploadArea] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [hoveredDocument, setHoveredDocument] = useState<string | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -78,7 +77,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     const file = event.target.files?.[0]
     if (!file) return
 
-    console.log('Starting file upload for:', file.name, 'Type:', file.type)
     setIsUploading(true)
     setUploadError(null)
 
@@ -86,23 +84,18 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       const formData = new FormData()
       formData.append('file', file)
 
-      console.log('Sending upload request...')
       const response = await fetch('/api/upload-document', {
         method: 'POST',
         body: formData
       })
 
-      console.log('Upload response status:', response.status)
-
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('Upload failed with error:', errorData)
         setUploadError(errorData.error || 'Upload failed')
         throw new Error(errorData.error || 'Upload failed')
       }
 
       const result = await response.json()
-      console.log('Upload successful, result:', result)
       
       const newDocument: UploadedDocument = {
         id: Date.now().toString(),
@@ -115,12 +108,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
         mimeType: result.mimeType
       }
 
-      console.log('Creating new document object:', newDocument)
-
       // Update documents state
       setDocuments(prev => {
         const updated = [...prev, newDocument]
-        console.log('Updated documents array:', updated)
         return updated
       })
       
@@ -128,57 +118,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       event.target.value = ''
       
       // Hide upload area
-      setShowUploadArea(false)
-      
-      console.log('Upload process completed successfully')
-      
-    } catch (error) {
-      console.error('Upload error:', error)
-      setUploadError(error instanceof Error ? error.message : 'Onbekende fout bij uploaden')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(false)
-    
-    const file = e.dataTransfer.files?.[0]
-    if (!file) return
-    
-    setIsUploading(true)
-    setUploadError(null)
-    
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      const response = await fetch('/api/upload-document', {
-        method: 'POST',
-        body: formData
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        setUploadError(errorData.error || 'Upload failed')
-        throw new Error(errorData.error || 'Upload failed')
-      }
-      
-      const result = await response.json()
-      
-      const newDocument: UploadedDocument = {
-        id: Date.now().toString(),
-        fileName: result.fileName,
-        fileType: result.fileType,
-        detectedType: result.detectedType,
-        text: result.text,
-        wordCount: result.wordCount,
-        uploadDate: new Date(),
-        mimeType: result.mimeType
-      }
-      
-      setDocuments(prev => [...prev, newDocument])
       setShowUploadArea(false)
       
     } catch (error) {
@@ -198,12 +137,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       }
 
       if (confirm(`Weet je zeker dat je "${docToDelete.fileName}" wilt verwijderen?`)) {
-        console.log('Deleting document:', documentId)
-        
         // Update state
         setDocuments(prev => {
           const updated = prev.filter(doc => doc.id !== documentId)
-          console.log('Documents after deletion:', updated)
           return updated
         })
       }
@@ -297,55 +233,43 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       {/* Quick Upload Area */}
       {showUploadArea && (
         <div className="p-4 border-b border-gray-200 bg-blue-50">
-          <div 
-            className={`border-2 ${isDragging ? 'border-blue-500 bg-blue-100' : 'border-dashed border-blue-300'} rounded-lg p-4 text-center hover:border-blue-400 transition-colors`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-          >
-            <div className="space-y-3">
-              <div className="text-3xl">{isDragging ? '📥' : '📁'}</div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  {isDragging ? 'Laat los om te uploaden' : 'Sleep je document hier of klik om te uploaden'}
-                </p>
-                <p className="text-xs text-gray-500 mb-3">
-                  Ondersteunde formaten: PDF, DOCX, TXT, JPG, PNG, GIF, WebP (max 10MB)
-                </p>
-                <input
-                  type="file"
-                  accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
-                  onChange={handleFileUpload}
-                  disabled={isUploading}
-                  className="hidden"
-                  id="document-upload"
-                />
-                <label
-                  htmlFor="document-upload"
-                  className={`inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-md text-white ${
-                    isUploading 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                  } transition-colors`}
-                >
-                  {isUploading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Uploaden & Analyseren...
-                    </>
-                  ) : (
-                    <>📤 Selecteer Document</>
-                  )}
-                </label>
-              </div>
+          <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center">
+            <div className="space-y-2">
+              <div className="text-2xl">📁</div>
+              <p className="text-sm font-medium text-gray-700">
+                Sleep document hier of klik om te uploaden
+              </p>
+              <p className="text-xs text-gray-500">
+                PDF, DOCX, TXT, JPG, PNG, GIF, WebP • Max 10MB
+              </p>
+              <input
+                type="file"
+                accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+                className="hidden"
+                id="quick-document-upload"
+              />
+              <label
+                htmlFor="quick-document-upload"
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white transition-colors cursor-pointer ${
+                  isUploading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploaden & Analyseren...
+                  </>
+                ) : '📤 Selecteer Bestand'}
+              </label>
               
               {/* Upload Error Message */}
               {uploadError && (
                 <div className="mt-3 p-2 bg-red-50 rounded-lg border border-red-200 text-red-700 text-xs">
-                  <strong>❌ Fout bij uploaden:</strong> {uploadError}
+                  <strong>❌ Fout:</strong> {uploadError}
                 </div>
               )}
             </div>

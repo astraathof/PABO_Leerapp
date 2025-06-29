@@ -644,8 +644,7 @@ export default function PABOLeerApp() {
         id: 'ai-integratie', 
         label: '🤖 Slimme AI Integratie', 
         beschrijving: 'AI-analyse van je documenten + rolgebaseerde chatbot',
-        tooltip: 'Upload je schooldocumenten voor gepersonaliseerde AI-begeleiding',
-        category: 'ai'
+        tooltip: 'Upload je schooldocumenten voor gepersonaliseerde AI-begeleiding'
       }
     ]
 
@@ -657,15 +656,13 @@ export default function PABOLeerApp() {
             id: 'kerndoelen', 
             label: '📚 Alle 58 Kerndoelen', 
             beschrijving: 'Interactieve kerndoelen met voorbeelden',
-            tooltip: 'Ontdek alle kerndoelen met audio en praktijkvoorbeelden',
-            category: 'content'
+            tooltip: 'Ontdek alle kerndoelen met audio en praktijkvoorbeelden'
           },
           { 
             id: 'kerndoelen-progressie', 
             label: '📈 Kerndoel Progressie', 
             beschrijving: 'Progressie tracking per groep',
-            tooltip: 'Volg de ontwikkeling van kerndoelen van groep 1 tot 8',
-            category: 'tools'
+            tooltip: 'Volg de ontwikkeling van kerndoelen van groep 1 tot 8'
           }
         ]
       case 'module2':
@@ -675,15 +672,13 @@ export default function PABOLeerApp() {
             id: 'ontwikkelingstheorie', 
             label: '🧠 Ontwikkelingstheorieën', 
             beschrijving: 'Interactieve theorieën met audio',
-            tooltip: 'Piaget, Vygotsky, Erikson en meer met voorleesfunctie',
-            category: 'content'
+            tooltip: 'Piaget, Vygotsky, Erikson en meer met voorleesfunctie'
           },
           { 
             id: 'ontwikkelingsstadia', 
             label: '🌱 Ontwikkelingsstadia', 
             beschrijving: 'Timeline van ontwikkeling',
-            tooltip: 'Visuele timeline van cognitieve en sociale ontwikkeling',
-            category: 'tools'
+            tooltip: 'Visuele timeline van cognitieve en sociale ontwikkeling'
           }
         ]
       case 'module3':
@@ -693,15 +688,13 @@ export default function PABOLeerApp() {
             id: 'sel-competenties', 
             label: '❤️ SEL Competentie Radar', 
             beschrijving: 'Visualisatie van SEL-vaardigheden',
-            tooltip: 'Interactieve radar voor sociaal-emotionele competenties',
-            category: 'tools'
+            tooltip: 'Interactieve radar voor sociaal-emotionele competenties'
           },
           { 
             id: 'sel-methoden', 
             label: '🤝 SEL Methodieken', 
             beschrijving: 'Vergelijking van SEL-methoden',
-            tooltip: 'Kanjertraining, Lions Quest en andere SEL-methoden vergelijken',
-            category: 'content'
+            tooltip: 'Kanjertraining, Lions Quest en andere SEL-methoden vergelijken'
           }
         ]
       case 'module9':
@@ -711,8 +704,7 @@ export default function PABOLeerApp() {
             id: 'cito-monitoring', 
             label: '📊 Cito & Monitoring', 
             beschrijving: 'Complete Cito-gids met A-E niveaus',
-            tooltip: 'Alles over Cito-toetsen, monitoring en coördinatorrollen',
-            category: 'content'
+            tooltip: 'Alles over Cito-toetsen, monitoring en coördinatorrollen'
           }
         ]
       case 'module10':
@@ -722,8 +714,7 @@ export default function PABOLeerApp() {
             id: 'inspectie-kader', 
             label: '🔍 Inspectie Onderzoekskader', 
             beschrijving: 'Voorbereiding op inspectiebezoek',
-            tooltip: 'Complete gids voor inspectie voorbereiding en kwaliteitszorg',
-            category: 'content'
+            tooltip: 'Complete gids voor inspectie voorbereiding en kwaliteitszorg'
           }
         ]
       default:
@@ -733,8 +724,7 @@ export default function PABOLeerApp() {
             id: 'klikbare-theorie', 
             label: '🔗 Klikbare Theorie', 
             beschrijving: 'Interactieve theorie verdieping',
-            tooltip: 'Klik op onderstreepte termen voor diepere uitleg',
-            category: 'content'
+            tooltip: 'Klik op onderstreepte termen voor diepere uitleg'
           }
         ]
     }
@@ -865,7 +855,7 @@ export default function PABOLeerApp() {
         </header>
 
         <div className="flex">
-          {/* Enhanced Sidebar */}
+          {/* Sticky Sidebar */}
           <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-white/95 backdrop-blur-sm shadow-lg border-r border-gray-200 transition-all duration-300 flex-shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto`}>
             <div className="p-4">
               {/* Collapse Button */}
@@ -875,7 +865,7 @@ export default function PABOLeerApp() {
                     <span className="text-2xl">{selectedModule.icon}</span>
                     <div>
                       <h3 className="font-semibold text-gray-800 text-sm">{selectedModule.titel}</h3>
-                      <p className="text-xs text-gray-500 capitalize">{selectedModule.leerlijn}</p>
+                      <p className="text-xs text-gray-500">{selectedModule.leerlijn}</p>
                     </div>
                   </div>
                 )}
@@ -898,113 +888,39 @@ export default function PABOLeerApp() {
                 </div>
               )}
 
-              {/* Enhanced Sub Views with Categories */}
-              <div className="space-y-4">
-                {/* AI Section */}
-                {!sidebarCollapsed && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                      🤖 AI Begeleiding
-                    </h4>
-                    <div className="space-y-2">
-                      {subViews.filter(view => view.category === 'ai').map((view) => (
-                        <div key={view.id} className="group relative">
-                          <button
-                            onClick={() => setSelectedSubView(view.id)}
-                            className={`w-full text-left p-3 rounded-lg transition-all ${
-                              selectedSubView === view.id
-                                ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm'
-                                : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                            }`}
-                          >
-                            <div className="font-medium text-sm">{view.label}</div>
-                            <div className="text-xs text-gray-500 mt-1">{view.beschrijving}</div>
-                          </button>
+              {/* Sub Views */}
+              <div className="space-y-2">
+                {subViews.map((view) => (
+                  <div key={view.id} className="group relative">
+                    <button
+                      onClick={() => setSelectedSubView(view.id)}
+                      className={`w-full text-left p-3 rounded-lg transition-all ${
+                        selectedSubView === view.id
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                      }`}
+                    >
+                      {sidebarCollapsed ? (
+                        <div className="text-center">
+                          <span className="text-xl">{view.label.split(' ')[0]}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Content Section */}
-                {!sidebarCollapsed && subViews.some(view => view.category === 'content') && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                      📚 Leerinhoud
-                    </h4>
-                    <div className="space-y-2">
-                      {subViews.filter(view => view.category === 'content').map((view) => (
-                        <div key={view.id} className="group relative">
-                          <button
-                            onClick={() => setSelectedSubView(view.id)}
-                            className={`w-full text-left p-3 rounded-lg transition-all ${
-                              selectedSubView === view.id
-                                ? 'bg-green-100 text-green-800 border border-green-200 shadow-sm'
-                                : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'
-                            }`}
-                          >
-                            <div className="font-medium text-sm">{view.label}</div>
-                            <div className="text-xs text-gray-500 mt-1">{view.beschrijving}</div>
-                          </button>
+                      ) : (
+                        <div>
+                          <div className="font-medium text-sm">{view.label}</div>
+                          <div className="text-xs text-gray-500 mt-1">{view.beschrijving}</div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Tools Section */}
-                {!sidebarCollapsed && subViews.some(view => view.category === 'tools') && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                      🛠️ Interactieve Tools
-                    </h4>
-                    <div className="space-y-2">
-                      {subViews.filter(view => view.category === 'tools').map((view) => (
-                        <div key={view.id} className="group relative">
-                          <button
-                            onClick={() => setSelectedSubView(view.id)}
-                            className={`w-full text-left p-3 rounded-lg transition-all ${
-                              selectedSubView === view.id
-                                ? 'bg-purple-100 text-purple-800 border border-purple-200 shadow-sm'
-                                : 'text-gray-700 hover:bg-gray-100 hover:text-purple-600'
-                            }`}
-                          >
-                            <div className="font-medium text-sm">{view.label}</div>
-                            <div className="text-xs text-gray-500 mt-1">{view.beschrijving}</div>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Collapsed View */}
-                {sidebarCollapsed && (
-                  <div className="space-y-2">
-                    {subViews.map((view) => (
-                      <div key={view.id} className="group relative">
-                        <button
-                          onClick={() => setSelectedSubView(view.id)}
-                          className={`w-full p-3 rounded-lg transition-all ${
-                            selectedSubView === view.id
-                              ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm'
-                              : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                          }`}
-                        >
-                          <div className="text-center">
-                            <span className="text-xl">{view.label.split(' ')[0]}</span>
-                          </div>
-                        </button>
-                        
-                        {/* Tooltip for collapsed state */}
-                        <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
-                          <div className="font-medium">{view.label}</div>
-                          <div className="text-gray-300">{view.tooltip}</div>
-                        </div>
+                      )}
+                    </button>
+                    
+                    {/* Tooltip for collapsed state */}
+                    {sidebarCollapsed && (
+                      <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+                        <div className="font-medium">{view.label}</div>
+                        <div className="text-gray-300">{view.tooltip}</div>
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
+                ))}
               </div>
 
               {/* Quick Actions */}
@@ -1014,17 +930,15 @@ export default function PABOLeerApp() {
                   <div className="space-y-2">
                     <button
                       onClick={goToOverview}
-                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center space-x-2"
+                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     >
-                      <span>🏠</span>
-                      <span>Terug naar overzicht</span>
+                      🏠 Terug naar overzicht
                     </button>
                     <button
                       onClick={goToDocuments}
-                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center space-x-2"
+                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     >
-                      <span>📚</span>
-                      <span>Documenten beheren</span>
+                      📚 Documenten beheren
                     </button>
                   </div>
                 </div>
