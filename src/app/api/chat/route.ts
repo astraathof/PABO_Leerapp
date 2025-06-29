@@ -5,10 +5,25 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if API key is configured
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: 'GEMINI_API_KEY niet geconfigureerd' },
+        { 
+          error: 'GEMINI_API_KEY niet geconfigureerd',
+          details: 'Voeg GEMINI_API_KEY toe aan je environment variables.'
+        },
         { status: 500 }
+      )
+    }
+
+    // Validate API key format
+    if (!process.env.GEMINI_API_KEY.startsWith('AIza')) {
+      return NextResponse.json(
+        { 
+          error: 'Ongeldige GEMINI_API_KEY format',
+          details: 'De Gemini API key moet beginnen met "AIza". Controleer je API key.'
+        },
+        { status: 401 }
       )
     }
 
@@ -21,7 +36,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    // Initialize Gemini with proper error handling
+    let model
+    try {
+      model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    } catch (initError) {
+      console.error('❌ Failed to initialize Gemini:', initError)
+      return NextResponse.json(
+        { 
+          error: 'Gemini initialisatie gefaald',
+          details: 'Kan geen verbinding maken met Gemini API. Controleer je API key.'
+        },
+        { status: 500 }
+      )
+    }
 
     // Socratische begeleiding prompt
     const systemPrompt = `Je bent een ervaren PABO-docent die gebruikers begeleidt met de socratische methode. 
@@ -57,7 +85,54 @@ Reageer nu op de gebruiker:`
 
     const fullPrompt = `${systemPrompt}\n\nGebruiker: ${message}`
 
-    const result = await model.generateContent(fullPrompt)
+    // Make the API call with proper error handling
+    let result
+    try {
+      // Add timeout handling
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Gemini API timeout after 30 seconds')), 30000)
+      })
+
+      const apiPromise = model.generateContent(fullPrompt)
+      result = await Promise.race([apiPromise, timeoutPromise])
+      
+    } catch (apiError) {
+      console.error('❌ Gemini API call failed:', apiError)
+      
+      // Specific error handling
+      if (apiError instanceof Error) {
+        if (apiError.message?.includes('timeout')) {
+          return NextResponse.json({
+            error: 'Gemini API timeout',
+            details: 'De verwerking duurde te lang. Probeer een kortere vraag.',
+            type: 'timeout_error'
+          }, { status: 408 })
+        }
+        
+        if (apiError.message?.includes('quota') || apiError.message?.includes('QUOTA_EXCEEDED')) {
+          return NextResponse.json({
+            error: 'API quota overschreden',
+            details: 'Je hebt je Gemini API quota overschreden. Probeer het later opnieuw.',
+            type: 'quota_error'
+          }, { status: 429 })
+        }
+        
+        if (apiError.message?.includes('API_KEY_INVALID') || apiError.message?.includes('401')) {
+          return NextResponse.json({
+            error: 'Ongeldige Gemini API key',
+            details: 'De Gemini API key is ongeldig. Controleer je API key.',
+            type: 'api_key_error'
+          }, { status: 401 })
+        }
+      }
+      
+      // Generic API error
+      return NextResponse.json(
+        { error: 'Er is een fout opgetreden bij het verwerken van je vraag' },
+        { status: 500 }
+      )
+    }
+
     const response = await result.response
     const text = response.text()
 
@@ -69,7 +144,10 @@ Reageer nu op de gebruiker:`
   } catch (error) {
     console.error('AI Chat error:', error)
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden bij het verwerken van je vraag' },
+      { 
+        error: 'Er is een fout opgetreden bij het verwerken van je vraag',
+        details: error instanceof Error ? error.message : 'Onbekende fout'
+      },
       { status: 500 }
     )
   }

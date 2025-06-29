@@ -136,40 +136,42 @@ VEREISTEN:
       const apiPromise = model.generateContent(analysisPrompt)
       result = await Promise.race([apiPromise, timeoutPromise])
       
-    } catch (apiError: any) {
+    } catch (apiError) {
       console.error('❌ Gemini API call failed:', apiError)
       
       // Specific error handling
-      if (apiError.message?.includes('timeout')) {
-        return NextResponse.json({
-          error: 'Gemini API timeout',
-          details: 'De analyse duurde te lang. Probeer met kleinere documenten.',
-          type: 'timeout_error'
-        }, { status: 408 })
-      }
-      
-      if (apiError.message?.includes('quota') || apiError.message?.includes('QUOTA_EXCEEDED')) {
-        return NextResponse.json({
-          error: 'API quota overschreden',
-          details: 'Je hebt je Gemini API quota overschreden. Controleer je Google Cloud billing.',
-          type: 'quota_error'
-        }, { status: 429 })
-      }
-      
-      if (apiError.message?.includes('API_KEY_INVALID') || apiError.message?.includes('401')) {
-        return NextResponse.json({
-          error: 'Ongeldige Gemini API key',
-          details: 'De Gemini API key is ongeldig. Controleer je API key in Google AI Studio.',
-          type: 'api_key_error'
-        }, { status: 401 })
-      }
+      if (apiError instanceof Error) {
+        if (apiError.message?.includes('timeout')) {
+          return NextResponse.json({
+            error: 'Gemini API timeout',
+            details: 'De analyse duurde te lang. Probeer met kleinere documenten.',
+            type: 'timeout_error'
+          }, { status: 408 })
+        }
+        
+        if (apiError.message?.includes('quota') || apiError.message?.includes('QUOTA_EXCEEDED')) {
+          return NextResponse.json({
+            error: 'API quota overschreden',
+            details: 'Je hebt je Gemini API quota overschreden. Controleer je Google Cloud billing.',
+            type: 'quota_error'
+          }, { status: 429 })
+        }
+        
+        if (apiError.message?.includes('API_KEY_INVALID') || apiError.message?.includes('401')) {
+          return NextResponse.json({
+            error: 'Ongeldige Gemini API key',
+            details: 'De Gemini API key is ongeldig. Controleer je API key in Google AI Studio.',
+            type: 'api_key_error'
+          }, { status: 401 })
+        }
 
-      if (apiError.message?.includes('SAFETY')) {
-        return NextResponse.json({
-          error: 'Content safety filter',
-          details: 'De inhoud werd geblokkeerd door Gemini safety filters. Probeer andere documenten.',
-          type: 'safety_error'
-        }, { status: 400 })
+        if (apiError.message?.includes('SAFETY')) {
+          return NextResponse.json({
+            error: 'Content safety filter',
+            details: 'De inhoud werd geblokkeerd door Gemini safety filters. Probeer andere documenten.',
+            type: 'safety_error'
+          }, { status: 400 })
+        }
       }
       
       // Generic API error
@@ -193,15 +195,17 @@ VEREISTEN:
       module: module
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Professional quickscan error:', error)
     
     // Enhanced error logging for debugging
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    })
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+    }
     
     // Return professional fallback response
     const fallbackAnalysis = `**📚 Documenten geanalyseerd**
@@ -230,7 +234,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
       error: 'AI analyse tijdelijk niet beschikbaar - professionele fallback gebruikt',
       documentsAnalyzed: documents?.length || 0,
       module: module,
-      errorDetails: error.message
+      errorDetails: error instanceof Error ? error.message : 'Unknown error'
     })
   }
 }
