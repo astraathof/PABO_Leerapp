@@ -288,13 +288,13 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
         }
       }
       
-      const errorMessage_: ChatMessage = {
+      const errorChatMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: errorMessage,
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorMessage_])
+      setMessages(prev => [...prev, errorChatMessage])
     } finally {
       setIsLoading(false)
     }
