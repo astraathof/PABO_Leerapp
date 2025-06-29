@@ -30,11 +30,11 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
       }
     }
 
-    setTranscript(finalTranscript + interimTranscript)
+    const currentTranscript = finalTranscript || interimTranscript
+    setTranscript(currentTranscript)
     
     if (finalTranscript) {
       onTranscript(finalTranscript)
-      setTranscript('') // Clear after sending
     }
   }, [onTranscript])
 
@@ -50,6 +50,8 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
       setErrorMessage('Microfoon toegang geweigerd. Controleer je browser instellingen.')
     } else if (event.error === 'network') {
       setErrorMessage('Netwerkprobleem. Controleer je internetverbinding.')
+    } else if (event.error === 'no-speech') {
+      setErrorMessage('Geen spraak gedetecteerd. Probeer opnieuw te spreken.')
     } else {
       setErrorMessage(`Fout: ${event.error}`)
     }
@@ -64,16 +66,35 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
     // Only restart if we're still supposed to be listening and not disabled
     if (isListening && !disabled && recognitionRef.current) {
       try {
-        recognitionRef.current.start()
+        // Small delay before restarting to prevent rapid restart issues
+        setTimeout(() => {
+          if (isListening && !disabled && recognitionRef.current) {
+            recognitionRef.current.start()
+          }
+        }, 100)
       } catch (error) {
         console.error('Failed to restart recognition:', error)
+        setErrorMessage('Kon spraakherkenning niet herstarten. Probeer opnieuw.')
+        onToggleListening()
       }
     }
-  }, [isListening, disabled])
+  }, [isListening, disabled, onToggleListening])
 
   // Initialize speech recognition only once
   useEffect(() => {
-    if (typeof window !== 'undefined' && !isInitializedRef.current) {
+    // Clean up any existing recognition instance first
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+        recognitionRef.current.onresult = null
+        recognitionRef.current.onerror = null
+        recognitionRef.current.onend = null
+      } catch (error) {
+        console.error('Failed to cleanup existing recognition:', error)
+      }
+    }
+
+    if (typeof window !== 'undefined') {
       const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition
       if (SpeechRecognition) {
         setIsSupported(true)
@@ -83,6 +104,7 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
         recognition.continuous = true
         recognition.interimResults = true
         recognition.lang = 'nl-NL'
+        recognition.maxAlternatives = 1
 
         // Set up event handlers
         recognition.onresult = handleResult
@@ -95,14 +117,14 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
 
     // Cleanup on unmount
     return () => {
-      if (recognitionRef.current && isInitializedRef.current) {
+      if (recognitionRef.current) {
         try {
           recognitionRef.current.stop()
           recognitionRef.current.onresult = null
           recognitionRef.current.onerror = null
           recognitionRef.current.onend = null
         } catch (error) {
-          console.error('Failed to cleanup recognition:', error)
+          console.error('Failed to cleanup recognition on unmount:', error)
         }
       }
     }
@@ -110,23 +132,41 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
 
   // Handle start/stop based on isListening state
   useEffect(() => {
-    if (recognitionRef.current && isInitializedRef.current) {
-      if (isListening && !disabled) {
-        try {
-          recognitionRef.current.start()
-          setErrorMessage(null)
-        } catch (error) {
-          console.error('Failed to start speech recognition:', error)
-          setErrorMessage('Kon spraakherkenning niet starten. Probeer de pagina te verversen.')
-          onToggleListening() // Turn off listening state
-        }
-      } else {
+    if (!recognitionRef.current || !isInitializedRef.current) return;
+    
+    if (isListening && !disabled) {
+      try {
+        // First stop any existing session to ensure clean state
         try {
           recognitionRef.current.stop()
-        } catch (error) {
-          // Ignore errors when stopping as it might already be stopped
-          console.log('Recognition stop error (likely already stopped):', error)
+        } catch (e) {
+          // Ignore errors when stopping as it might not be started
         }
+        
+        // Small delay before starting
+        setTimeout(() => {
+          if (recognitionRef.current && isListening && !disabled) {
+            recognitionRef.current.start()
+            setErrorMessage(null)
+            console.log('Speech recognition started successfully')
+          }
+        }, 100)
+      } catch (error) {
+        console.error('Failed to start speech recognition:', error)
+        setErrorMessage('Kon spraakherkenning niet starten. Probeer de pagina te verversen.')
+        onToggleListening() // Turn off listening state
+      }
+    } else {
+      try {
+        recognitionRef.current.stop()
+        console.log('Speech recognition stopped')
+      } catch (error) {
+        // Ignore errors when stopping as it might already be stopped
+        console.log('Recognition stop error (likely already stopped):', error)
+      }
+      
+      // Only clear transcript when explicitly stopping, not when disabled
+      if (!isListening) {
         setTranscript('')
       }
     }
