@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: false,
+  env: {
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  },
   webpack: (config) => {
     // Fix for canvas module in serverless environments
     config.resolve.alias.canvas = false;

@@ -6,14 +6,21 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 function initializeGemini() {
   const apiKey = process.env.GEMINI_API_KEY
   
+  console.log('🔑 Checking API key configuration...')
+  console.log('API key exists:', !!apiKey)
+  console.log('API key starts with AIza:', apiKey?.startsWith('AIza'))
+  
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY not configured in environment variables')
+    console.error('❌ GEMINI_API_KEY not found in environment variables')
+    throw new Error('GEMINI_API_KEY not configured in environment variables. Please add it to your .env.local file.')
   }
   
   if (!apiKey.startsWith('AIza')) {
-    throw new Error('Invalid GEMINI_API_KEY format - should start with "AIza"')
+    console.error('❌ Invalid GEMINI_API_KEY format:', apiKey.substring(0, 10) + '...')
+    throw new Error('Invalid GEMINI_API_KEY format - should start with "AIza". Please check your API key.')
   }
   
+  console.log('✅ API key configuration valid')
   return new GoogleGenerativeAI(apiKey)
 }
 
