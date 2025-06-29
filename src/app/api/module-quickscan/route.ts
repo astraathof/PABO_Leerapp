@@ -23,12 +23,17 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    // Prepare document content for analysis
+    // Prepare document content for analysis with text truncation to prevent token limit issues
     const documentContent = documents.map((doc: any) => {
+      // Truncate document text to prevent token limit issues (max 2000 characters per document)
+      const truncatedText = doc.text.length > 2000 
+        ? doc.text.substring(0, 2000) + '...[tekst ingekort]'
+        : doc.text
+
       return `**DOCUMENT: ${doc.fileName}** (${doc.detectedType})
       
 **INHOUD:**
-${doc.text}
+${truncatedText}
 
 **EINDE DOCUMENT**`
     }).join('\n\n')

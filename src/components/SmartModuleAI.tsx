@@ -131,14 +131,23 @@ export default function SmartModuleAI({ moduleId, moduleTitle, documents, userLe
         },
         body: JSON.stringify({
           documents: documents,
-          moduleId: moduleId,
-          userLevel: userLevel
+          module: moduleTitle,
+          analysisType: 'quickscan'
         }),
       })
 
       if (response.ok) {
         const result = await response.json()
-        setQuickscanResult(result)
+        setQuickscanResult({
+          quickscan: result.analysis,
+          openingQuestion: result.openingQuestion,
+          moduleInfo: {
+            titel: moduleTitle,
+            leerdoelen: ['Module leerdoelen laden...'],
+            competenties: ['Competenties laden...']
+          },
+          documentsAnalyzed: result.documentCount
+        })
         console.log('✅ Quickscan completed successfully')
       } else {
         throw new Error('Quickscan failed')
