@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI, GenerateContentResult } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
@@ -88,7 +88,7 @@ Reageer nu op de gebruiker:`
     const fullPrompt = `${systemPrompt}\n\nGebruiker: ${message}`
 
     // Make the API call with proper error handling
-    let result
+    let result: GenerateContentResult
     try {
       // Add timeout handling
       const timeoutPromise = new Promise((_, reject) => {
@@ -96,7 +96,7 @@ Reageer nu op de gebruiker:`
       })
 
       const apiPromise = model.generateContent(fullPrompt)
-      result = await Promise.race([apiPromise, timeoutPromise])
+      result = await Promise.race([apiPromise, timeoutPromise]) as GenerateContentResult
       
     } catch (apiError) {
       console.error('❌ Gemini API call failed:', apiError)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI, GenerateContentResult } from '@google/generative-ai'
 
 // Initialize Gemini with better error handling
 function initializeGemini() {
@@ -88,8 +88,8 @@ Geef de volledige tekstinhoud terug:`
     // Race between API call and timeout
     const apiPromise = model.generateContent([prompt, pdfPart])
     
-    const result = await Promise.race([apiPromise, timeoutPromise])
-    const response = await (result as any).response
+    const result = await Promise.race([apiPromise, timeoutPromise]) as GenerateContentResult
+    const response = await result.response
     const extractedText = response.text()
 
     console.log(`✅ Enhanced PDF text extraction completed (${extractedText.length} characters)`)
@@ -356,8 +356,8 @@ Geef een volledige transcriptie van alle tekst in de afbeelding.`
     })
 
     const apiPromise = model.generateContent([prompt, imagePart])
-    const result = await Promise.race([apiPromise, timeoutPromise])
-    const response = await (result as any).response
+    const result = await Promise.race([apiPromise, timeoutPromise]) as GenerateContentResult
+    const response = await result.response
     const extractedText = response.text()
 
     console.log(`✅ Image text extraction completed successfully (${extractedText.length} characters)`)

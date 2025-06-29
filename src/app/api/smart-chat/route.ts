@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI, GenerateContentStreamResult } from '@google/generative-ai'
 import { NextRequest } from 'next/server'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
@@ -230,9 +230,9 @@ Reageer nu als ${role.naam} op de gebruiker:`
 
           const apiPromise = model.generateContentStream(fullPrompt)
           
-          let result
+          let result: GenerateContentStreamResult
           try {
-            result = await Promise.race([apiPromise, timeoutPromise])
+            result = await Promise.race([apiPromise, timeoutPromise]) as GenerateContentStreamResult
           } catch (streamError) {
             console.error('Streaming error:', streamError)
             const errorMessage = streamError instanceof Error ? streamError.message : 'Onbekende streaming fout'
