@@ -23,6 +23,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
   const [isUploading, setIsUploading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showUploadArea, setShowUploadArea] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -85,6 +86,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     if (!file) return
 
     setIsUploading(true)
+    setUploadError(null)
 
     try {
       const formData = new FormData()
@@ -97,6 +99,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
 
       if (!response.ok) {
         const errorData = await response.json()
+        setUploadError(errorData.error || 'Upload failed')
         throw new Error(errorData.error || 'Upload failed')
       }
 
@@ -119,7 +122,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       
     } catch (error) {
       console.error('Upload error:', error)
-      alert(`❌ Fout bij uploaden: ${error instanceof Error ? error.message : 'Onbekende fout'}`)
+      setUploadError(error instanceof Error ? error.message : 'Onbekende fout bij uploaden')
     } finally {
       setIsUploading(false)
     }
@@ -183,7 +186,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                   : 'bg-green-600 text-white hover:bg-green-700'
               }`}
             >
-              {isUploading ? '⏳' : '📤'} Upload
+              {isUploading ? '⏳' : '📤'} {isUploading ? 'Bezig...' : 'Upload'}
             </button>
             
             {/* Expand/Collapse Button */}
@@ -227,8 +230,20 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
-                {isUploading ? 'Uploaden & Analyseren...' : '📤 Selecteer Bestand'}
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploaden & Analyseren...
+                  </>
+                ) : '📤 Selecteer Bestand'}
               </label>
+              
+              {/* Upload Error Message */}
+              {uploadError && (
+                <div className="mt-3 p-2 bg-red-50 rounded-lg border border-red-200 text-red-700 text-xs">
+                  <strong>❌ Fout:</strong> {uploadError}
+                </div>
+              )}
             </div>
           </div>
         </div>

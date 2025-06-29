@@ -24,6 +24,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
     console.log('Starting file upload for:', file.name, 'Type:', file.type)
     setIsUploading(true)
     setUploadSuccess(false)
+    setUploadError(null)
 
     try {
       const formData = new FormData()
@@ -100,6 +102,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       if (!response.ok) {
         const errorData = await response.json()
         console.error('Upload failed with error:', errorData)
+        setUploadError(errorData.error || 'Upload failed')
         throw new Error(errorData.error || 'Upload failed')
       }
 
@@ -137,7 +140,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
       
     } catch (error) {
       console.error('Upload error:', error)
-      alert(`❌ Fout bij uploaden: ${error instanceof Error ? error.message : 'Onbekende fout'}`)
+      setUploadError(error instanceof Error ? error.message : 'Onbekende fout bij uploaden')
     } finally {
       setIsUploading(false)
     }
@@ -303,6 +306,13 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                 )}
               </label>
             </div>
+            
+            {/* Upload Error Message */}
+            {uploadError && (
+              <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200 text-red-700 text-sm">
+                <strong>❌ Fout bij uploaden:</strong> {uploadError}
+              </div>
+            )}
           </div>
         </div>
 
@@ -447,7 +457,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
                       <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-800">{doc.fileName}</h4>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                        <div className="flex items-center space-x-3 text-sm text-gray-500 mt-1">
                           <span>📄 {doc.fileType}</span>
                           <span>🎯 {doc.detectedType}</span>
                           <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
