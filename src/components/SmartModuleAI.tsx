@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 interface UploadedDocument {
   id: string
@@ -12,117 +12,42 @@ interface UploadedDocument {
   uploadDate: Date
 }
 
-interface ModuleInfo {
-  titel: string
-  leerdoelen: string[]
-  competenties: string[]
+interface SmartModuleAIProps {
+  moduleTitle: string
+  moduleId: string
+  documents: UploadedDocument[]
 }
 
 interface QuickscanResult {
-  quickscan: string
-  openingQuestion: string
-  moduleInfo: ModuleInfo
+  success: boolean
+  analysis: string
+  analysisType: string
   documentsAnalyzed: number
+  module: string
+  error?: string
+  type?: string
 }
 
-interface SmartModuleAIProps {
-  moduleId: string
-  moduleTitle: string
-  documents: UploadedDocument[]
-  userLevel: 'beginnend' | 'gevorderd' | 'expert'
-}
-
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
-
-const aiRoles = [
-  {
-    id: 'tutor',
-    naam: 'AI-Tutor',
-    icon: '👨‍🏫',
-    beschrijving: 'Leert je stap voor stap nieuwe concepten',
-    kleur: 'bg-blue-500'
-  },
-  {
-    id: 'coach',
-    naam: 'AI-Coach',
-    icon: '💪',
-    beschrijving: 'Helpt je doelen bereiken en vaardigheden ontwikkelen',
-    kleur: 'bg-green-500'
-  },
-  {
-    id: 'mentor',
-    naam: 'AI-Mentor',
-    icon: '🧙‍♂️',
-    beschrijving: 'Begeleidt je professionele ontwikkeling',
-    kleur: 'bg-purple-500'
-  },
-  {
-    id: 'teammate',
-    naam: 'AI-Teammate',
-    icon: '🤝',
-    beschrijving: 'Werkt samen met je aan projecten en ideeën',
-    kleur: 'bg-orange-500'
-  },
-  {
-    id: 'tool',
-    naam: 'AI-Tool',
-    icon: '🔧',
-    beschrijving: 'Voert specifieke taken uit en geeft directe antwoorden',
-    kleur: 'bg-gray-500'
-  },
-  {
-    id: 'simulator',
-    naam: 'AI-Simulator',
-    icon: '🎭',
-    beschrijving: 'Simuleert situaties voor oefening en training',
-    kleur: 'bg-red-500'
-  },
-  {
-    id: 'student',
-    naam: 'AI-Student',
-    icon: '🙋‍♀️',
-    beschrijving: 'Stelt vragen en laat jou uitleggen en onderwijzen',
-    kleur: 'bg-pink-500'
-  }
-]
-
-export default function SmartModuleAI({ moduleId, moduleTitle, documents, userLevel }: SmartModuleAIProps) {
+export default function SmartModuleAI({ moduleTitle, moduleId, documents }: SmartModuleAIProps) {
   const [quickscanResult, setQuickscanResult] = useState<QuickscanResult | null>(null)
-  const [isLoadingQuickscan, setIsLoadingQuickscan] = useState(false)
-  const [selectedAIRole, setSelectedAIRole] = useState('tutor')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [inputMessage, setInputMessage] = useState('')
-  const [isLoadingChat, setIsLoadingChat] = useState(false)
-  const [chatStarted, setChatStarted] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [aiPersonality, setAiPersonality] = useState<'tutor' | 'coach' | 'mentor' | 'teammate' | 'tool' | 'simulator' | 'student'>('mentor')
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  // Auto-start quickscan when documents are available
-  useEffect(() => {
-    if (documents.length > 0 && !quickscanResult && !isLoadingQuickscan) {
+    if (documents.length > 0) {
       performQuickscan()
     }
-  }, [documents, quickscanResult, isLoadingQuickscan])
+  }, [documents, moduleTitle])
 
   const performQuickscan = async () => {
     if (documents.length === 0) return
 
-    setIsLoadingQuickscan(true)
+    setIsAnalyzing(true)
+    setError(null)
     
     try {
-      console.log(`🔍 Starting quickscan for module ${moduleId} with ${documents.length} documents`)
+      console.log(`🔍 Starting quickscan for ${documents.length} documents and module: ${moduleTitle}`)
       
       const response = await fetch('/api/module-quickscan', {
         method: 'POST',
@@ -131,383 +56,251 @@ export default function SmartModuleAI({ moduleId, moduleTitle, documents, userLe
         },
         body: JSON.stringify({
           documents: documents,
-          module: moduleTitle,
-          analysisType: 'quickscan'
+          module: moduleTitle, // Changed from moduleId to module: moduleTitle
+          analysisType: 'module-quickscan'
         }),
       })
 
-      if (response.ok) {
-        const result = await response.json()
-        setQuickscanResult({
-          quickscan: result.analysis,
-          openingQuestion: result.openingQuestion,
-          moduleInfo: {
-            titel: moduleTitle,
-            leerdoelen: ['Module leerdoelen laden...'],
-            competenties: ['Competenties laden...']
-          },
-          documentsAnalyzed: result.documentCount
-        })
-        console.log('✅ Quickscan completed successfully')
-      } else {
-        throw new Error('Quickscan failed')
-      }
-    } catch (error) {
-      console.error('Quickscan error:', error)
-      
-      // Fallback quickscan
-      setQuickscanResult({
-        quickscan: `**📚 Documenten Quickscan**\nJe hebt ${documents.length} document(en) geüpload voor ${moduleTitle}.\n\n**💪 Sterke Punten**\n• Je documenten bieden concrete schoolcontext\n• Ze maken praktijkgericht leren mogelijk\n• Er is materiaal voor realistische verbeteringen\n\n**🔧 Ontwikkelpunten**\n• Koppeling tussen theorie en praktijk versterken\n• Concrete implementatiestrategieën ontwikkelen\n• Systematische evaluatie van huidige aanpak\n\n**🎯 Aanbeveling**\nStart met het bespreken van één specifiek aspect uit je documenten.\n\n**❓ Openingsvraag voor Chatbot**\nWelk onderdeel van je documenten wil je als eerste verdiepen?`,
-        openingQuestion: `Welk aspect van ${moduleTitle} wil je verdiepen?`,
-        moduleInfo: {
-          titel: moduleTitle,
-          leerdoelen: ['Module leerdoelen laden...'],
-          competenties: ['Competenties laden...']
-        },
-        documentsAnalyzed: documents.length
-      })
-    } finally {
-      setIsLoadingQuickscan(false)
-    }
-  }
-
-  const startChat = async () => {
-    if (!quickscanResult) return
-
-    setChatStarted(true)
-    
-    // Add opening message from AI
-    const selectedRole = aiRoles.find(role => role.id === selectedAIRole)
-    const openingMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: `👋 Hallo! Ik ben je **${selectedRole?.naam}** voor de module "${moduleTitle}". \n\nOp basis van je documenten heb ik een quickscan gemaakt. ${quickscanResult.openingQuestion}`,
-      timestamp: new Date()
-    }
-    
-    setMessages([openingMessage])
-  }
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoadingChat || !quickscanResult) return
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
-    setInputMessage('')
-    setIsLoadingChat(true)
-
-    try {
-      const documentContext = documents.map(doc => 
-        `${doc.fileName}: ${doc.text.substring(0, 500)}...`
-      ).join('\n\n')
-
-      const conversationHistory = messages.slice(-5).map(msg => 
-        `${msg.role}: ${msg.content}`
-      ).join('\n')
-
-      const response = await fetch('/api/smart-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputMessage,
-          aiRole: selectedAIRole,
-          moduleInfo: quickscanResult.moduleInfo,
-          quickscanResult: quickscanResult.quickscan,
-          documentContext: documentContext,
-          conversationHistory: conversationHistory,
-          userLevel: userLevel
-        }),
-      })
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error('Chat response failed')
-      }
-
-      // Handle streaming response
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error('No response body')
-
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: '',
-        timestamp: new Date()
-      }
-
-      setMessages(prev => [...prev, assistantMessage])
-
-      let fullResponse = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = new TextDecoder().decode(value)
-        const lines = chunk.split('\n')
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
-            if (data === '[DONE]') break
-            
-            try {
-              const parsed = JSON.parse(data)
-              if (parsed.content) {
-                fullResponse += parsed.content
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessage.id 
-                    ? { ...msg, content: fullResponse }
-                    : msg
-                ))
-              }
-            } catch (e) {
-              // Continue if parsing fails
-            }
-          }
+        // Handle specific error types
+        if (result.type === 'configuration_error') {
+          throw new Error(`⚙️ Configuratie Probleem: ${result.details}`)
+        } else if (result.type === 'api_key_error') {
+          throw new Error(`🔑 API Key Probleem: ${result.details}`)
+        } else if (result.type === 'quota_error') {
+          throw new Error(`📊 Quota Probleem: ${result.details}`)
+        } else {
+          throw new Error(result.error || `Server error: ${response.status}`)
         }
       }
 
-    } catch (error) {
-      console.error('Chat error:', error)
+      console.log('✅ Quickscan completed successfully')
+      setQuickscanResult(result)
       
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Sorry, er is een fout opgetreden. Probeer het opnieuw.',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorMessage])
+    } catch (error) {
+      console.error('Quickscan error:', error)
+      setError(error instanceof Error ? error.message : 'Er is een onbekende fout opgetreden')
+      
+      // Set a fallback result for better UX
+      setQuickscanResult({
+        success: false,
+        analysis: `**⚠️ Analyse niet beschikbaar**
+
+Er is een probleem opgetreden bij het analyseren van je documenten. 
+
+**📚 Documenten beschikbaar**
+Je hebt ${documents.length} document(en) geüpload die we kunnen bespreken.
+
+**💡 Wat kun je doen?**
+• Start een gesprek over je documenten
+• Stel specifieke vragen over de module "${moduleTitle}"
+• Gebruik de AI-begeleiding voor praktische tips
+
+**🤖 AI-begeleiding beschikbaar**
+Ook zonder automatische analyse kan de AI je helpen met vragen over je documenten en de module.`,
+        analysisType: 'error-fallback',
+        documentsAnalyzed: documents.length,
+        module: moduleTitle,
+        error: 'Analyse niet beschikbaar'
+      })
     } finally {
-      setIsLoadingChat(false)
+      setIsAnalyzing(false)
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
+  const getPersonalityDescription = (personality: string) => {
+    switch (personality) {
+      case 'tutor': return 'Gestructureerde begeleiding met duidelijke uitleg'
+      case 'coach': return 'Motiverende ondersteuning en doelgerichte feedback'
+      case 'mentor': return 'Wijze begeleiding met persoonlijke ontwikkeling'
+      case 'teammate': return 'Samenwerking op gelijk niveau'
+      case 'tool': return 'Directe, praktische antwoorden en oplossingen'
+      case 'simulator': return 'Rollenspel en scenario-gebaseerde oefening'
+      case 'student': return 'Leren door samen vragen te stellen'
+      default: return 'Persoonlijke AI-begeleiding'
     }
+  }
+
+  const getPersonalityIcon = (personality: string) => {
+    switch (personality) {
+      case 'tutor': return '👨‍🏫'
+      case 'coach': return '💪'
+      case 'mentor': return '🧙‍♂️'
+      case 'teammate': return '🤝'
+      case 'tool': return '🔧'
+      case 'simulator': return '🎭'
+      case 'student': return '🎓'
+      default: return '🤖'
+    }
+  }
+
+  if (documents.length === 0) {
+    return (
+      <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
+        <div className="text-4xl mb-3">📚</div>
+        <h3 className="text-lg font-semibold text-orange-800 mb-2">Geen documenten geüpload</h3>
+        <p className="text-orange-700 text-sm">
+          Upload je schooldocumenten om slimme AI-analyse en begeleiding te krijgen voor de module "{moduleTitle}"
+        </p>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      {/* DEEL 1: QUICKSCAN ANALYSE */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white">
-          <h3 className="text-lg font-bold flex items-center">
-            <span className="text-xl mr-2">🔍</span>
-            Deel 1: Slimme Quickscan Analyse
-          </h3>
-          <p className="text-emerald-100 text-sm">
-            AI analyseert je documenten en vergelijkt met module leerdoelen
-          </p>
+      {/* Part 1: Quickscan Analysis */}
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-bold mb-2">📊 Deel 1: Slimme Quickscan Analyse</h3>
+            <p className="text-emerald-100">AI analyseert je documenten en vergelijkt met module leerdoelen</p>
+          </div>
+          {documents.length > 0 && (
+            <button
+              onClick={performQuickscan}
+              disabled={isAnalyzing}
+              className="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors disabled:opacity-50"
+            >
+              {isAnalyzing ? '🔄 Analyseren...' : '🔄 Heranalyse'}
+            </button>
+          )}
         </div>
 
-        <div className="p-6">
-          {documents.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-3">📚</div>
-              <h4 className="font-semibold text-gray-700 mb-2">Geen documenten geüpload</h4>
-              <p className="text-gray-500 text-sm">
-                Upload je schooldocumenten om een slimme analyse te krijgen
+        {/* Analysis Status */}
+        {isAnalyzing ? (
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              <span className="text-white font-medium">🔍 AI analyseert je documenten...</span>
+            </div>
+            <p className="text-emerald-100 text-sm">
+              Vergelijking met leerdoelen van "{moduleTitle}" en identificatie van sterke punten en ontwikkelkansen
+            </p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-500 bg-opacity-20 rounded-lg p-4 border border-red-300">
+            <div className="flex items-center space-x-2 mb-2">
+              <span className="text-red-100 font-medium">❌ Analyse Probleem</span>
+            </div>
+            <p className="text-red-100 text-sm mb-3">{error}</p>
+            <div className="bg-white bg-opacity-20 rounded p-3">
+              <p className="text-white text-sm">
+                <strong>💡 Oplossing:</strong> Controleer of de GEMINI_API_KEY correct is ingesteld in je environment variables. 
+                Voor lokale ontwikkeling: voeg toe aan .env.local. Voor deployment: configureer in je hosting platform.
               </p>
             </div>
-          ) : isLoadingQuickscan ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-              <h4 className="font-semibold text-gray-700 mb-2">🔍 AI analyseert je documenten...</h4>
-              <p className="text-gray-500 text-sm">
-                Vergelijkt met leerdoelen van {moduleTitle}
+          </div>
+        ) : quickscanResult ? (
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-3">
+              <span className="text-white font-medium">
+                {quickscanResult.success ? '✅ Analyse voltooid!' : '⚠️ Beperkte analyse'}
+              </span>
+              <span className="text-emerald-100 text-sm">
+                ({quickscanResult.documentsAnalyzed} document(en))
+              </span>
+            </div>
+            {quickscanResult.error && (
+              <p className="text-emerald-100 text-sm mb-2">
+                ⚠️ {quickscanResult.error}
               </p>
-            </div>
-          ) : quickscanResult ? (
-            <div className="space-y-4">
-              <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                <div className="prose prose-sm max-w-none">
-                  <div className="whitespace-pre-wrap text-emerald-800">
-                    {quickscanResult.quickscan}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>📊 {quickscanResult.documentsAnalyzed} document(en) geanalyseerd</span>
-                <span>🎯 {quickscanResult.moduleInfo.leerdoelen.length} leerdoelen vergeleken</span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-3">⚠️</div>
-              <h4 className="font-semibold text-gray-700 mb-2">Analyse mislukt</h4>
-              <button
-                onClick={performQuickscan}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                🔄 Opnieuw proberen
-              </button>
+            )}
+          </div>
+        ) : (
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <p className="text-white text-sm">🔄 Klaar voor analyse van {documents.length} document(en)...</p>
+          </div>
+        )}
+      </div>
+
+      {/* Quickscan Results */}
+      {quickscanResult && (
+        <div className="bg-white rounded-lg p-6 border-l-4 border-emerald-500 shadow-lg">
+          <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="text-xl mr-2">📋</span>
+            Quickscan Resultaten: {moduleTitle}
+          </h4>
+          <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="whitespace-pre-wrap">{quickscanResult.analysis}</div>
+          </div>
+          {quickscanResult.analysisType === 'fallback' && (
+            <div className="mt-4 p-3 bg-yellow-50 rounded border border-yellow-200">
+              <p className="text-yellow-800 text-sm">
+                💡 <strong>Opmerking:</strong> Dit is een standaard analyse omdat de AI-service tijdelijk niet beschikbaar is. 
+                De chatbot kan je nog steeds helpen met vragen over je documenten.
+              </p>
             </div>
           )}
         </div>
-      </div>
+      )}
 
-      {/* DEEL 2: SLIMME CHATBOT */}
-      {quickscanResult && (
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white">
-            <h3 className="text-lg font-bold flex items-center">
-              <span className="text-xl mr-2">🤖</span>
-              Deel 2: Slimme AI Chatbot
-            </h3>
-            <p className="text-indigo-100 text-sm">
-              Kies je AI-rol en ga dieper in op de analyse
+      {/* Part 2: AI Chatbot Configuration */}
+      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
+        <h3 className="text-xl font-bold mb-4">🤖 Deel 2: Slimme Chatbot per Module</h3>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* AI Personality Selector */}
+          <div>
+            <h4 className="font-semibold mb-3">Kies je AI-begeleider:</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'tutor', label: 'AI-Tutor' },
+                { id: 'coach', label: 'AI-Coach' },
+                { id: 'mentor', label: 'AI-Mentor' },
+                { id: 'teammate', label: 'AI-Teammate' },
+                { id: 'tool', label: 'AI-Tool' },
+                { id: 'simulator', label: 'AI-Simulator' },
+                { id: 'student', label: 'AI-Student' }
+              ].map((personality) => (
+                <button
+                  key={personality.id}
+                  onClick={() => setAiPersonality(personality.id as any)}
+                  className={`p-2 rounded-lg text-sm transition-all ${
+                    aiPersonality === personality.id
+                      ? 'bg-white text-blue-600 font-semibold'
+                      : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                  }`}
+                >
+                  {getPersonalityIcon(personality.id)} {personality.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Personality Info */}
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <h4 className="font-semibold mb-2">
+              {getPersonalityIcon(aiPersonality)} {aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}
+            </h4>
+            <p className="text-blue-100 text-sm">
+              {getPersonalityDescription(aiPersonality)}
             </p>
           </div>
-
-          <div className="p-6">
-            {!chatStarted ? (
-              <div className="space-y-6">
-                {/* AI Role Selector */}
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-4">🎭 Kies je AI-rol:</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                    {aiRoles.map((role) => (
-                      <button
-                        key={role.id}
-                        onClick={() => setSelectedAIRole(role.id)}
-                        className={`p-3 rounded-lg text-center transition-all hover:scale-105 ${
-                          selectedAIRole === role.id
-                            ? `${role.kleur} text-white shadow-lg`
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        <div className="text-2xl mb-1">{role.icon}</div>
-                        <div className="font-medium text-xs">{role.naam}</div>
-                      </button>
-                    ))}
-                  </div>
-                  
-                  {/* Selected Role Description */}
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">
-                        {aiRoles.find(role => role.id === selectedAIRole)?.icon}
-                      </span>
-                      <div>
-                        <h5 className="font-semibold text-blue-800">
-                          {aiRoles.find(role => role.id === selectedAIRole)?.naam}
-                        </h5>
-                        <p className="text-blue-700 text-sm">
-                          {aiRoles.find(role => role.id === selectedAIRole)?.beschrijving}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Start Chat Button */}
-                <div className="text-center">
-                  <button
-                    onClick={startChat}
-                    className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold text-lg shadow-lg hover:shadow-xl"
-                  >
-                    🚀 Start Chat met {aiRoles.find(role => role.id === selectedAIRole)?.naam}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Chat Header */}
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">
-                      {aiRoles.find(role => role.id === selectedAIRole)?.icon}
-                    </span>
-                    <div>
-                      <h5 className="font-semibold text-gray-800">
-                        {aiRoles.find(role => role.id === selectedAIRole)?.naam}
-                      </h5>
-                      <p className="text-gray-600 text-sm">Module: {moduleTitle}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setChatStarted(false)
-                      setMessages([])
-                    }}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
-                  >
-                    🔄 Nieuwe chat
-                  </button>
-                </div>
-
-                {/* Chat Messages */}
-                <div className="bg-gray-50 rounded-lg h-96 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                          message.role === 'user'
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white text-gray-800 border border-gray-200'
-                        }`}
-                      >
-                        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                        <div className="text-xs opacity-75 mt-2">
-                          {message.timestamp.toLocaleTimeString()}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {isLoadingChat && (
-                    <div className="flex justify-start">
-                      <div className="bg-white rounded-lg px-4 py-3 max-w-xs border border-gray-200">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Chat Input */}
-                <div className="flex space-x-3">
-                  <textarea
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Typ je vraag..."
-                    className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    rows={2}
-                    disabled={isLoadingChat}
-                  />
-                  <button
-                    onClick={sendMessage}
-                    disabled={!inputMessage.trim() || isLoadingChat}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isLoadingChat ? '⏳' : '🚀'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-      )}
+
+        {/* Start Chat Button */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => {
+              // Trigger chat start with analysis context
+              const event = new CustomEvent('startModuleChat', {
+                detail: {
+                  module: moduleTitle,
+                  personality: aiPersonality,
+                  analysis: quickscanResult?.analysis,
+                  documents: documents
+                }
+              })
+              window.dispatchEvent(event)
+            }}
+            className="px-8 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg"
+          >
+            🚀 Start Slimme Chat
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
