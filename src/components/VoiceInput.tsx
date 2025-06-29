@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void
@@ -14,10 +14,66 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
   const [transcript, setTranscript] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
+  const isInitializedRef = useRef(false)
 
+  // Use useCallback to prevent stale closures
+  const handleResult = useCallback((event: any) => {
+    let finalTranscript = ''
+    let interimTranscript = ''
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript
+      } else {
+        interimTranscript += transcript
+      }
+    }
+
+    setTranscript(finalTranscript + interimTranscript)
+    
+    if (finalTranscript) {
+      onTranscript(finalTranscript)
+      setTranscript('') // Clear after sending
+    }
+  }, [onTranscript])
+
+  const handleError = useCallback((event: any) => {
+    console.error('Speech recognition error:', event.error)
+    
+    // Don't show error message for 'aborted' as it's usually intentional
+    if (event.error === 'aborted') {
+      return
+    }
+    
+    if (event.error === 'not-allowed') {
+      setErrorMessage('Microfoon toegang geweigerd. Controleer je browser instellingen.')
+    } else if (event.error === 'network') {
+      setErrorMessage('Netwerkprobleem. Controleer je internetverbinding.')
+    } else {
+      setErrorMessage(`Fout: ${event.error}`)
+    }
+    
+    // Auto-stop on error (except for aborted)
+    if (isListening && event.error !== 'aborted') {
+      onToggleListening()
+    }
+  }, [isListening, onToggleListening])
+
+  const handleEnd = useCallback(() => {
+    // Only restart if we're still supposed to be listening and not disabled
+    if (isListening && !disabled && recognitionRef.current) {
+      try {
+        recognitionRef.current.start()
+      } catch (error) {
+        console.error('Failed to restart recognition:', error)
+      }
+    }
+  }, [isListening, disabled])
+
+  // Initialize speech recognition only once
   useEffect(() => {
-    // Check if speech recognition is supported
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isInitializedRef.current) {
       const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition
       if (SpeechRecognition) {
         setIsSupported(true)
@@ -28,68 +84,33 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
         recognition.interimResults = true
         recognition.lang = 'nl-NL'
 
-        recognition.onresult = (event: any) => {
-          let finalTranscript = ''
-          let interimTranscript = ''
+        // Set up event handlers
+        recognition.onresult = handleResult
+        recognition.onerror = handleError
+        recognition.onend = handleEnd
 
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript
-            } else {
-              interimTranscript += transcript
-            }
-          }
-
-          setTranscript(finalTranscript + interimTranscript)
-          
-          if (finalTranscript) {
-            onTranscript(finalTranscript)
-            setTranscript('') // Clear after sending
-          }
-        }
-
-        recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error)
-          if (event.error === 'not-allowed') {
-            setErrorMessage('Microfoon toegang geweigerd. Controleer je browser instellingen.')
-          } else if (event.error === 'network') {
-            setErrorMessage('Netwerkprobleem. Controleer je internetverbinding.')
-          } else {
-            setErrorMessage(`Fout: ${event.error}`)
-          }
-          
-          // Auto-stop on error
-          if (isListening) {
-            onToggleListening()
-          }
-        }
-
-        recognition.onend = () => {
-          if (isListening) {
-            try {
-              recognition.start() // Restart if still supposed to be listening
-            } catch (error) {
-              console.error('Failed to restart recognition:', error)
-            }
-          }
-        }
+        isInitializedRef.current = true
       }
     }
 
+    // Cleanup on unmount
     return () => {
-      if (recognitionRef.current) {
+      if (recognitionRef.current && isInitializedRef.current) {
         try {
           recognitionRef.current.stop()
+          recognitionRef.current.onresult = null
+          recognitionRef.current.onerror = null
+          recognitionRef.current.onend = null
         } catch (error) {
-          console.error('Failed to stop recognition:', error)
+          console.error('Failed to cleanup recognition:', error)
         }
       }
     }
-  }, [isListening, onTranscript, onToggleListening])
+  }, [handleResult, handleError, handleEnd])
 
+  // Handle start/stop based on isListening state
   useEffect(() => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && isInitializedRef.current) {
       if (isListening && !disabled) {
         try {
           recognitionRef.current.start()
@@ -103,7 +124,8 @@ export default function VoiceInput({ onTranscript, isListening, onToggleListenin
         try {
           recognitionRef.current.stop()
         } catch (error) {
-          console.error('Failed to stop speech recognition:', error)
+          // Ignore errors when stopping as it might already be stopped
+          console.log('Recognition stop error (likely already stopped):', error)
         }
         setTranscript('')
       }
