@@ -14,6 +14,7 @@ import SELCompetentieRadar from './SELCompetentieRadar'
 import InspectionFrameworkViewer from './InspectionFrameworkViewer'
 import MRWMSViewer from './MRWMSViewer'
 import PersistentDocumentPanel from './PersistentDocumentPanel'
+import SmartModuleAI from './SmartModuleAI'
 
 interface Module {
   id: string
@@ -47,7 +48,7 @@ const modules: Module[] = [
     difficulty: 'Beginner',
     duration: '2-3 uur',
     category: 'Curriculum',
-    components: ['Kerndoelen Viewer', 'Progressie Tracker', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'Kerndoelen Viewer', 'Progressie Tracker', 'Klikbare Theorie'],
     learningGoals: [
       'Alle 58 kerndoelen beheersen',
       'Kerndoelen vertalen naar lesdoelen',
@@ -64,7 +65,7 @@ const modules: Module[] = [
     difficulty: 'Intermediate',
     duration: '3-4 uur',
     category: 'Ontwikkeling',
-    components: ['Ontwikkelingsstadia Timeline', 'Theorie Viewer', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'Ontwikkelingsstadia Timeline', 'Theorie Viewer', 'Klikbare Theorie'],
     learningGoals: [
       'Ontwikkelingsstadia herkennen',
       'Theorie koppelen aan praktijk',
@@ -81,7 +82,7 @@ const modules: Module[] = [
     difficulty: 'Intermediate',
     duration: '3-4 uur',
     category: 'Pedagogiek',
-    components: ['SEL Methodieken', 'Competentie Radar', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'SEL Methodieken', 'Competentie Radar', 'Klikbare Theorie'],
     learningGoals: [
       'SEL-methodieken vergelijken',
       'Klassenklimaat verbeteren',
@@ -98,7 +99,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '4-5 uur',
     category: 'Pedagogiek',
-    components: ['Differentiatie Strategieën', 'Inclusief Onderwijs', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'Differentiatie Strategieën', 'Inclusief Onderwijs', 'Klikbare Theorie'],
     learningGoals: [
       'Differentiatie strategieën toepassen',
       'Inclusief onderwijs vormgeven',
@@ -115,7 +116,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '3-4 uur',
     category: 'Praktijk',
-    components: ['Data Analyse', 'Formatieve Evaluatie', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'Data Analyse', 'Formatieve Evaluatie', 'Klikbare Theorie'],
     learningGoals: [
       'Data interpreteren en gebruiken',
       'Formatieve evaluatie toepassen',
@@ -132,7 +133,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '4-5 uur',
     category: 'Praktijk',
-    components: ['21e-eeuwse Vaardigheden', 'Computational Thinking', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', '21e-eeuwse Vaardigheden', 'Computational Thinking', 'Klikbare Theorie'],
     learningGoals: [
       '21e-eeuwse vaardigheden integreren',
       'Design thinking toepassen',
@@ -149,7 +150,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '4-5 uur',
     category: 'Leiderschap',
-    components: ['Pedagogisch Leiderschap', 'Verandermanagement', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'Pedagogisch Leiderschap', 'Verandermanagement', 'Klikbare Theorie'],
     learningGoals: [
       'Pedagogisch leiderschap ontwikkelen',
       'Veranderprocessen leiden',
@@ -166,7 +167,7 @@ const modules: Module[] = [
     difficulty: 'Intermediate',
     duration: '3-4 uur',
     category: 'Pedagogiek',
-    components: ['Burgerschapsonderwijs', 'Interculturele Competentie', 'Klikbare Theorie'],
+    components: ['Slimme AI Integratie', 'Burgerschapsonderwijs', 'Interculturele Competentie', 'Klikbare Theorie'],
     learningGoals: [
       'Burgerschapsonderwijs vormgeven',
       'Democratische waarden overdragen',
@@ -183,7 +184,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '3-4 uur',
     category: 'Leiderschap',
-    components: ['Cito Monitoring', 'Coördinatorrollen', 'Data Doorstroom'],
+    components: ['Slimme AI Integratie', 'Cito Monitoring', 'Coördinatorrollen', 'Data Doorstroom'],
     learningGoals: [
       'Cito A-E en I-V niveaus begrijpen',
       'Monitoring groep 1-8 organiseren',
@@ -200,7 +201,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '4-5 uur',
     category: 'Leiderschap',
-    components: ['Inspectie Framework', 'Zelfevaluatie Tools', 'Praktijkvoorbeelden', 'Voorbereiding Checklist'],
+    components: ['Slimme AI Integratie', 'Inspectie Framework', 'Zelfevaluatie Tools', 'Praktijkvoorbeelden', 'Voorbereiding Checklist'],
     learningGoals: [
       'Alle 5 inspectiestandaarden beheersen',
       'Zelfevaluatie systematisch uitvoeren',
@@ -217,7 +218,7 @@ const modules: Module[] = [
     difficulty: 'Advanced',
     duration: '3-4 uur',
     category: 'Leiderschap',
-    components: ['MR Bevoegdheden', 'WMS Procedures', 'Praktijktips', 'Sjablonen & Checklists'],
+    components: ['Slimme AI Integratie', 'MR Bevoegdheden', 'WMS Procedures', 'Praktijktips', 'Sjablonen & Checklists'],
     learningGoals: [
       'Alle MR-rechten en -plichten beheersen',
       'WMS-procedures correct toepassen',
@@ -316,6 +317,7 @@ export default function PABOLeerApp() {
   const [showDocumentManager, setShowDocumentManager] = useState(false)
   const [showDirectChat, setShowDirectChat] = useState(false)
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
+  const [userLevel, setUserLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
 
   // Check URL hash for direct navigation
   useEffect(() => {
@@ -431,6 +433,13 @@ export default function PABOLeerApp() {
     if (!moduleData) return null
 
     switch (activeComponent) {
+      case 'Slimme AI Integratie':
+        return <SmartModuleAI 
+          moduleId={activeModule}
+          moduleTitle={moduleData.title}
+          documents={documents}
+          userLevel={userLevel}
+        />
       case 'Kerndoelen Viewer':
         return <KerndoelenViewer />
       case 'Progressie Tracker':
@@ -588,6 +597,20 @@ export default function PABOLeerApp() {
                   <span className="text-gray-700">{activeComponent}</span>
                 </div>
               </div>
+              
+              {/* User Level Selector in Header */}
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">Niveau:</span>
+                <select
+                  value={userLevel}
+                  onChange={(e) => setUserLevel(e.target.value as any)}
+                  className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="beginnend">🌱 Beginnend</option>
+                  <option value="gevorderd">🎯 Gevorderd</option>
+                  <option value="expert">🏆 Expert</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -677,7 +700,52 @@ export default function PABOLeerApp() {
             <h2 className="text-2xl font-bold text-gray-800">📚 Module Onderdelen</h2>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {moduleData.components.map((component, index) => (
+              {/* Slimme AI Integratie - FEATURED */}
+              <div
+                onClick={() => setActiveComponent('Slimme AI Integratie')}
+                className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105 text-white col-span-full md:col-span-2 lg:col-span-3"
+              >
+                <div className="flex items-center space-x-4 mb-4">
+                  <span className="text-4xl">🤖</span>
+                  <div>
+                    <h3 className="text-xl font-bold">🌟 Slimme AI Integratie</h3>
+                    <p className="text-emerald-100">
+                      Quickscan van je documenten + Rolgebaseerde AI Chatbot (Tutor, Coach, Mentor, etc.)
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">🔍</div>
+                      <div className="font-medium">Quickscan</div>
+                      <div className="text-emerald-100 text-xs">Document analyse</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">👨‍🏫</div>
+                      <div className="font-medium">AI-Tutor</div>
+                      <div className="text-emerald-100 text-xs">Stap voor stap</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">💪</div>
+                      <div className="font-medium">AI-Coach</div>
+                      <div className="text-emerald-100 text-xs">Doelgericht</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">🧙‍♂️</div>
+                      <div className="font-medium">AI-Mentor</div>
+                      <div className="text-emerald-100 text-xs">Professioneel</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-emerald-100 text-sm">🚀 Nieuw! Geavanceerde AI per module</span>
+                  <span className="text-2xl">⭐</span>
+                </div>
+              </div>
+
+              {/* Other Components */}
+              {moduleData.components.filter(comp => comp !== 'Slimme AI Integratie').map((component, index) => (
                 <div
                   key={index}
                   onClick={() => setActiveComponent(component)}
@@ -726,13 +794,13 @@ export default function PABOLeerApp() {
               >
                 <div className="flex items-center space-x-3 mb-4">
                   <span className="text-2xl">🤖</span>
-                  <h3 className="font-semibold">AI Begeleiding</h3>
+                  <h3 className="font-semibold">Klassieke AI Begeleiding</h3>
                 </div>
                 <p className="text-purple-100 text-sm mb-4">
                   Socratische AI-begeleiding met automatische analyse van je schooldocumenten
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-purple-100">Gepersonaliseerde begeleiding</span>
+                  <span className="text-sm text-purple-100">Traditionele chatbot</span>
                   <span className="text-xl">🔗</span>
                 </div>
               </div>
@@ -790,48 +858,56 @@ export default function PABOLeerApp() {
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Een interactieve leerapp voor PABO-studenten om alle competenties eigen te maken 
-            met AI-begeleiding, praktijkvoorbeelden en socratische methode.
+            met geavanceerde AI-integratie, praktijkvoorbeelden en rolgebaseerde begeleiding.
           </p>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 mb-12 text-white">
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-xl p-8 mb-12 text-white">
           <h2 className="text-2xl font-bold mb-6 text-center">
-            🤖 Geavanceerde AI-begeleiding met jouw eigen documenten
+            🚀 Nieuwe Slimme AI Integratie per Module!
           </h2>
           
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center p-6 bg-white bg-opacity-20 rounded-xl">
-              <div className="text-4xl mb-3">📚</div>
-              <h3 className="font-semibold mb-2">Upload Schooldocumenten</h3>
-              <p className="text-purple-100 text-sm">
-                Upload je schoolplan, beleid, observatieformulieren en andere documenten om gepersonaliseerd te leren
-              </p>
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-white bg-opacity-20 rounded-xl p-6">
+              <h3 className="text-xl font-bold mb-4 flex items-center">
+                <span className="text-2xl mr-3">🔍</span>
+                Deel 1: Quickscan Analyse
+              </h3>
+              <ul className="space-y-2 text-emerald-100">
+                <li>• 📚 Analyseert je schooldocumenten</li>
+                <li>• 🎯 Vergelijkt met module leerdoelen</li>
+                <li>• 💪 Identificeert sterke punten</li>
+                <li>• 🔧 Benoemt ontwikkelpunten</li>
+                <li>• ❓ Genereert openingsvraag voor chat</li>
+              </ul>
             </div>
 
-            <div className="text-center p-6 bg-white bg-opacity-20 rounded-xl">
-              <div className="text-4xl mb-3">🤝</div>
-              <h3 className="font-semibold mb-2">Vergelijk met Praktijk</h3>
-              <p className="text-purple-100 text-sm">
-                AI helpt je theorie te koppelen aan jouw specifieke schoolsituatie en geeft praktische tips
-              </p>
-            </div>
-
-            <div className="text-center p-6 bg-white bg-opacity-20 rounded-xl">
-              <div className="text-4xl mb-3">💬</div>
-              <h3 className="font-semibold mb-2">Socratische Methode</h3>
-              <p className="text-purple-100 text-sm">
-                Door vragen te stellen helpt de AI je zelf tot inzichten te komen in plaats van directe antwoorden
-              </p>
+            <div className="bg-white bg-opacity-20 rounded-xl p-6">
+              <h3 className="text-xl font-bold mb-4 flex items-center">
+                <span className="text-2xl mr-3">🤖</span>
+                Deel 2: Rolgebaseerde Chatbot
+              </h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="text-center p-2 bg-white bg-opacity-20 rounded">👨‍🏫 AI-Tutor</div>
+                <div className="text-center p-2 bg-white bg-opacity-20 rounded">💪 AI-Coach</div>
+                <div className="text-center p-2 bg-white bg-opacity-20 rounded">🧙‍♂️ AI-Mentor</div>
+                <div className="text-center p-2 bg-white bg-opacity-20 rounded">🤝 AI-Teammate</div>
+                <div className="text-center p-2 bg-white bg-opacity-20 rounded">🔧 AI-Tool</div>
+                <div className="text-center p-2 bg-white bg-opacity-20 rounded">🎭 AI-Simulator</div>
+              </div>
             </div>
           </div>
 
           <div className="text-center">
+            <p className="text-emerald-100 mb-4">
+              Elke module heeft nu een slimme AI die je documenten analyseert en zich aanpast aan jouw gekozen rol!
+            </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => setShowDocumentManager(true)}
                 className="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-semibold"
               >
-                📚 Beheer Documenten
+                📚 Upload Documenten
               </button>
             </div>
           </div>
@@ -955,6 +1031,15 @@ export default function PABOLeerApp() {
                 </div>
                 
                 <p className="text-gray-600 text-sm mb-4">{module.description}</p>
+                
+                {/* NEW: Smart AI Badge */}
+                <div className="mb-3 p-2 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg border border-emerald-200">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🤖</span>
+                    <span className="text-xs font-medium text-emerald-700">Slimme AI Integratie</span>
+                  </div>
+                  <p className="text-xs text-emerald-600 mt-1">Quickscan + 7 AI-rollen</p>
+                </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
