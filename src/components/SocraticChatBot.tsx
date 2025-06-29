@@ -39,6 +39,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [initialQuestion, setInitialQuestion] = useState<string>('')
   const [analysisComplete, setAnalysisComplete] = useState(false)
   const [returnToModule, setReturnToModule] = useState<boolean>(true)
+  const [analysisVisible, setAnalysisVisible] = useState(true)
 
   // Load documents from localStorage
   useEffect(() => {
@@ -221,7 +222,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
       beschrijving: "Chat direct met de AI over je geüploade schooldocumenten",
       type: "reflectie",
       startVraag: "Hoe kan ik je helpen met je schooldocumenten?",
-      context: `Je bent een ervaren PABO-docent die gebruikers helpt met vragen over hun studie en schoolpraktijk. De gebruiker heeft ${documents.length} schooldocument(en) geüpload. Gebruik de socratische methode en verwijs naar de documenten waar relevant. Spreek de gebruiker aan als "je".`
+      context: `Je bent een ervaren onderwijsprofessional die gebruikers helpt met vragen over hun werk en schoolpraktijk. De gebruiker heeft ${documents.length} schooldocument(en) geüpload. Gebruik de socratische methode en verwijs naar de documenten waar relevant. Spreek de gebruiker aan als "je".`
     })
     
     // Start analysis AFTER setting up chat
@@ -266,6 +267,12 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setAnalysisVisible(!analysisVisible)}
+                className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                {analysisVisible ? '🔍 Verberg analyse' : '🔍 Toon analyse'}
+              </button>
               <label className="flex items-center space-x-2 bg-white bg-opacity-20 px-3 py-1 rounded-lg text-sm">
                 <input
                   type="checkbox"
@@ -325,13 +332,21 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
           )}
         </div>
 
-        {/* Analysis Results */}
-        {analysisComplete && documentAnalysis && (
+        {/* Analysis Results - Now toggleable */}
+        {analysisVisible && analysisComplete && documentAnalysis && (
           <div className="bg-white rounded-lg p-6 border-l-4 border-green-500 shadow-lg">
-            <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
-              <span className="text-xl mr-2">📋</span>
-              Analyse van je Schooldocumenten
-            </h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-semibold text-gray-800 flex items-center">
+                <span className="text-xl mr-2">📋</span>
+                Analyse van je Schooldocumenten
+              </h4>
+              <button
+                onClick={() => setAnalysisVisible(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
             <div className="prose prose-sm max-w-none text-gray-700">
               <div className="whitespace-pre-wrap">{documentAnalysis}</div>
             </div>
@@ -418,7 +433,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
           <h3 className="font-semibold text-blue-800 mb-3">🎯 Stel je niveau in</h3>
           <div className="flex space-x-3">
             {[
-              { id: 'beginnend', label: '🌱 Beginnend', desc: 'Eerste jaar PABO' },
+              { id: 'beginnend', label: '🌱 Beginnend', desc: 'Eerste jaar' },
               { id: 'gevorderd', label: '🌿 Gevorderd', desc: 'Tweede/derde jaar' },
               { id: 'expert', label: '🌳 Expert', desc: 'Vierde jaar/ervaren' }
             ].map((level) => (
@@ -487,6 +502,14 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
             )}
           </div>
           <div className="flex items-center space-x-3">
+            {analysisComplete && (
+              <button
+                onClick={() => setAnalysisVisible(!analysisVisible)}
+                className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                {analysisVisible ? '🔍 Verberg analyse' : '🔍 Toon analyse'}
+              </button>
+            )}
             <label className="flex items-center space-x-2 bg-white bg-opacity-20 px-3 py-1 rounded-lg text-sm">
               <input
                 type="checkbox"
@@ -505,6 +528,27 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
           </div>
         </div>
       </div>
+
+      {/* Analysis Results - Now toggleable */}
+      {analysisVisible && analysisComplete && documentAnalysis && (
+        <div className="bg-white rounded-lg p-6 border-l-4 border-green-500 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold text-gray-800 flex items-center">
+              <span className="text-xl mr-2">📋</span>
+              Analyse van je Schooldocumenten
+            </h4>
+            <button
+              onClick={() => setAnalysisVisible(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="whitespace-pre-wrap">{documentAnalysis}</div>
+          </div>
+        </div>
+      )}
 
       {/* Context-Aware Chat Component */}
       <ContextAwareChat

@@ -92,7 +92,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
       const welcomeMessage: ChatMessage = {
         id: 'welcome-no-docs-' + Date.now(),
         role: 'assistant',
-        content: `👋 **Welkom bij je AI-mentor!** Ik ben hier om je te helpen met je PABO-studie.
+        content: `👋 **Welkom bij je AI-mentor!** Ik ben hier om je te helpen met je professionele ontwikkeling.
 
 🤔 **Hoe kan ik je helpen?**
 • Stel vragen over onderwijstheorie
@@ -424,7 +424,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
             onKeyPress={handleKeyPress}
             placeholder={selectedDocuments.length > 0 ? 
               "Stel een vraag over je schooldocumenten..." : 
-              "Typ je vraag over PABO-onderwerpen..."
+              "Typ je vraag over onderwijsonderwerpen..."
             }
             className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={3}

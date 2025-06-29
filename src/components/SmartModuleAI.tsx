@@ -47,6 +47,7 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [analysisVisible, setAnalysisVisible] = useState(true)
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -93,6 +94,14 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
       const result = await response.json()
       console.log('✅ Quickscan completed successfully')
       setQuickscanResult(result)
+      
+      // Dispatch event to notify parent component
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('quickscanCompleted', { 
+          detail: { result } 
+        })
+        window.dispatchEvent(event)
+      }
       
     } catch (error) {
       console.error('Quickscan error:', error)
@@ -382,14 +391,51 @@ ${quickscanResult?.analysis ? quickscanResult.analysis.split('**❓')[0] : 'Je d
                 Module: {moduleTitle} • {documents.length} document(en) • {userLevel}
               </p>
             </div>
-            <button
-              onClick={() => setShowChat(false)}
-              className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
-            >
-              🔙 Terug
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setAnalysisVisible(!analysisVisible)}
+                className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                {analysisVisible ? '🔍 Verberg analyse' : '🔍 Toon analyse'}
+              </button>
+              <button
+                onClick={() => setShowChat(false)}
+                className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                🔙 Terug
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Analysis Results - Now toggleable */}
+        {analysisVisible && quickscanResult && (
+          <div className="bg-white rounded-lg p-6 border-l-4 border-emerald-500 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-semibold text-gray-800 flex items-center">
+                <span className="text-xl mr-2">📋</span>
+                Quickscan Resultaten: {moduleTitle}
+              </h4>
+              <button
+                onClick={() => setAnalysisVisible(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="prose prose-sm max-w-none text-gray-700">
+              <div className="whitespace-pre-wrap">{quickscanResult.analysis}</div>
+            </div>
+            {quickscanResult.analysisType === 'fallback' && (
+              <div className="mt-4 p-3 bg-yellow-50 rounded border border-yellow-200">
+                <p className="text-yellow-800 text-sm">
+                  💡 <strong>Opmerking:</strong> Dit is een standaard analyse omdat de AI-service tijdelijk niet beschikbaar is. 
+                  De chatbot kan je nog steeds helpen met vragen over je documenten.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Chat Messages */}
         <div className="bg-white rounded-lg border border-gray-200 h-96 overflow-y-auto p-4 space-y-4">
