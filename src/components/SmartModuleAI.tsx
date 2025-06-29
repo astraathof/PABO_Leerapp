@@ -28,6 +28,7 @@ interface QuickscanResult {
   module: string
   error?: string
   type?: string
+  action?: string
 }
 
 interface ChatMessage {
@@ -94,6 +95,11 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Network error' }))
+        
+        // Handle specific API key expired error
+        if (response.status === 401 && errorData.type === 'api_key_expired') {
+          throw new Error(`🔑 API Key Verlopen!\n\nJe Gemini API key is verlopen en moet vernieuwd worden.\n\n📋 Stappen om te herstellen:\n1. Ga naar: https://makersuite.google.com/app/apikey\n2. Maak een nieuwe API key aan\n3. Update je .env.local bestand met de nieuwe key\n4. Herstart je development server: npm run dev\n\nVoor deployment: update ook je Netlify environment variables!`)
+        }
         
         if (response.status === 500 && errorData.error?.includes('GEMINI_API_KEY')) {
           throw new Error('🔑 API Key Configuratie Probleem\n\nDe Gemini API key is niet correct geconfigureerd. Dit is nodig voor de AI-functionaliteit.\n\nVoor ontwikkelaars:\n• Controleer of GEMINI_API_KEY is ingesteld in je environment variables\n• Verkrijg een API key via: https://makersuite.google.com/app/apikey\n• Herstart de applicatie na het instellen van de key')
@@ -710,13 +716,14 @@ ${openingQuestion}`,
             <div className="flex items-center space-x-2 mb-2">
               <span className="text-red-100 font-medium">❌ Analyse Probleem</span>
             </div>
-            <p className="text-red-100 text-sm mb-3">{error}</p>
-            <div className="bg-white bg-opacity-20 rounded p-3">
-              <p className="text-white text-sm">
-                <strong>💡 Oplossing:</strong> Controleer of de GEMINI_API_KEY correct is ingesteld in je environment variables. 
-                Voor lokale ontwikkeling: voeg toe aan .env.local. Voor deployment: configureer in je hosting platform.
-              </p>
-            </div>
+            <div className="text-red-100 text-sm mb-3 whitespace-pre-wrap">{error}</div>
+            {error.includes('API Key Verlopen') && (
+              <div className="bg-white bg-opacity-20 rounded p-3 mt-3">
+                <p className="text-white text-sm">
+                  <strong>🔧 Snelle Fix:</strong> Ga naar <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-200">Google AI Studio</a> om een nieuwe API key aan te maken.
+                </p>
+              </div>
+            )}
           </div>
         ) : quickscanResult ? (
           <div className="bg-white bg-opacity-20 rounded-lg p-4">

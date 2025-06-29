@@ -150,8 +150,17 @@ VEREISTEN:
     } catch (apiError) {
       console.error('❌ Gemini API call failed:', apiError)
       
-      // Specific error handling
+      // Specific error handling for expired API key
       if (apiError instanceof Error) {
+        if (apiError.message?.includes('API key expired') || apiError.message?.includes('API_KEY_INVALID')) {
+          return NextResponse.json({
+            error: 'API key verlopen',
+            details: 'Je Gemini API key is verlopen. Ga naar https://makersuite.google.com/app/apikey om een nieuwe key aan te maken en update je environment variables.',
+            type: 'api_key_expired',
+            action: 'renew_api_key'
+          }, { status: 401 })
+        }
+        
         if (apiError.message?.includes('timeout')) {
           return NextResponse.json({
             error: 'Gemini API timeout',
@@ -168,7 +177,7 @@ VEREISTEN:
           }, { status: 429 })
         }
         
-        if (apiError.message?.includes('API_KEY_INVALID') || apiError.message?.includes('401')) {
+        if (apiError.message?.includes('401')) {
           return NextResponse.json({
             error: 'Ongeldige Gemini API key',
             details: 'De Gemini API key is ongeldig. Controleer je API key in Google AI Studio.',
