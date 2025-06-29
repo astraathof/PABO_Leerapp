@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import ContextAwareChat from './ContextAwareChat'
+import VoiceInput from './VoiceInput'
 
 interface Opdracht {
   titel: string
@@ -40,6 +41,8 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [analysisComplete, setAnalysisComplete] = useState(false)
   const [returnToModule, setReturnToModule] = useState<boolean>(true)
   const [analysisVisible, setAnalysisVisible] = useState(true)
+  const [isListening, setIsListening] = useState(false)
+  const [transcript, setTranscript] = useState('')
 
   // Load documents from localStorage
   useEffect(() => {
@@ -98,6 +101,10 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
       }
     }
   }, [])
+
+  const handleVoiceTranscript = (text: string) => {
+    setTranscript(text)
+  }
 
   const analyzeDocumentsForModule = async (documents: UploadedDocument[], moduleTitle: string) => {
     setIsAnalyzing(true)
@@ -448,6 +455,30 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
                 <div className="text-xs opacity-80">{level.desc}</div>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Voice Input Test */}
+        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">🎤 Test Spraakherkenning</h3>
+          <p className="text-gray-600 mb-4">
+            Test hier de spraakherkenning voordat je begint met chatten
+          </p>
+          
+          <div className="space-y-4">
+            <VoiceInput
+              onTranscript={handleVoiceTranscript}
+              isListening={isListening}
+              onToggleListening={() => setIsListening(!isListening)}
+              disabled={false}
+            />
+            
+            {transcript && (
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <h4 className="font-medium text-green-800 mb-2">✅ Spraakherkenning werkt!</h4>
+                <p className="text-green-700">Herkende tekst: "{transcript}"</p>
+              </div>
+            )}
           </div>
         </div>
 

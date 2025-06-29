@@ -46,6 +46,7 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [analysisVisible, setAnalysisVisible] = useState(true)
   const [selectedPersonalityInfo, setSelectedPersonalityInfo] = useState<{
@@ -282,7 +283,12 @@ ${openingQuestion}`,
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      setIsListening(false) // Stop listening after sending message
     }
+  }
+
+  const handleVoiceTranscript = (transcript: string) => {
+    setInputMessage(prev => prev + ' ' + transcript)
   }
 
   const getPersonalityDescription = (personality: string) => {
@@ -611,8 +617,8 @@ ${openingQuestion}`,
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        {/* Chat Input with Voice */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
           <div className="flex space-x-3">
             <textarea
               value={inputMessage}
@@ -623,13 +629,44 @@ ${openingQuestion}`,
               rows={3}
               disabled={isLoading}
             />
-            <button
-              onClick={sendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? '⏳' : '🚀'}
-            </button>
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={sendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? '⏳' : '🚀'}
+              </button>
+              
+              <button
+                onClick={() => setIsListening(!isListening)}
+                disabled={isLoading}
+                className={`px-4 py-3 rounded-lg transition-colors ${
+                  isListening 
+                    ? 'bg-red-500 text-white animate-pulse' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                title={isListening ? 'Stop spraakherkenning' : 'Start spraakherkenning'}
+              >
+                {isListening ? '🛑' : '🎤'}
+              </button>
+            </div>
+          </div>
+          
+          {isListening && (
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 flex items-center">
+              <span className="text-blue-700 mr-2">🎙️ Luisteren...</span>
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>💡 Tip: Klik op de microfoon voor spraakherkenning</span>
+            <span>{inputMessage.length}/1000</span>
           </div>
         </div>
       </div>
