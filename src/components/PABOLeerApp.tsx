@@ -855,17 +855,19 @@ export default function PABOLeerApp() {
         </header>
 
         <div className="flex">
-          {/* Sticky Sidebar */}
+          {/* Sticky Sidebar - ENHANCED */}
           <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-white/95 backdrop-blur-sm shadow-lg border-r border-gray-200 transition-all duration-300 flex-shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto`}>
             <div className="p-4">
-              {/* Collapse Button */}
+              {/* Module Header with Icon */}
               <div className="flex items-center justify-between mb-6">
                 {!sidebarCollapsed && (
                   <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{selectedModule.icon}</span>
+                    <div className={`w-10 h-10 bg-gradient-to-br ${selectedModule.kleur} rounded-lg flex items-center justify-center text-white text-xl shadow-sm`}>
+                      {selectedModule.icon}
+                    </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 text-sm">{selectedModule.titel}</h3>
-                      <p className="text-xs text-gray-500">{selectedModule.leerlijn}</p>
+                      <h3 className="font-semibold text-gray-800">{selectedModule.titel}</h3>
+                      <p className="text-xs text-gray-500 capitalize">{selectedModule.leerlijn}</p>
                     </div>
                   </div>
                 )}
@@ -888,26 +890,34 @@ export default function PABOLeerApp() {
                 </div>
               )}
 
-              {/* Sub Views */}
-              <div className="space-y-2">
+              {/* Sub Views - ENHANCED */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-500 uppercase text-xs tracking-wider mb-2 px-2">
+                  {sidebarCollapsed ? '📋' : 'Module Onderdelen'}
+                </h4>
+                
                 {subViews.map((view) => (
                   <div key={view.id} className="group relative">
                     <button
                       onClick={() => setSelectedSubView(view.id)}
                       className={`w-full text-left p-3 rounded-lg transition-all ${
                         selectedSubView === view.id
-                          ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm'
+                          ? `bg-gradient-to-r ${selectedModule.kleur} text-white shadow-sm`
                           : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
                       }`}
                     >
                       {sidebarCollapsed ? (
-                        <div className="text-center">
+                        <div className="flex flex-col items-center">
                           <span className="text-xl">{view.label.split(' ')[0]}</span>
+                          <span className="text-[10px] mt-1">{view.id.split('-')[0]}</span>
                         </div>
                       ) : (
-                        <div>
-                          <div className="font-medium text-sm">{view.label}</div>
-                          <div className="text-xs text-gray-500 mt-1">{view.beschrijving}</div>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-xl">{view.label.split(' ')[0]}</span>
+                          <div>
+                            <div className="font-medium text-sm">{view.label.split(' ').slice(1).join(' ')}</div>
+                            <div className="text-xs opacity-80">{view.beschrijving}</div>
+                          </div>
                         </div>
                       )}
                     </button>
@@ -926,19 +936,21 @@ export default function PABOLeerApp() {
               {/* Quick Actions */}
               {!sidebarCollapsed && (
                 <div className="mt-8 pt-6 border-t border-gray-200">
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Snelle Acties</h4>
+                  <h4 className="font-medium text-gray-500 uppercase text-xs tracking-wider mb-3 px-2">Snelle Acties</h4>
                   <div className="space-y-2">
                     <button
                       onClick={goToOverview}
-                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="w-full text-left p-3 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center space-x-3"
                     >
-                      🏠 Terug naar overzicht
+                      <span className="text-blue-500 text-lg">🏠</span>
+                      <span>Terug naar overzicht</span>
                     </button>
                     <button
                       onClick={goToDocuments}
-                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="w-full text-left p-3 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center space-x-3"
                     >
-                      📚 Documenten beheren
+                      <span className="text-blue-500 text-lg">📚</span>
+                      <span>Documenten beheren</span>
                     </button>
                   </div>
                 </div>
@@ -1040,9 +1052,15 @@ export default function PABOLeerApp() {
                     {documents.length} document(en) geüpload voor AI-begeleiding
                   </span>
                 </div>
-                <p className="text-blue-100 text-sm">
+                <p className="text-blue-100 mb-4">
                   Je documenten zijn inhoudelijk geanalyseerd en klaar voor gebruik in alle modules
                 </p>
+                <button
+                  onClick={goToDocuments}
+                  className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-lg font-medium"
+                >
+                  📚 Beheer documenten
+                </button>
               </div>
             ) : (
               <button

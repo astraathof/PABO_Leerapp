@@ -172,7 +172,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="text-2xl">📚</div>
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-white text-xl shadow-sm">
+              📚
+            </div>
             <div>
               <h3 className="font-semibold text-gray-800">Mijn Schooldocumenten</h3>
               <div className="flex items-center text-sm">
@@ -181,7 +183,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                 </span>
                 {currentModule && documents.length > 0 && (
                   <span className="text-green-600 flex items-center">
-                    • <span className="inline-flex items-center ml-1">Actief voor {currentModule}</span>
+                    • <span className="inline-flex items-center ml-1">
+                      <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">Actief voor {currentModule}</span>
+                    </span>
                   </span>
                 )}
               </div>
@@ -196,7 +200,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                 e.preventDefault();
                 navigateToDocuments();
               }}
-              className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm flex items-center space-x-1"
+              className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm flex items-center space-x-1 font-medium"
             >
               <span className="text-blue-700">📂</span>
               <span>Beheer</span>
@@ -234,13 +238,13 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       {showUploadArea && (
         <div className="p-4 border-b border-gray-200 bg-blue-50">
           <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center">
-            <div className="space-y-2">
-              <div className="text-2xl">📁</div>
-              <p className="text-sm font-medium text-gray-700">
+            <div className="space-y-4">
+              <div className="text-4xl">📁</div>
+              <p className="text-lg font-medium text-gray-700 mb-2">
                 Sleep document hier of klik om te uploaden
               </p>
-              <p className="text-xs text-gray-500">
-                PDF, DOCX, TXT, JPG, PNG, GIF, WebP • Max 10MB
+              <p className="text-sm text-gray-500 mb-4">
+                Ondersteunde formaten: PDF, DOCX, TXT, JPG, PNG, GIF, WebP (max 10MB)
               </p>
               <input
                 type="file"
@@ -252,27 +256,27 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
               />
               <label
                 htmlFor="quick-document-upload"
-                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white transition-colors cursor-pointer ${
+                className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white ${
                   isUploading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                    : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                } transition-colors shadow-sm`}
               >
                 {isUploading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     Uploaden & Analyseren...
                   </>
-                ) : '📤 Selecteer Bestand'}
+                ) : '📤 Selecteer Document'}
               </label>
-              
-              {/* Upload Error Message */}
-              {uploadError && (
-                <div className="mt-3 p-2 bg-red-50 rounded-lg border border-red-200 text-red-700 text-xs">
-                  <strong>❌ Fout:</strong> {uploadError}
-                </div>
-              )}
             </div>
+            
+            {/* Upload Error Message */}
+            {uploadError && (
+              <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200 text-red-700 text-sm">
+                <strong>❌ Fout bij uploaden:</strong> {uploadError}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -292,13 +296,14 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-xl shadow-sm border border-gray-200">
+                        {getDocumentIcon(doc.detectedType, doc.mimeType)}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-800 truncate">{doc.fileName}</h4>
                         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mt-1">
-                          <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">📄 {doc.fileType}</span>
-                          <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">🎯 {doc.detectedType}</span>
-                          <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">📝 {doc.wordCount.toLocaleString()} woorden</span>
+                          <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">{doc.detectedType}</span>
+                          <span className="text-xs">📝 {doc.wordCount.toLocaleString()} woorden</span>
                           {doc.mimeType?.startsWith('image/') && (
                             <span className="bg-purple-100 px-2 py-0.5 rounded-full text-xs text-purple-600">🔍 AI Vision</span>
                           )}
@@ -376,8 +381,16 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
           {/* Module Context Info */}
           {currentModule && documents.length > 0 && (
             <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-700">
-                <strong>💡 AI-analyse actief:</strong> Je documenten zijn inhoudelijk geanalyseerd en worden gebruikt voor de module "{currentModule}" 
+              <div className="flex items-center space-x-2 mb-1">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs shadow-sm">
+                  ✓
+                </div>
+                <p className="text-sm font-medium text-blue-700">
+                  AI-analyse actief:
+                </p>
+              </div>
+              <p className="text-sm text-blue-700 pl-8">
+                Je documenten zijn inhoudelijk geanalyseerd en worden gebruikt voor de module "<span className="font-medium">{currentModule}</span>" 
                 om gepersonaliseerde begeleiding te geven.
                 {documents.some(doc => doc.mimeType?.startsWith('image/')) && (
                   <span className="block mt-1">
@@ -392,9 +405,12 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
 
       {/* Empty State - Clear Call to Action */}
       {documents.length === 0 && !showUploadArea && (
-        <div className="p-4 text-center">
-          <div className="text-4xl mb-2">📚</div>
-          <p className="text-gray-600 text-sm mb-3">
+        <div className="p-6 text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-3">
+            📚
+          </div>
+          <h4 className="text-lg font-medium text-gray-800 mb-2">Geen documenten</h4>
+          <p className="text-gray-600 text-sm mb-4">
             Upload je schooldocumenten voor gepersonaliseerde AI-begeleiding
           </p>
           <div className="flex justify-center space-x-3">
@@ -404,14 +420,14 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                 e.preventDefault();
                 navigateToDocuments();
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-1"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-1 shadow-sm"
             >
               <span>📂</span>
               <span>Beheer Documenten</span>
             </a>
             <button
               onClick={() => setShowUploadArea(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center space-x-1"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center space-x-1 shadow-sm"
             >
               <span>📤</span>
               <span>Upload Document</span>
