@@ -12,6 +12,7 @@ import CitoMonitoringViewer from './CitoMonitoringViewer'
 import InspectionFrameworkViewer from './InspectionFrameworkViewer'
 import KerndoelenProgressieTracker from './KerndoelenProgressieTracker'
 import ClickableTheoryViewer from './ClickableTheoryViewer'
+import PersistentDocumentPanel from './PersistentDocumentPanel'
 import SmartModuleAI from './SmartModuleAI'
 
 interface UploadedDocument {
@@ -38,6 +39,30 @@ interface Module {
   praktijkvoorbeelden: string[]
   opdrachten: any[]
 }
+
+const leerlijnen = [
+  {
+    id: 'didactiek',
+    titel: 'Didactiek & Vakinhoud',
+    beschrijving: 'Lesgeven, kerndoelen en vakspecifieke kennis',
+    icon: '📚',
+    kleur: 'from-blue-500 to-indigo-600'
+  },
+  {
+    id: 'pedagogiek',
+    titel: 'Pedagogiek & Ontwikkeling',
+    beschrijving: 'Kindontwikkeling, SEL en klassenmanagement',
+    icon: '❤️',
+    kleur: 'from-red-500 to-pink-600'
+  },
+  {
+    id: 'organisatie',
+    titel: 'Organisatie & Leiderschap',
+    beschrijving: 'Schoolorganisatie, data en kwaliteitszorg',
+    icon: '⚖️',
+    kleur: 'from-purple-500 to-indigo-600'
+  }
+]
 
 const modules: Module[] = [
   {
@@ -492,7 +517,7 @@ export default function PABOLeerApp() {
   const [userLevel, setUserLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [selectedLeerlijn, setSelectedLeerlijn] = useState<'alle' | 'didactiek' | 'pedagogiek' | 'organisatie'>('alle')
+  const [selectedLeerlijn, setSelectedLeerlijn] = useState<string>('alle')
 
   // Load documents from localStorage
   useEffect(() => {
@@ -543,6 +568,24 @@ export default function PABOLeerApp() {
   const goToDocuments = () => {
     setCurrentView('documenten')
     setSelectedModule(null)
+  }
+
+  const getBreadcrumbs = () => {
+    const breadcrumbs = [
+      { label: 'Home', onClick: goToOverview, active: currentView === 'overzicht' }
+    ]
+
+    if (currentView === 'documenten') {
+      breadcrumbs.push({ label: 'Documenten', onClick: goToDocuments, active: true })
+    } else if (currentView === 'module' && selectedModule) {
+      breadcrumbs.push({ 
+        label: selectedModule.titel, 
+        onClick: () => {}, 
+        active: true 
+      })
+    }
+
+    return breadcrumbs
   }
 
   const getSubViewComponent = () => {
@@ -597,387 +640,145 @@ export default function PABOLeerApp() {
 
   const getModuleSubViews = (moduleId: string) => {
     const baseViews = [
-      { id: 'ai-integratie', label: '🤖 Slimme AI Integratie', beschrijving: 'AI-analyse van je documenten + rolgebaseerde chatbot' }
+      { 
+        id: 'ai-integratie', 
+        label: '🤖 Slimme AI Integratie', 
+        beschrijving: 'AI-analyse van je documenten + rolgebaseerde chatbot',
+        tooltip: 'Upload je schooldocumenten voor gepersonaliseerde AI-begeleiding'
+      }
     ]
 
     switch (moduleId) {
       case 'module1':
         return [
           ...baseViews,
-          { id: 'kerndoelen', label: '📚 Alle 58 Kerndoelen', beschrijving: 'Interactieve kerndoelen met voorbeelden' },
-          { id: 'kerndoelen-progressie', label: '📈 Kerndoel Progressie', beschrijving: 'Progressie tracking per groep' }
+          { 
+            id: 'kerndoelen', 
+            label: '📚 Alle 58 Kerndoelen', 
+            beschrijving: 'Interactieve kerndoelen met voorbeelden',
+            tooltip: 'Ontdek alle kerndoelen met audio en praktijkvoorbeelden'
+          },
+          { 
+            id: 'kerndoelen-progressie', 
+            label: '📈 Kerndoel Progressie', 
+            beschrijving: 'Progressie tracking per groep',
+            tooltip: 'Volg de ontwikkeling van kerndoelen van groep 1 tot 8'
+          }
         ]
       case 'module2':
         return [
           ...baseViews,
-          { id: 'ontwikkelingstheorie', label: '🧠 Ontwikkelingstheorieën', beschrijving: 'Interactieve theorieën met audio' },
-          { id: 'ontwikkelingsstadia', label: '🌱 Ontwikkelingsstadia', beschrijving: 'Timeline van ontwikkeling' }
+          { 
+            id: 'ontwikkelingstheorie', 
+            label: '🧠 Ontwikkelingstheorieën', 
+            beschrijving: 'Interactieve theorieën met audio',
+            tooltip: 'Piaget, Vygotsky, Erikson en meer met voorleesfunctie'
+          },
+          { 
+            id: 'ontwikkelingsstadia', 
+            label: '🌱 Ontwikkelingsstadia', 
+            beschrijving: 'Timeline van ontwikkeling',
+            tooltip: 'Visuele timeline van cognitieve en sociale ontwikkeling'
+          }
         ]
       case 'module3':
         return [
           ...baseViews,
-          { id: 'sel-competenties', label: '❤️ SEL Competentie Radar', beschrijving: 'Visualisatie van SEL-vaardigheden' },
-          { id: 'sel-methoden', label: '🤝 SEL Methodieken', beschrijving: 'Vergelijking van SEL-methoden' }
+          { 
+            id: 'sel-competenties', 
+            label: '❤️ SEL Competentie Radar', 
+            beschrijving: 'Visualisatie van SEL-vaardigheden',
+            tooltip: 'Interactieve radar voor sociaal-emotionele competenties'
+          },
+          { 
+            id: 'sel-methoden', 
+            label: '🤝 SEL Methodieken', 
+            beschrijving: 'Vergelijking van SEL-methoden',
+            tooltip: 'Kanjertraining, Lions Quest en andere SEL-methoden vergelijken'
+          }
         ]
       case 'module9':
         return [
           ...baseViews,
-          { id: 'cito-monitoring', label: '📊 Cito & Monitoring', beschrijving: 'Complete Cito-gids met A-E niveaus' }
+          { 
+            id: 'cito-monitoring', 
+            label: '📊 Cito & Monitoring', 
+            beschrijving: 'Complete Cito-gids met A-E niveaus',
+            tooltip: 'Alles over Cito-toetsen, monitoring en coördinatorrollen'
+          }
         ]
       case 'module10':
         return [
           ...baseViews,
-          { id: 'inspectie-kader', label: '🔍 Inspectie Onderzoekskader', beschrijving: 'Voorbereiding op inspectiebezoek' }
+          { 
+            id: 'inspectie-kader', 
+            label: '🔍 Inspectie Onderzoekskader', 
+            beschrijving: 'Voorbereiding op inspectiebezoek',
+            tooltip: 'Complete gids voor inspectie voorbereiding en kwaliteitszorg'
+          }
         ]
       default:
         return [
           ...baseViews,
-          { id: 'klikbare-theorie', label: '🔗 Klikbare Theorie', beschrijving: 'Interactieve theorie verdieping' }
+          { 
+            id: 'klikbare-theorie', 
+            label: '🔗 Klikbare Theorie', 
+            beschrijving: 'Interactieve theorie verdieping',
+            tooltip: 'Klik op onderstreepte termen voor diepere uitleg'
+          }
         ]
     }
   }
 
-  const getLeerlijnen = () => {
-    return [
-      { id: 'didactiek', naam: 'Didactiek', icon: '📚', beschrijving: 'Lesgeven, instructie en leerprocessen', kleur: 'bg-blue-500' },
-      { id: 'pedagogiek', naam: 'Pedagogiek', icon: '❤️', beschrijving: 'Ontwikkeling, gedrag en welbevinden', kleur: 'bg-red-500' },
-      { id: 'organisatie', naam: 'Organisatie', icon: '🏢', beschrijving: 'Leiderschap, kwaliteit en beleid', kleur: 'bg-purple-500' }
-    ]
-  }
+  const filteredModules = selectedLeerlijn === 'alle' 
+    ? modules 
+    : modules.filter(module => module.leerlijn === selectedLeerlijn)
 
-  const getFilteredModules = () => {
-    if (selectedLeerlijn === 'alle') {
-      return modules
-    }
-    return modules.filter(module => module.leerlijn === selectedLeerlijn)
-  }
-
-  // Document Manager View
   if (currentView === 'documenten') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Top Navigation Bar */}
-        <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              {/* Left: Logo & Navigation */}
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🎓</span>
-                  <h1 className="text-xl font-bold text-gray-900">PO Leerapp</h1>
-                </div>
-                
-                <div className="hidden md:flex items-center space-x-1">
-                  <button
-                    onClick={goToOverview}
-                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                  >
-                    🏠 Overzicht
-                  </button>
-                  <span className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md">
-                    📚 Documenten
-                  </span>
-                </div>
-              </div>
-
-              {/* Right: User Level & Actions */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">Niveau:</span>
-                  <select
-                    value={userLevel}
-                    onChange={(e) => setUserLevel(e.target.value as any)}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="beginnend">🌱 Beginnend</option>
-                    <option value="gevorderd">🌿 Gevorderd</option>
-                    <option value="expert">🌳 Expert</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <DocumentManager onDocumentsChange={setDocuments} />
-        </main>
-      </div>
-    )
-  }
-
-  // Module View
-  if (currentView === 'module' && selectedModule) {
-    const subViews = getModuleSubViews(selectedModule.id)
-
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Top Navigation Bar */}
-        <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Left: Logo & Breadcrumb */}
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🎓</span>
-                  <h1 className="text-xl font-bold text-gray-900">PO Leerapp</h1>
-                </div>
-                
-                <div className="hidden md:flex items-center space-x-2 text-sm">
-                  <button
-                    onClick={goToOverview}
-                    className="text-gray-600 hover:text-gray-900 transition-colors"
-                  >
-                    🏠 Overzicht
-                  </button>
-                  <span className="text-gray-400">→</span>
-                  <span className="text-gray-900 font-medium">
-                    {selectedModule.icon} {selectedModule.titel}
-                  </span>
-                  <span className="text-gray-400">→</span>
-                  <span className="text-blue-600">
-                    {subViews.find(v => v.id === selectedSubView)?.label.split(' ').slice(1).join(' ')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right: Actions */}
+              {/* Logo & Breadcrumbs */}
               <div className="flex items-center space-x-4">
                 <button
-                  onClick={goToDocuments}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                  onClick={goToOverview}
+                  className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-colors group"
                 >
-                  <span>📚</span>
-                  <span className="hidden sm:inline">Documenten</span>
-                  {documents.length > 0 && (
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                      {documents.length}
-                    </span>
-                  )}
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm group-hover:scale-105 transition-transform">
+                    PO
+                  </div>
+                  <span className="font-semibold">PO Leerapp</span>
                 </button>
                 
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">Niveau:</span>
-                  <select
-                    value={userLevel}
-                    onChange={(e) => setUserLevel(e.target.value as any)}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="beginnend">🌱 Beginnend</option>
-                    <option value="gevorderd">🌿 Gevorderd</option>
-                    <option value="expert">🌳 Expert</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        <div className="flex">
-          {/* Left Sidebar */}
-          <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-white shadow-lg border-r border-gray-200 transition-all duration-300 flex-shrink-0 min-h-screen sticky top-16 h-[calc(100vh-4rem)]`}>
-            {/* Sidebar Header */}
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                {!sidebarCollapsed && (
-                  <div>
-                    <h3 className="font-semibold text-gray-800">Module Onderdelen</h3>
-                    <p className="text-sm text-gray-600">{selectedModule.titel}</p>
-                  </div>
-                )}
-                <button
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-                  title={sidebarCollapsed ? "Uitklappen" : "Inklappen"}
-                >
-                  {sidebarCollapsed ? '→' : '←'}
-                </button>
-              </div>
-            </div>
-
-            {/* Document Panel */}
-            {!sidebarCollapsed && (
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <div className="bg-white rounded-lg border border-gray-200 p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-800 text-sm">📚 Mijn Documenten</h4>
-                    <button
-                      onClick={goToDocuments}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Beheer
-                    </button>
-                  </div>
-                  
-                  {documents.length > 0 ? (
-                    <div className="space-y-2">
-                      {documents.slice(0, 2).map((doc, index) => (
-                        <div key={index} className="flex items-center space-x-2 p-2 bg-green-50 rounded border border-green-200">
-                          <span className="text-sm">{doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'}</span>
-                          <span className="text-xs text-gray-700 truncate flex-1">{doc.fileName}</span>
-                        </div>
-                      ))}
-                      {documents.length > 2 && (
-                        <p className="text-xs text-gray-500 text-center">+{documents.length - 2} meer</p>
-                      )}
-                      <div className="bg-blue-50 rounded p-2 border border-blue-200">
-                        <p className="text-xs text-blue-700">
-                          ✅ AI-analyse actief voor {selectedModule.titel}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-3">
-                      <p className="text-xs text-gray-500 mb-2">Geen documenten</p>
+                <nav className="flex items-center space-x-2 text-sm">
+                  {getBreadcrumbs().map((crumb, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      {index > 0 && <span className="text-gray-400">/</span>}
                       <button
-                        onClick={goToDocuments}
-                        className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
+                        onClick={crumb.onClick}
+                        className={`px-2 py-1 rounded transition-colors ${
+                          crumb.active 
+                            ? 'text-blue-600 bg-blue-50' 
+                            : 'text-gray-600 hover:text-blue-600'
+                        }`}
                       >
-                        Upload
+                        {crumb.label}
                       </button>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Module Info */}
-            {!sidebarCollapsed && (
-              <div className="p-4 border-b border-gray-200">
-                <div className={`p-3 rounded-lg bg-gradient-to-r ${selectedModule.kleur} text-white`}>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-xl">{selectedModule.icon}</span>
-                    <h4 className="font-semibold">{selectedModule.titel}</h4>
-                  </div>
-                  <p className="text-xs text-white text-opacity-90 mb-2">{selectedModule.beschrijving}</p>
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20`}>
-                      {selectedModule.leerlijn}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20`}>
-                      {selectedModule.competenties.length} competenties
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Navigation Menu */}
-            <div className="p-4 overflow-y-auto h-full">
-              <div className="space-y-2">
-                {subViews.map((view) => (
-                  <button
-                    key={view.id}
-                    onClick={() => setSelectedSubView(view.id)}
-                    className={`w-full text-left p-3 rounded-lg transition-all group ${
-                      selectedSubView === view.id
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                    title={sidebarCollapsed ? view.beschrijving : undefined}
-                  >
-                    {sidebarCollapsed ? (
-                      <div className="text-center">
-                        <span className="text-xl">{view.label.split(' ')[0]}</span>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="font-medium text-sm mb-1">{view.label}</div>
-                        <div className="text-xs text-gray-500 group-hover:text-gray-600">
-                          {view.beschrijving}
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                ))}
+                  ))}
+                </nav>
               </div>
 
-              {/* Quick Links */}
-              {!sidebarCollapsed && (
-                <div className="mt-8 pt-4 border-t border-gray-200">
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Snelkoppelingen</h4>
-                  <div className="space-y-2">
-                    <button
-                      onClick={goToOverview}
-                      className="w-full text-left p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm flex items-center space-x-2"
-                    >
-                      <span>🏠</span>
-                      <span>Terug naar overzicht</span>
-                    </button>
-                    <button
-                      onClick={goToDocuments}
-                      className="w-full text-left p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm flex items-center space-x-2"
-                    >
-                      <span>📚</span>
-                      <span>Documenten beheren</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="flex-1 p-6 bg-gray-50 overflow-y-auto">
-            {getSubViewComponent()}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Overview/Homepage
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left: Logo & Navigation */}
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">🎓</span>
-                <h1 className="text-xl font-bold text-gray-900">PO Leerapp</h1>
-                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                  Primair Onderwijs
-                </span>
-              </div>
-              
-              <div className="hidden md:flex items-center space-x-1">
-                <span className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md">
-                  🏠 Overzicht
-                </span>
-                <button
-                  onClick={goToDocuments}
-                  className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  📚 Documenten
-                </button>
-              </div>
-            </div>
-
-            {/* Right: Actions */}
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={goToDocuments}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                <span>📚</span>
-                <span>Mijn Documenten</span>
-                {documents.length > 0 && (
-                  <span className="bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs">
-                    {documents.length}
-                  </span>
-                )}
-              </button>
-              
-              <div className="flex items-center space-x-2">
+              {/* User Level */}
+              <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">Niveau:</span>
                 <select
                   value={userLevel}
                   onChange={(e) => setUserLevel(e.target.value as any)}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 >
                   <option value="beginnend">🌱 Beginnend</option>
                   <option value="gevorderd">🌿 Gevorderd</option>
@@ -986,14 +787,244 @@ export default function PABOLeerApp() {
               </div>
             </div>
           </div>
+        </header>
+
+        {/* Document Manager */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <DocumentManager onDocumentsChange={setDocuments} />
+        </main>
+      </div>
+    )
+  }
+
+  if (currentView === 'module' && selectedModule) {
+    const subViews = getModuleSubViews(selectedModule.id)
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo & Breadcrumbs */}
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={goToOverview}
+                  className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 transition-colors group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm group-hover:scale-105 transition-transform">
+                    PO
+                  </div>
+                  <span className="font-semibold">PO Leerapp</span>
+                </button>
+                
+                <nav className="flex items-center space-x-2 text-sm">
+                  {getBreadcrumbs().map((crumb, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      {index > 0 && <span className="text-gray-400">/</span>}
+                      <button
+                        onClick={crumb.onClick}
+                        className={`px-2 py-1 rounded transition-colors ${
+                          crumb.active 
+                            ? 'text-blue-600 bg-blue-50' 
+                            : 'text-gray-600 hover:text-blue-600'
+                        }`}
+                      >
+                        {crumb.label}
+                      </button>
+                    </div>
+                  ))}
+                </nav>
+              </div>
+
+              {/* User Level */}
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Niveau:</span>
+                <select
+                  value={userLevel}
+                  onChange={(e) => setUserLevel(e.target.value as any)}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="beginnend">🌱 Beginnend</option>
+                  <option value="gevorderd">🌿 Gevorderd</option>
+                  <option value="expert">🌳 Expert</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex">
+          {/* Sticky Sidebar */}
+          <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-white/95 backdrop-blur-sm shadow-lg border-r border-gray-200 transition-all duration-300 flex-shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto`}>
+            <div className="p-4">
+              {/* Collapse Button */}
+              <div className="flex items-center justify-between mb-6">
+                {!sidebarCollapsed && (
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">{selectedModule.icon}</span>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-sm">{selectedModule.titel}</h3>
+                      <p className="text-xs text-gray-500">{selectedModule.leerlijn}</p>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                  title={sidebarCollapsed ? 'Uitklappen' : 'Inklappen'}
+                >
+                  {sidebarCollapsed ? '→' : '←'}
+                </button>
+              </div>
+
+              {/* Document Panel */}
+              {!sidebarCollapsed && (
+                <div className="mb-6">
+                  <PersistentDocumentPanel 
+                    onDocumentsChange={setDocuments}
+                    currentModule={selectedModule.titel}
+                  />
+                </div>
+              )}
+
+              {/* Sub Views */}
+              <div className="space-y-2">
+                {subViews.map((view) => (
+                  <div key={view.id} className="group relative">
+                    <button
+                      onClick={() => setSelectedSubView(view.id)}
+                      className={`w-full text-left p-3 rounded-lg transition-all ${
+                        selectedSubView === view.id
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                      }`}
+                    >
+                      {sidebarCollapsed ? (
+                        <div className="text-center">
+                          <span className="text-xl">{view.label.split(' ')[0]}</span>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-medium text-sm">{view.label}</div>
+                          <div className="text-xs text-gray-500 mt-1">{view.beschrijving}</div>
+                        </div>
+                      )}
+                    </button>
+                    
+                    {/* Tooltip for collapsed state */}
+                    {sidebarCollapsed && (
+                      <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+                        <div className="font-medium">{view.label}</div>
+                        <div className="text-gray-300">{view.tooltip}</div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Actions */}
+              {!sidebarCollapsed && (
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Snelle Acties</h4>
+                  <div className="space-y-2">
+                    <button
+                      onClick={goToOverview}
+                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      🏠 Terug naar overzicht
+                    </button>
+                    <button
+                      onClick={goToDocuments}
+                      className="w-full text-left p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      📚 Documenten beheren
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 p-6">
+            {getSubViewComponent()}
+          </div>
         </div>
-      </nav>
+      </div>
+    )
+  }
+
+  // Homepage
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                PO
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">PO Leerapp</h1>
+                <p className="text-xs text-gray-500">Primair Onderwijs</p>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center space-x-6">
+              <button
+                onClick={() => setCurrentView('overzicht')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  currentView === 'overzicht'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-blue-600'
+                }`}
+              >
+                🏠 Overzicht
+              </button>
+              <button
+                onClick={goToDocuments}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors relative ${
+                  currentView === 'documenten'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-600 hover:text-blue-600'
+                }`}
+              >
+                📚 Documenten
+                {documents.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {documents.length}
+                  </span>
+                )}
+              </button>
+            </nav>
+
+            {/* User Level */}
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Niveau:</span>
+              <select
+                value={userLevel}
+                onChange={(e) => setUserLevel(e.target.value as any)}
+                className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="beginnend">🌱 Beginnend</option>
+                <option value="gevorderd">🌿 Gevorderd</option>
+                <option value="expert">🌳 Expert</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 opacity-90"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <h2 className="text-4xl font-bold mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Welkom bij de PO Leerapp
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
@@ -1002,10 +1033,10 @@ export default function PABOLeerApp() {
             </p>
             
             {documents.length > 0 ? (
-              <div className="bg-white bg-opacity-10 rounded-lg p-6 max-w-2xl mx-auto">
-                <div className="flex items-center justify-center space-x-3 text-green-200 mb-3">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto border border-white/20">
+                <div className="flex items-center justify-center space-x-3 text-white mb-4">
                   <span className="text-2xl">✅</span>
-                  <span className="font-semibold text-lg">
+                  <span className="text-lg font-semibold">
                     {documents.length} document(en) geüpload voor AI-begeleiding
                   </span>
                 </div>
@@ -1014,263 +1045,214 @@ export default function PABOLeerApp() {
                 </p>
               </div>
             ) : (
-              <div className="bg-white bg-opacity-10 rounded-lg p-6 max-w-2xl mx-auto">
-                <div className="flex items-center justify-center space-x-3 text-yellow-200 mb-3">
-                  <span className="text-2xl">💡</span>
-                  <span className="font-semibold">Upload je schooldocumenten voor de beste ervaring</span>
-                </div>
-                <button
-                  onClick={goToDocuments}
-                  className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                >
-                  📚 Upload Documenten
-                </button>
-              </div>
+              <button
+                onClick={goToDocuments}
+                className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                📚 Upload je eerste document
+              </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Leerlijnen Selector */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Kies een leerlijn</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button
-              onClick={() => setSelectedLeerlijn('alle')}
-              className={`p-4 rounded-lg text-center transition-all ${
-                selectedLeerlijn === 'alle'
-                  ? 'bg-gray-800 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <div className="text-2xl mb-2">🎓</div>
-              <div className="font-medium">Alle Leerlijnen</div>
-              <div className="text-xs mt-1 opacity-80">Compleet overzicht</div>
-            </button>
-            
-            {getLeerlijnen().map(leerlijn => (
-              <button
-                key={leerlijn.id}
-                onClick={() => setSelectedLeerlijn(leerlijn.id as any)}
-                className={`p-4 rounded-lg text-center transition-all ${
-                  selectedLeerlijn === leerlijn.id
-                    ? `${leerlijn.kleur} text-white shadow-lg`
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <div className="text-2xl mb-2">{leerlijn.icon}</div>
-                <div className="font-medium">{leerlijn.naam}</div>
-                <div className="text-xs mt-1 opacity-80">{leerlijn.beschrijving}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Modules Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            {selectedLeerlijn === 'alle' 
-              ? 'Alle modules' 
-              : `${getLeerlijnen().find(l => l.id === selectedLeerlijn)?.naam} modules`}
-          </h3>
-          <p className="text-gray-600">
-            {selectedLeerlijn === 'alle'
-              ? '11 complete modules voor professionele ontwikkeling'
-              : `Modules gericht op ${getLeerlijnen().find(l => l.id === selectedLeerlijn)?.beschrijving.toLowerCase()}`}
+      {/* Leerlijnen Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-12">
+          <h3 className="text-3xl font-bold text-gray-900 mb-4">Kies je leerlijn</h3>
+          <p className="text-lg text-gray-600">
+            Filter modules op basis van je interessegebied
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getFilteredModules().map((module) => (
-            <div
-              key={module.id}
-              onClick={() => selectModule(module)}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 group"
-            >
-              <div className={`bg-gradient-to-r ${module.kleur} p-6 text-white`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-3xl">{module.icon}</span>
-                    <h4 className="text-xl font-bold">{module.titel}</h4>
-                  </div>
-                  <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
-                    {module.leerlijn}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {leerlijnen.map((leerlijn) => (
+            <div key={leerlijn.id} className="group relative">
+              <button
+                onClick={() => setSelectedLeerlijn(selectedLeerlijn === leerlijn.id ? 'alle' : leerlijn.id)}
+                className={`w-full p-8 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                  selectedLeerlijn === leerlijn.id
+                    ? `bg-gradient-to-br ${leerlijn.kleur} text-white shadow-2xl`
+                    : 'bg-white text-gray-700 shadow-lg hover:shadow-xl border border-gray-200'
+                }`}
+              >
+                <div className="text-4xl mb-4">{leerlijn.icon}</div>
+                <h4 className="text-xl font-bold mb-3">{leerlijn.titel}</h4>
+                <p className={`text-sm ${
+                  selectedLeerlijn === leerlijn.id ? 'text-white/90' : 'text-gray-600'
+                }`}>
+                  {leerlijn.beschrijving}
+                </p>
+                <div className="mt-4">
+                  <span className={`text-xs px-3 py-1 rounded-full ${
+                    selectedLeerlijn === leerlijn.id 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {modules.filter(m => m.leerlijn === leerlijn.id).length} modules
                   </span>
                 </div>
-                <p className="text-sm opacity-90">{module.beschrijving}</p>
-              </div>
+              </button>
               
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h5 className="font-semibold text-gray-800 mb-2 text-sm">🎯 Leerdoelen:</h5>
-                    <ul className="space-y-1">
-                      {module.leerdoelen.slice(0, 2).map((doel, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start space-x-2">
-                          <span className="text-blue-500 mt-0.5 text-xs">•</span>
-                          <span>{doel}</span>
-                        </li>
-                      ))}
-                      {module.leerdoelen.length > 2 && (
-                        <li className="text-sm text-gray-500 italic">
-                          +{module.leerdoelen.length - 2} meer...
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <div className="flex items-center space-x-3 text-sm text-gray-500">
-                      <span className="flex items-center space-x-1">
-                        <span>📚</span>
-                        <span>{module.onderwerpen.length} onderwerpen</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <span>🎯</span>
-                        <span>{module.competenties.length} competenties</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-blue-600 font-medium group-hover:text-blue-800 transition-colors">
-                      <span className="text-sm">Start</span>
-                      <span className="group-hover:translate-x-1 transition-transform">→</span>
-                    </div>
-                  </div>
-                </div>
+              {/* Tooltip */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                Klik om te filteren op {leerlijn.titel.toLowerCase()}
               </div>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Features Section */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              🚀 Wat maakt deze app bijzonder?
-            </h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Een complete leerervaring met AI-begeleiding, interactieve tools en praktijkgerichte content
-            </p>
+        {/* Filter Reset */}
+        {selectedLeerlijn !== 'alle' && (
+          <div className="text-center mb-8">
+            <button
+              onClick={() => setSelectedLeerlijn('alle')}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              ← Toon alle modules
+            </button>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-lg bg-blue-50 border border-blue-200">
-              <div className="text-4xl mb-4">🤖</div>
-              <h4 className="font-semibold text-gray-800 mb-3">AI-Begeleiding</h4>
-              <p className="text-gray-600 text-sm">
-                Upload je schooldocumenten en krijg gepersonaliseerde AI-analyse en begeleiding per module
-              </p>
+        )}
+
+        {/* Modules Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredModules.map((module) => (
+            <div key={module.id} className="group relative">
+              <div
+                onClick={() => selectModule(module)}
+                className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+              >
+                <div className={`bg-gradient-to-r ${module.kleur} p-6 text-white relative overflow-hidden`}>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                  <div className="relative">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-3xl">{module.icon}</span>
+                      <div>
+                        <h3 className="text-lg font-bold">{module.titel}</h3>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          {module.leerlijn}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm opacity-90">{module.beschrijving}</p>
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-gray-800 mb-2 text-sm">🎯 Leerdoelen:</h4>
+                      <ul className="space-y-1">
+                        {module.leerdoelen.slice(0, 2).map((doel, index) => (
+                          <li key={index} className="text-xs text-gray-600 flex items-start space-x-2">
+                            <span className="text-blue-500 mt-0.5">•</span>
+                            <span>{doel}</span>
+                          </li>
+                        ))}
+                        {module.leerdoelen.length > 2 && (
+                          <li className="text-xs text-gray-500 italic">
+                            +{module.leerdoelen.length - 2} meer...
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                      <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        <span>📚</span>
+                        <span>{module.onderwerpen.length} onderwerpen</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-blue-600 font-medium text-sm">
+                        <span>Start module</span>
+                        <span>→</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Hover Tooltip */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                Klik om {module.titel} te starten
+              </div>
             </div>
-            
-            <div className="text-center p-6 rounded-lg bg-green-50 border border-green-200">
-              <div className="text-4xl mb-4">🎯</div>
-              <h4 className="font-semibold text-gray-800 mb-3">Interactieve Modules</h4>
-              <p className="text-gray-600 text-sm">
-                11 complete modules met theorie, praktijk, tools en rolgebaseerde AI-chatbots
-              </p>
-            </div>
-            
-            <div className="text-center p-6 rounded-lg bg-purple-50 border border-purple-200">
-              <div className="text-4xl mb-4">📊</div>
-              <h4 className="font-semibold text-gray-800 mb-3">Data & Monitoring</h4>
-              <p className="text-gray-600 text-sm">
-                Complete gidsen voor Cito, inspectie, kwaliteitszorg en professionele ontwikkeling
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
-      </div>
 
-      {/* Quick Access Section */}
-      <div className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Snelle toegang</h3>
-            <p className="text-gray-600">Direct naar populaire onderdelen</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button
-              onClick={() => {
-                const module = modules.find(m => m.id === 'module1')
-                if (module) selectModule(module)
-              }}
-              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <span className="text-2xl">📚</span>
-                <span className="font-medium text-gray-800">Kerndoelen</span>
+        {/* Features Section */}
+        <div className="mt-20 bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+            🚀 Wat maakt deze app bijzonder?
+          </h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 group-hover:scale-110 transition-transform">
+                🤖
               </div>
-              <p className="text-sm text-gray-600">Alle 58 kerndoelen interactief</p>
-            </button>
-            
-            <button
-              onClick={() => {
-                const module = modules.find(m => m.id === 'module2')
-                if (module) selectModule(module)
-              }}
-              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <span className="text-2xl">🧠</span>
-                <span className="font-medium text-gray-800">Ontwikkelingstheorieën</span>
+              <h4 className="font-semibold text-gray-800 mb-2">AI-Begeleiding</h4>
+              <p className="text-gray-600 text-sm">
+                Upload je schooldocumenten en krijg gepersonaliseerde AI-analyse en begeleiding
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 group-hover:scale-110 transition-transform">
+                🎯
               </div>
-              <p className="text-sm text-gray-600">Interactieve theorieën met audio</p>
-            </button>
-            
-            <button
-              onClick={() => {
-                const module = modules.find(m => m.id === 'module9')
-                if (module) selectModule(module)
-              }}
-              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <span className="text-2xl">📈</span>
-                <span className="font-medium text-gray-800">Cito & Monitoring</span>
+              <h4 className="font-semibold text-gray-800 mb-2">Interactieve Modules</h4>
+              <p className="text-gray-600 text-sm">
+                11 complete modules met theorie, praktijk en interactieve tools
+              </p>
+            </div>
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 group-hover:scale-110 transition-transform">
+                📊
               </div>
-              <p className="text-sm text-gray-600">Complete Cito-gids met A-E niveaus</p>
-            </button>
-            
-            <button
-              onClick={() => {
-                const module = modules.find(m => m.id === 'module10')
-                if (module) selectModule(module)
-              }}
-              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <span className="text-2xl">🔍</span>
-                <span className="font-medium text-gray-800">Inspectie Onderzoekskader</span>
-              </div>
-              <p className="text-sm text-gray-600">Voorbereiding op inspectiebezoek</p>
-            </button>
+              <h4 className="font-semibold text-gray-800 mb-2">Data & Monitoring</h4>
+              <p className="text-gray-600 text-sm">
+                Complete gidsen voor Cito, inspectie en kwaliteitszorg
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-8">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <span className="text-2xl">🎓</span>
-              <h2 className="text-lg font-bold text-gray-900">PO Leerapp</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                  PO
+                </div>
+                <span className="font-bold text-lg">PO Leerapp</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Professionele ontwikkeling voor het primair onderwijs met AI-ondersteuning
+              </p>
             </div>
             
-            <div className="flex items-center space-x-6">
-              <span className="text-sm text-gray-600">© 2025 PO Leerapp</span>
-              <button
-                onClick={goToDocuments}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Documenten
-              </button>
+            <div>
+              <h4 className="font-semibold mb-4">Snelle Links</h4>
+              <div className="space-y-2">
+                <button onClick={goToDocuments} className="block text-gray-400 hover:text-white text-sm transition-colors">
+                  Documenten uploaden
+                </button>
+                <button onClick={() => selectModule(modules[0])} className="block text-gray-400 hover:text-white text-sm transition-colors">
+                  Curriculum & Kerndoelen
+                </button>
+                <button onClick={() => selectModule(modules[8])} className="block text-gray-400 hover:text-white text-sm transition-colors">
+                  Cito & Monitoring
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Contact</h4>
+              <p className="text-gray-400 text-sm">
+                Gemaakt voor het primair onderwijs<br />
+                © 2024 PO Leerapp
+              </p>
             </div>
           </div>
         </div>

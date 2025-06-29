@@ -504,7 +504,7 @@ ${openingQuestion}`,
   return (
     <div className="space-y-6">
       {/* Part 1: Quickscan Analysis */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-6 text-white shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-xl font-bold mb-2">📊 Deel 1: Slimme Quickscan Analyse</h3>
@@ -515,6 +515,7 @@ ${openingQuestion}`,
               onClick={performQuickscan}
               disabled={isAnalyzing}
               className="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors disabled:opacity-50"
+              title="Voer een nieuwe analyse uit"
             >
               {isAnalyzing ? '🔄 Analyseren...' : '🔄 Heranalyse'}
             </button>
@@ -589,68 +590,6 @@ ${openingQuestion}`,
         </div>
       )}
 
-      {/* Part 2: AI Chatbot Configuration */}
-      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
-        <h3 className="text-xl font-bold mb-4">🤖 Deel 2: Slimme Chatbot per Module</h3>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* AI Personality Selector */}
-          <div>
-            <h4 className="font-semibold mb-3">Kies je AI-begeleider:</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { id: 'tutor', label: 'AI-Tutor' },
-                { id: 'coach', label: 'AI-Coach' },
-                { id: 'mentor', label: 'AI-Mentor' },
-                { id: 'teammate', label: 'AI-Teammate' },
-                { id: 'tool', label: 'AI-Tool' },
-                { id: 'simulator', label: 'AI-Simulator' },
-                { id: 'student', label: 'AI-Student' }
-              ].map((personality) => (
-                <button
-                  key={personality.id}
-                  onClick={() => setAiPersonality(personality.id as any)}
-                  className={`p-2 rounded-lg text-sm transition-all ${
-                    aiPersonality === personality.id
-                      ? 'bg-white text-blue-600 font-semibold'
-                      : 'bg-white bg-opacity-20 hover:bg-opacity-30'
-                  }`}
-                  title={getPersonalityDescription(personality.id)}
-                >
-                  {getPersonalityIcon(personality.id)} {personality.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Selected Personality Info */}
-          <div className="bg-white bg-opacity-20 rounded-lg p-4">
-            <h4 className="font-semibold mb-2">
-              {getPersonalityIcon(aiPersonality)} {aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}
-            </h4>
-            <p className="text-blue-100 text-sm">
-              {getPersonalityDescription(aiPersonality)}
-            </p>
-          </div>
-        </div>
-
-        {/* Start Chat Button */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={startChat}
-            disabled={!quickscanResult}
-            className="px-8 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            🚀 Start Slimme Chat
-          </button>
-          {!quickscanResult && (
-            <p className="text-blue-100 text-sm mt-2">
-              Wacht tot de quickscan voltooid is...
-            </p>
-          )}
-        </div>
-      </div>
-
       {/* Module Info Card */}
       <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Over deze module</h3>
@@ -685,6 +624,73 @@ ${openingQuestion}`,
           <p className="text-sm text-blue-700">
             <strong>💡 Tip:</strong> Gebruik de AI-chatbot om vragen te stellen over hoe je deze module kunt toepassen in jouw specifieke schoolsituatie.
           </p>
+        </div>
+      </div>
+
+      {/* Part 2: AI Chatbot Configuration */}
+      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
+        <h3 className="text-xl font-bold mb-4">🤖 Deel 2: Slimme Chatbot per Module</h3>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* AI Personality Selector */}
+          <div>
+            <h4 className="font-semibold mb-3">Kies je AI-begeleider:</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'tutor', label: 'AI-Tutor', tooltip: 'Stap-voor-stap uitleg en begeleiding' },
+                { id: 'coach', label: 'AI-Coach', tooltip: 'Motiverende ondersteuning en feedback' },
+                { id: 'mentor', label: 'AI-Mentor', tooltip: 'Wijze begeleiding en reflectie' },
+                { id: 'teammate', label: 'AI-Teammate', tooltip: 'Samenwerking op gelijk niveau' },
+                { id: 'tool', label: 'AI-Tool', tooltip: 'Directe, praktische antwoorden' },
+                { id: 'simulator', label: 'AI-Simulator', tooltip: 'Rollenspel en scenario-oefening' },
+                { id: 'student', label: 'AI-Student', tooltip: 'Jij bent de leraar, AI is de leerling' }
+              ].map((personality) => (
+                <div key={personality.id} className="group relative">
+                  <button
+                    onClick={() => setAiPersonality(personality.id as any)}
+                    className={`w-full p-2 rounded-lg text-sm transition-all ${
+                      aiPersonality === personality.id
+                        ? 'bg-white text-blue-600 font-semibold shadow-md'
+                        : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                    }`}
+                  >
+                    {getPersonalityIcon(personality.id)} {personality.label}
+                  </button>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                    {personality.tooltip}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Personality Info */}
+          <div className="bg-white bg-opacity-20 rounded-lg p-4">
+            <h4 className="font-semibold mb-2">
+              {getPersonalityIcon(aiPersonality)} {aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}
+            </h4>
+            <p className="text-blue-100 text-sm">
+              {getPersonalityDescription(aiPersonality)}
+            </p>
+          </div>
+        </div>
+
+        {/* Start Chat Button */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={startChat}
+            disabled={!quickscanResult}
+            className="px-8 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            🚀 Start Slimme Chat
+          </button>
+          {!quickscanResult && (
+            <p className="text-blue-100 text-sm mt-2">
+              Wacht tot de quickscan voltooid is...
+            </p>
+          )}
         </div>
       </div>
     </div>

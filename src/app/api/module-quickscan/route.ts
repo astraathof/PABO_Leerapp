@@ -123,7 +123,7 @@ VEREISTEN:
 - Houd het praktisch en actionable
 - Focus op de directe koppeling tussen documenten en module doelen
 - Schrijf op B1 niveau (eenvoudig Nederlands)
-- Vermijd overbodige leestekens zoals **`
+- Vermijd overbodige leestekens`
 
     console.log('🤖 Sending analysis request to Gemini 2.5 Flash...')
 

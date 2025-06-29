@@ -180,28 +180,40 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
           
           <div className="flex items-center space-x-2">
             {/* Quick Upload Button */}
-            <button
-              onClick={() => setShowUploadArea(!showUploadArea)}
-              disabled={isUploading}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isUploading 
-                  ? 'bg-gray-400 text-white cursor-not-allowed' 
-                  : 'bg-green-600 text-white hover:bg-green-700'
-              }`}
-              title="Upload een document"
-            >
-              {isUploading ? '⏳ Bezig...' : '📤 Upload'}
-            </button>
+            <div className="group relative">
+              <button
+                onClick={() => setShowUploadArea(!showUploadArea)}
+                disabled={isUploading}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isUploading 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+              >
+                {isUploading ? '⏳ Bezig...' : '📤 Upload'}
+              </button>
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                Upload een schooldocument voor AI-analyse
+              </div>
+            </div>
             
             {/* Expand/Collapse Button */}
             {documents.length > 0 && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                title={isExpanded ? "Verberg documenten" : "Toon alle documenten"}
-              >
-                {isExpanded ? '🔼 Inklappen' : '🔽 Bekijk alle'}
-              </button>
+              <div className="group relative">
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                >
+                  {isExpanded ? '🔼 Inklappen' : '🔽 Bekijk alle'}
+                </button>
+                
+                {/* Tooltip */}
+                <div className="absolute bottom-full right-0 mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                  {isExpanded ? "Verberg documenten" : "Toon alle documenten"}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -263,10 +275,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
               {documents.slice(0, 2).map((doc) => (
                 <div 
                   key={doc.id} 
-                  className="flex items-center justify-between p-2 bg-gray-50 rounded border hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-2 bg-gray-50 rounded border hover:bg-gray-100 transition-colors group"
                   onMouseEnter={() => setHoveredDocument(doc.id)}
                   onMouseLeave={() => setHoveredDocument(null)}
-                  title={`${doc.detectedType} - ${doc.wordCount} woorden - Geüpload op ${doc.uploadDate.toLocaleDateString()}`}
                 >
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
                     <span className="text-lg">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
@@ -280,6 +291,14 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                    <div className="font-medium">{doc.fileName}</div>
+                    <div className="text-gray-300">{doc.wordCount} woorden • {doc.detectedType}</div>
+                    <div className="text-gray-300">Geüpload op {doc.uploadDate.toLocaleDateString()}</div>
+                  </div>
+                  
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -310,7 +329,7 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
               {documents.map((doc) => (
                 <div 
                   key={doc.id} 
-                  className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:shadow-md transition-all"
+                  className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:shadow-md transition-all group"
                   onMouseEnter={() => setHoveredDocument(doc.id)}
                   onMouseLeave={() => setHoveredDocument(null)}
                 >
@@ -330,6 +349,14 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Tooltip */}
+                    <div className="absolute right-full mr-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                      <div className="font-medium">{doc.fileName}</div>
+                      <div className="text-gray-300">Inhoudelijk geanalyseerd met AI</div>
+                      <div className="text-gray-300">Beschikbaar voor alle modules</div>
+                    </div>
+                    
                     <div className="flex items-center space-x-2">
                       <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                         ✅ Geanalyseerd
