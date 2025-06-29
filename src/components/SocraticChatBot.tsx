@@ -19,6 +19,7 @@ interface UploadedDocument {
   text: string
   wordCount: number
   uploadDate: Date
+  mimeType?: string
 }
 
 interface SocraticChatBotProps {
@@ -37,6 +38,7 @@ export default function SocraticChatBot({ module, opdrachten }: SocraticChatBotP
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [initialQuestion, setInitialQuestion] = useState<string>('')
   const [analysisComplete, setAnalysisComplete] = useState(false)
+  const [returnToModule, setReturnToModule] = useState<boolean>(true)
 
   // Load documents from localStorage
   useEffect(() => {
@@ -263,19 +265,30 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
                 <span>🌱 {studentLevel}</span>
               </div>
             </div>
-            <button
-              onClick={resetChat}
-              className="px-4 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
-            >
-              ⚙️ Instellingen
-            </button>
+            <div className="flex items-center space-x-3">
+              <label className="flex items-center space-x-2 bg-white bg-opacity-20 px-3 py-1 rounded-lg text-sm">
+                <input
+                  type="checkbox"
+                  checked={returnToModule}
+                  onChange={(e) => setReturnToModule(e.target.checked)}
+                  className="rounded border-white border-opacity-50"
+                />
+                <span>Blijf in module</span>
+              </label>
+              <button
+                onClick={resetChat}
+                className="px-4 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+              >
+                ⚙️ Instellingen
+              </button>
+            </div>
           </div>
           
           {/* Document List */}
           <div className="flex flex-wrap gap-2 mb-4">
             {availableDocuments.slice(0, 3).map((doc, index) => (
               <span key={index} className="px-3 py-1 bg-white bg-opacity-25 rounded-full text-sm font-medium">
-                📄 {doc.fileName}
+                {doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'} {doc.fileName}
               </span>
             ))}
             {availableDocuments.length > 3 && (
@@ -333,6 +346,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
           availableDocuments={availableDocuments}
           selectedDocuments={selectedDocuments}
           initialQuestion={initialQuestion}
+          returnToModule={returnToModule}
         />
       </div>
     )
@@ -368,7 +382,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
                 <div className="flex flex-wrap gap-2 mb-4">
                   {availableDocuments.slice(0, 3).map((doc, index) => (
                     <span key={index} className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-sm">
-                      📄 {doc.fileName}
+                      {doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'} {doc.fileName}
                     </span>
                   ))}
                   {availableDocuments.length > 3 && (
@@ -378,12 +392,23 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => startDirectChatWithAnalysis()}
-                className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-              >
-                💬 Start Chat
-              </button>
+              <div className="flex flex-col space-y-2">
+                <button
+                  onClick={() => startDirectChatWithAnalysis()}
+                  className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
+                >
+                  💬 Start Chat
+                </button>
+                <label className="flex items-center justify-center space-x-2 bg-white bg-opacity-20 px-3 py-1 rounded-lg text-sm">
+                  <input
+                    type="checkbox"
+                    checked={returnToModule}
+                    onChange={(e) => setReturnToModule(e.target.checked)}
+                    className="rounded border-white border-opacity-50"
+                  />
+                  <span>Blijf in module</span>
+                </label>
+              </div>
             </div>
           </div>
         )}
@@ -461,12 +486,23 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
               <p className="text-blue-100 text-xs">📚 Met {selectedDocuments.length} schooldocument(en)</p>
             )}
           </div>
-          <button
-            onClick={resetChat}
-            className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
-          >
-            Nieuwe opdracht
-          </button>
+          <div className="flex items-center space-x-3">
+            <label className="flex items-center space-x-2 bg-white bg-opacity-20 px-3 py-1 rounded-lg text-sm">
+              <input
+                type="checkbox"
+                checked={returnToModule}
+                onChange={(e) => setReturnToModule(e.target.checked)}
+                className="rounded border-white border-opacity-50"
+              />
+              <span>Blijf in module</span>
+            </label>
+            <button
+              onClick={resetChat}
+              className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors"
+            >
+              Nieuwe opdracht
+            </button>
+          </div>
         </div>
       </div>
 
@@ -478,6 +514,7 @@ Welk specifiek aspect van je schooldocumenten wil je als eerste bespreken in rel
         availableDocuments={availableDocuments}
         selectedDocuments={selectedDocuments}
         initialQuestion={initialQuestion}
+        returnToModule={returnToModule}
       />
     </div>
   )

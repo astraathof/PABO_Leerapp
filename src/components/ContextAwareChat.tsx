@@ -23,6 +23,7 @@ interface ContextAwareChatProps {
   availableDocuments: any[]
   selectedDocuments: string[]
   initialQuestion?: string
+  returnToModule?: boolean
 }
 
 export default function ContextAwareChat({ 
@@ -31,7 +32,8 @@ export default function ContextAwareChat({
   studentLevel, 
   availableDocuments, 
   selectedDocuments,
-  initialQuestion 
+  initialQuestion,
+  returnToModule = true
 }: ContextAwareChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -58,7 +60,7 @@ export default function ContextAwareChat({
         role: 'assistant',
         content: `🎉 **Welkom! Ik heb toegang tot ${selectedDocuments.length} van jouw schooldocumenten:**
 
-${selectedDocs.map(doc => `📄 **${doc.fileName}** (${doc.detectedType})`).join('\n')}
+${selectedDocs.map(doc => `${doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'} **${doc.fileName}** (${doc.detectedType})`).join('\n')}
 
 Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke schoolsituatie! 
 
@@ -335,7 +337,7 @@ Nu kan ik **gepersonaliseerde begeleiding** geven op basis van jouw specifieke s
                 .filter(doc => selectedDocuments.includes(doc.id))
                 .map((doc, index) => (
                 <span key={index} className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs border border-green-200">
-                  {doc.fileName}
+                  {doc.mimeType?.startsWith('image/') ? '🖼️' : '📄'} {doc.fileName}
                 </span>
               ))}
             </div>
