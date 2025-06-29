@@ -804,6 +804,19 @@ ${openingQuestion}`,
             </div>
           </div>
 
+          {/* Selected Personality Info */}
+          <div className="bg-white bg-opacity-10 rounded-lg p-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl">
+                {selectedPersonalityInfo?.icon}
+              </div>
+              <div>
+                <h4 className="font-semibold">AI-{aiPersonality.charAt(0).toUpperCase() + aiPersonality.slice(1)}</h4>
+                <p className="text-blue-100 text-sm">{selectedPersonalityInfo?.description}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Start Chat Button */}
           <div className="flex justify-center">
             <button

@@ -21,7 +21,7 @@ interface PersistentDocumentPanelProps {
 export default function PersistentDocumentPanel({ onDocumentsChange, currentModule }: PersistentDocumentPanelProps) {
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true) // Default to expanded (list view)
   const [showUploadArea, setShowUploadArea] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [hoveredDocument, setHoveredDocument] = useState<string | null>(null)
@@ -160,12 +160,18 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     return '📄'
   }
 
+  const navigateToDocuments = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/documenten'
+    }
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       {/* Header - Always Visible */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={navigateToDocuments}>
             <span className="text-xl">📚</span>
             <div>
               <h3 className="font-semibold text-gray-800">Mijn Schooldocumenten</h3>
@@ -179,41 +185,27 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
           </div>
           
           <div className="flex items-center space-x-2">
-            {/* Quick Upload Button */}
-            <div className="group relative">
-              <button
-                onClick={() => setShowUploadArea(!showUploadArea)}
-                disabled={isUploading}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isUploading 
-                    ? 'bg-gray-400 text-white cursor-not-allowed' 
-                    : 'bg-green-600 text-white hover:bg-green-700'
-                }`}
-              >
-                {isUploading ? '⏳ Bezig...' : '📤 Upload'}
-              </button>
-              
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                Upload een schooldocument voor AI-analyse
-              </div>
-            </div>
+            {/* Upload Button */}
+            <button
+              onClick={() => setShowUploadArea(!showUploadArea)}
+              disabled={isUploading}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isUploading 
+                  ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+            >
+              {isUploading ? '⏳ Bezig...' : '📤 Upload'}
+            </button>
             
-            {/* Expand/Collapse Button */}
+            {/* View Toggle Button */}
             {documents.length > 0 && (
-              <div className="group relative">
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                >
-                  {isExpanded ? '🔼 Inklappen' : '🔽 Bekijk alle'}
-                </button>
-                
-                {/* Tooltip */}
-                <div className="absolute bottom-full right-0 mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                  {isExpanded ? "Verberg documenten" : "Toon alle documenten"}
-                </div>
-              </div>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              >
+                {isExpanded ? '🔼 Compact' : '🔽 Uitgebreid'}
+              </button>
             )}
           </div>
         </div>
@@ -269,7 +261,56 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       {/* Documents List */}
       {documents.length > 0 && (
         <div className="p-4">
-          {/* Compact View - First 2 documents */}
+          {/* List View (Default) */}
+          {isExpanded && (
+            <div className="space-y-3">
+              {documents.map((doc) => (
+                <div 
+                  key={doc.id} 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all bg-gradient-to-r from-green-50 to-blue-50"
+                  onMouseEnter={() => setHoveredDocument(doc.id)}
+                  onMouseLeave={() => setHoveredDocument(null)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-800">{doc.fileName}</h4>
+                        <div className="flex items-center space-x-3 text-sm text-gray-500 mt-1">
+                          <span>📄 {doc.fileType}</span>
+                          <span>🎯 {doc.detectedType}</span>
+                          <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
+                          <span>📅 {doc.uploadDate.toLocaleDateString()}</span>
+                          {doc.mimeType?.startsWith('image/') && (
+                            <span className="text-purple-600">🔍 AI Vision</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                        ✅ Geanalyseerd
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteDocument(doc.id)
+                        }}
+                        className={`px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm ${
+                          hoveredDocument === doc.id ? 'opacity-100' : 'opacity-70'
+                        }`}
+                      >
+                        🗑️ Verwijder
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Compact View */}
           {!isExpanded && (
             <div className="space-y-2">
               {documents.slice(0, 2).map((doc) => (
@@ -290,13 +331,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                         )}
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Tooltip */}
-                  <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                    <div className="font-medium">{doc.fileName}</div>
-                    <div className="text-gray-300">{doc.wordCount} woorden • {doc.detectedType}</div>
-                    <div className="text-gray-300">Geüpload op {doc.uploadDate.toLocaleDateString()}</div>
                   </div>
                   
                   <button
@@ -320,63 +354,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
                   </span>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Expanded View - All documents */}
-          {isExpanded && (
-            <div className="space-y-3">
-              {documents.map((doc) => (
-                <div 
-                  key={doc.id} 
-                  className="border border-gray-200 rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:shadow-md transition-all group"
-                  onMouseEnter={() => setHoveredDocument(doc.id)}
-                  onMouseLeave={() => setHoveredDocument(null)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <span className="text-2xl">{getDocumentIcon(doc.detectedType, doc.mimeType)}</span>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-800 truncate">{doc.fileName}</h4>
-                        <div className="flex items-center space-x-3 text-sm text-gray-500 mt-1">
-                          <span>📄 {doc.fileType}</span>
-                          <span>🎯 {doc.detectedType}</span>
-                          <span>📝 {doc.wordCount.toLocaleString()} woorden</span>
-                          <span>📅 {doc.uploadDate.toLocaleDateString()}</span>
-                          {doc.mimeType?.startsWith('image/') && (
-                            <span className="text-purple-600">🔍 AI Vision</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Tooltip */}
-                    <div className="absolute right-full mr-2 top-0 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-                      <div className="font-medium">{doc.fileName}</div>
-                      <div className="text-gray-300">Inhoudelijk geanalyseerd met AI</div>
-                      <div className="text-gray-300">Beschikbaar voor alle modules</div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        ✅ Geanalyseerd
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          deleteDocument(doc.id)
-                        }}
-                        className={`px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors text-xs ${
-                          hoveredDocument === doc.id ? 'opacity-100' : 'opacity-0'
-                        }`}
-                        title="Verwijder document"
-                      >
-                        🗑️ Verwijder
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           )}
 
@@ -408,10 +385,16 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
             Ondersteunt: PDF, Word, afbeeldingen en meer
           </p>
           <button
-            onClick={() => setShowUploadArea(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            onClick={navigateToDocuments}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm mr-2"
           >
-            📤 Upload Eerste Document
+            📂 Beheer Documenten
+          </button>
+          <button
+            onClick={() => setShowUploadArea(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+          >
+            📤 Upload Document
           </button>
         </div>
       )}

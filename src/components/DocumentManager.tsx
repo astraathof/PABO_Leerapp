@@ -23,7 +23,7 @@ export default function DocumentManager({ onDocumentsChange }: DocumentManagerPr
   const [selectedDocument, setSelectedDocument] = useState<UploadedDocument | null>(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list') // Default to list view
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Load documents from localStorage on mount
