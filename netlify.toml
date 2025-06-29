@@ -9,6 +9,11 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+[functions]
+  # Increase timeout for document processing functions
+  "src/app/api/upload-document/route" = { timeout = 25 }
+  "src/app/api/analyze-document/route" = { timeout = 25 }
+
 [[headers]]
   for = "/*"
   [headers.values]
