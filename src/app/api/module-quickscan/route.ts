@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 Starting quickscan for ${documents.length} documents and module: ${module}`)
 
+    // Initialize GoogleGenerativeAI after API key validation
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
