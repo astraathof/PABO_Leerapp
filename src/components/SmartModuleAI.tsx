@@ -110,7 +110,7 @@ export default function SmartModuleAI({ moduleTitle, moduleId, documents, userLe
       // Create fallback result instead of failing completely
       setQuickscanResult({
         success: false,
-        analysis: `⚠️ Analyse niet beschikbaar
+        analysis: `Analyse niet beschikbaar
 
 Er is een probleem opgetreden bij het analyseren van je documenten. 
 
@@ -366,9 +366,15 @@ ${openingQuestion}`,
       <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
         <div className="text-4xl mb-3">📚</div>
         <h3 className="text-lg font-semibold text-orange-800 mb-2">Geen documenten geüpload</h3>
-        <p className="text-orange-700 text-sm">
+        <p className="text-orange-700 text-sm mb-4">
           Upload je schooldocumenten om slimme AI-analyse en begeleiding te krijgen voor de module "{moduleTitle}"
         </p>
+        <button
+          onClick={() => window.location.href = '/documenten'}
+          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+        >
+          Documenten uploaden
+        </button>
       </div>
     )
   }
@@ -425,7 +431,7 @@ ${openingQuestion}`,
             {quickscanResult.analysisType === 'fallback' && (
               <div className="mt-4 p-3 bg-yellow-50 rounded border border-yellow-200">
                 <p className="text-yellow-800 text-sm">
-                  💡 <strong>Opmerking:</strong> Dit is een standaard analyse omdat de AI-service tijdelijk niet beschikbaar is. 
+                  💡 Opmerking: Dit is een standaard analyse omdat de AI-service tijdelijk niet beschikbaar is. 
                   De chatbot kan je nog steeds helpen met vragen over je documenten.
                 </p>
               </div>
@@ -575,7 +581,7 @@ ${openingQuestion}`,
           {quickscanResult.analysisType === 'fallback' && (
             <div className="mt-4 p-3 bg-yellow-50 rounded border border-yellow-200">
               <p className="text-yellow-800 text-sm">
-                💡 <strong>Opmerking:</strong> Dit is een standaard analyse omdat de AI-service tijdelijk niet beschikbaar is. 
+                💡 Opmerking: Dit is een standaard analyse omdat de AI-service tijdelijk niet beschikbaar is. 
                 De chatbot kan je nog steeds helpen met vragen over je documenten.
               </p>
             </div>
@@ -642,6 +648,43 @@ ${openingQuestion}`,
               Wacht tot de quickscan voltooid is...
             </p>
           )}
+        </div>
+      </div>
+
+      {/* Module Info Card */}
+      <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Over deze module</h3>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-medium text-gray-700 mb-2">🎯 Leerdoelen:</h4>
+            <ul className="space-y-1">
+              {getModuleLeerdoelen(moduleId).map((doel, index) => (
+                <li key={index} className="text-sm text-gray-600 flex items-start space-x-2">
+                  <span className="text-blue-500 mt-0.5">•</span>
+                  <span>{doel}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-medium text-gray-700 mb-2">💪 Competenties:</h4>
+            <ul className="space-y-1">
+              {getModuleCompetenties(moduleId).map((competentie, index) => (
+                <li key={index} className="text-sm text-gray-600 flex items-start space-x-2">
+                  <span className="text-green-500 mt-0.5">•</span>
+                  <span>{competentie}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-sm text-blue-700">
+            <strong>💡 Tip:</strong> Gebruik de AI-chatbot om vragen te stellen over hoe je deze module kunt toepassen in jouw specifieke schoolsituatie.
+          </p>
         </div>
       </div>
     </div>

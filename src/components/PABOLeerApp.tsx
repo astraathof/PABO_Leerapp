@@ -31,6 +31,7 @@ interface Module {
   beschrijving: string
   icon: string
   kleur: string
+  leerlijn: 'didactiek' | 'pedagogiek' | 'organisatie'
   leerdoelen: string[]
   competenties: string[]
   onderwerpen: string[]
@@ -45,6 +46,7 @@ const modules: Module[] = [
     beschrijving: 'Alle 58 kerndoelen beheersen en toepassen in de onderwijspraktijk',
     icon: '📚',
     kleur: 'from-blue-500 to-indigo-600',
+    leerlijn: 'didactiek',
     leerdoelen: [
       'Alle 58 kerndoelen kennen en begrijpen',
       'Kerndoelen vertalen naar concrete lesdoelen',
@@ -86,6 +88,7 @@ const modules: Module[] = [
     beschrijving: 'Kindontwikkeling begrijpen en toepassen in het onderwijs',
     icon: '🧠',
     kleur: 'from-green-500 to-emerald-600',
+    leerlijn: 'pedagogiek',
     leerdoelen: [
       'Ontwikkelingsstadia herkennen en begrijpen',
       'Theorie koppelen aan onderwijspraktijk',
@@ -126,6 +129,7 @@ const modules: Module[] = [
     beschrijving: 'Sociaal-emotioneel leren en effectief klassenmanagement',
     icon: '❤️',
     kleur: 'from-red-500 to-pink-600',
+    leerlijn: 'pedagogiek',
     leerdoelen: [
       'SEL-competenties begrijpen en ontwikkelen',
       'Positief klassenklimaat creëren',
@@ -165,6 +169,7 @@ const modules: Module[] = [
     beschrijving: 'Onderwijs op maat voor alle leerlingen',
     icon: '🎯',
     kleur: 'from-purple-500 to-violet-600',
+    leerlijn: 'didactiek',
     leerdoelen: [
       'Differentiatie strategieën toepassen',
       'Inclusief onderwijs vormgeven',
@@ -204,6 +209,7 @@ const modules: Module[] = [
     beschrijving: 'Data-gedreven besluitvorming en evaluatie in het onderwijs',
     icon: '📊',
     kleur: 'from-orange-500 to-red-600',
+    leerlijn: 'organisatie',
     leerdoelen: [
       'Data verzamelen en analyseren',
       'Evaluatie-instrumenten inzetten',
@@ -243,6 +249,7 @@ const modules: Module[] = [
     beschrijving: 'Toekomstgerichte vaardigheden ontwikkelen',
     icon: '💡',
     kleur: 'from-teal-500 to-cyan-600',
+    leerlijn: 'didactiek',
     leerdoelen: [
       '21e-eeuwse vaardigheden herkennen',
       'Kritisch denken stimuleren',
@@ -282,6 +289,7 @@ const modules: Module[] = [
     beschrijving: 'Leiderschap en management in het onderwijs',
     icon: '👑',
     kleur: 'from-indigo-500 to-purple-600',
+    leerlijn: 'organisatie',
     leerdoelen: [
       'Leiderschapsstijlen begrijpen',
       'Teamontwikkeling faciliteren',
@@ -321,6 +329,7 @@ const modules: Module[] = [
     beschrijving: 'Burgerschapsonderwijs en omgaan met diversiteit',
     icon: '🤝',
     kleur: 'from-emerald-500 to-teal-600',
+    leerlijn: 'pedagogiek',
     leerdoelen: [
       'Burgerschapscompetenties ontwikkelen',
       'Diversiteit waarderen en benutten',
@@ -360,6 +369,7 @@ const modules: Module[] = [
     beschrijving: 'Complete gids voor Cito-toetsen en leerlingmonitoring',
     icon: '📈',
     kleur: 'from-blue-500 to-indigo-600',
+    leerlijn: 'organisatie',
     leerdoelen: [
       'Cito-systeem volledig begrijpen',
       'A-E en I-V niveaus interpreteren',
@@ -399,6 +409,7 @@ const modules: Module[] = [
     beschrijving: 'Voorbereiding op inspectiebezoek en kwaliteitszorg',
     icon: '🔍',
     kleur: 'from-purple-500 to-indigo-600',
+    leerlijn: 'organisatie',
     leerdoelen: [
       'Onderzoekskader 2021 beheersen',
       'Inspectie voorbereiding organiseren',
@@ -438,6 +449,7 @@ const modules: Module[] = [
     beschrijving: 'Medezeggenschapsraad en Wet Medezeggenschap Scholen',
     icon: '⚖️',
     kleur: 'from-gray-500 to-slate-600',
+    leerlijn: 'organisatie',
     leerdoelen: [
       'WMS wetgeving begrijpen',
       'MR-taken en bevoegdheden kennen',
@@ -480,6 +492,7 @@ export default function PABOLeerApp() {
   const [userLevel, setUserLevel] = useState<'beginnend' | 'gevorderd' | 'expert'>('beginnend')
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [selectedLeerlijn, setSelectedLeerlijn] = useState<'alle' | 'didactiek' | 'pedagogiek' | 'organisatie'>('alle')
 
   // Load documents from localStorage
   useEffect(() => {
@@ -624,6 +637,21 @@ export default function PABOLeerApp() {
     }
   }
 
+  const getLeerlijnen = () => {
+    return [
+      { id: 'didactiek', naam: 'Didactiek', icon: '📚', beschrijving: 'Lesgeven, instructie en leerprocessen', kleur: 'bg-blue-500' },
+      { id: 'pedagogiek', naam: 'Pedagogiek', icon: '❤️', beschrijving: 'Ontwikkeling, gedrag en welbevinden', kleur: 'bg-red-500' },
+      { id: 'organisatie', naam: 'Organisatie', icon: '🏢', beschrijving: 'Leiderschap, kwaliteit en beleid', kleur: 'bg-purple-500' }
+    ]
+  }
+
+  const getFilteredModules = () => {
+    if (selectedLeerlijn === 'alle') {
+      return modules
+    }
+    return modules.filter(module => module.leerlijn === selectedLeerlijn)
+  }
+
   // Document Manager View
   if (currentView === 'documenten') {
     return (
@@ -748,7 +776,7 @@ export default function PABOLeerApp() {
 
         <div className="flex">
           {/* Left Sidebar */}
-          <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-white shadow-lg border-r border-gray-200 transition-all duration-300 flex-shrink-0 min-h-screen`}>
+          <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-white shadow-lg border-r border-gray-200 transition-all duration-300 flex-shrink-0 min-h-screen sticky top-16 h-[calc(100vh-4rem)]`}>
             {/* Sidebar Header */}
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
@@ -814,8 +842,29 @@ export default function PABOLeerApp() {
               </div>
             )}
 
+            {/* Module Info */}
+            {!sidebarCollapsed && (
+              <div className="p-4 border-b border-gray-200">
+                <div className={`p-3 rounded-lg bg-gradient-to-r ${selectedModule.kleur} text-white`}>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-xl">{selectedModule.icon}</span>
+                    <h4 className="font-semibold">{selectedModule.titel}</h4>
+                  </div>
+                  <p className="text-xs text-white text-opacity-90 mb-2">{selectedModule.beschrijving}</p>
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20`}>
+                      {selectedModule.leerlijn}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20`}>
+                      {selectedModule.competenties.length} competenties
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Navigation Menu */}
-            <div className="p-4">
+            <div className="p-4 overflow-y-auto h-full">
               <div className="space-y-2">
                 {subViews.map((view) => (
                   <button
@@ -843,11 +892,34 @@ export default function PABOLeerApp() {
                   </button>
                 ))}
               </div>
+
+              {/* Quick Links */}
+              {!sidebarCollapsed && (
+                <div className="mt-8 pt-4 border-t border-gray-200">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Snelkoppelingen</h4>
+                  <div className="space-y-2">
+                    <button
+                      onClick={goToOverview}
+                      className="w-full text-left p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm flex items-center space-x-2"
+                    >
+                      <span>🏠</span>
+                      <span>Terug naar overzicht</span>
+                    </button>
+                    <button
+                      onClick={goToDocuments}
+                      className="w-full text-left p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm flex items-center space-x-2"
+                    >
+                      <span>📚</span>
+                      <span>Documenten beheren</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-6 bg-gray-50">
+          <div className="flex-1 p-6 bg-gray-50 overflow-y-auto">
             {getSubViewComponent()}
           </div>
         </div>
@@ -959,24 +1031,75 @@ export default function PABOLeerApp() {
         </div>
       </div>
 
+      {/* Leerlijnen Selector */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Kies een leerlijn</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => setSelectedLeerlijn('alle')}
+              className={`p-4 rounded-lg text-center transition-all ${
+                selectedLeerlijn === 'alle'
+                  ? 'bg-gray-800 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="text-2xl mb-2">🎓</div>
+              <div className="font-medium">Alle Leerlijnen</div>
+              <div className="text-xs mt-1 opacity-80">Compleet overzicht</div>
+            </button>
+            
+            {getLeerlijnen().map(leerlijn => (
+              <button
+                key={leerlijn.id}
+                onClick={() => setSelectedLeerlijn(leerlijn.id as any)}
+                className={`p-4 rounded-lg text-center transition-all ${
+                  selectedLeerlijn === leerlijn.id
+                    ? `${leerlijn.kleur} text-white shadow-lg`
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <div className="text-2xl mb-2">{leerlijn.icon}</div>
+                <div className="font-medium">{leerlijn.naam}</div>
+                <div className="text-xs mt-1 opacity-80">{leerlijn.beschrijving}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Modules Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">Kies een module</h3>
-          <p className="text-gray-600">11 complete modules voor professionele ontwikkeling</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            {selectedLeerlijn === 'alle' 
+              ? 'Alle modules' 
+              : `${getLeerlijnen().find(l => l.id === selectedLeerlijn)?.naam} modules`}
+          </h3>
+          <p className="text-gray-600">
+            {selectedLeerlijn === 'alle'
+              ? '11 complete modules voor professionele ontwikkeling'
+              : `Modules gericht op ${getLeerlijnen().find(l => l.id === selectedLeerlijn)?.beschrijving.toLowerCase()}`}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {modules.map((module) => (
+          {getFilteredModules().map((module) => (
             <div
               key={module.id}
               onClick={() => selectModule(module)}
               className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 group"
             >
               <div className={`bg-gradient-to-r ${module.kleur} p-6 text-white`}>
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-3xl">{module.icon}</span>
-                  <h4 className="text-xl font-bold">{module.titel}</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-3xl">{module.icon}</span>
+                    <h4 className="text-xl font-bold">{module.titel}</h4>
+                  </div>
+                  <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs">
+                    {module.leerlijn}
+                  </span>
                 </div>
                 <p className="text-sm opacity-90">{module.beschrijving}</p>
               </div>
@@ -1062,6 +1185,96 @@ export default function PABOLeerApp() {
           </div>
         </div>
       </div>
+
+      {/* Quick Access Section */}
+      <div className="bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Snelle toegang</h3>
+            <p className="text-gray-600">Direct naar populaire onderdelen</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={() => {
+                const module = modules.find(m => m.id === 'module1')
+                if (module) selectModule(module)
+              }}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="text-2xl">📚</span>
+                <span className="font-medium text-gray-800">Kerndoelen</span>
+              </div>
+              <p className="text-sm text-gray-600">Alle 58 kerndoelen interactief</p>
+            </button>
+            
+            <button
+              onClick={() => {
+                const module = modules.find(m => m.id === 'module2')
+                if (module) selectModule(module)
+              }}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="text-2xl">🧠</span>
+                <span className="font-medium text-gray-800">Ontwikkelingstheorieën</span>
+              </div>
+              <p className="text-sm text-gray-600">Interactieve theorieën met audio</p>
+            </button>
+            
+            <button
+              onClick={() => {
+                const module = modules.find(m => m.id === 'module9')
+                if (module) selectModule(module)
+              }}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="text-2xl">📈</span>
+                <span className="font-medium text-gray-800">Cito & Monitoring</span>
+              </div>
+              <p className="text-sm text-gray-600">Complete Cito-gids met A-E niveaus</p>
+            </button>
+            
+            <button
+              onClick={() => {
+                const module = modules.find(m => m.id === 'module10')
+                if (module) selectModule(module)
+              }}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="text-2xl">🔍</span>
+                <span className="font-medium text-gray-800">Inspectie Onderzoekskader</span>
+              </div>
+              <p className="text-sm text-gray-600">Voorbereiding op inspectiebezoek</p>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <span className="text-2xl">🎓</span>
+              <h2 className="text-lg font-bold text-gray-900">PO Leerapp</h2>
+            </div>
+            
+            <div className="flex items-center space-x-6">
+              <span className="text-sm text-gray-600">© 2025 PO Leerapp</span>
+              <button
+                onClick={goToDocuments}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Documenten
+              </button>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

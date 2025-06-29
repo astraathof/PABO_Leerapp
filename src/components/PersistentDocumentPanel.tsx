@@ -31,14 +31,12 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     const loadDocuments = () => {
       try {
         const savedDocs = localStorage.getItem('pabo-documents')
-        console.log('Loading documents from localStorage:', savedDocs)
         
         if (savedDocs) {
           const parsedDocs = JSON.parse(savedDocs).map((doc: any) => ({
             ...doc,
             uploadDate: new Date(doc.uploadDate)
           }))
-          console.log('Parsed documents:', parsedDocs)
           setDocuments(parsedDocs)
           onDocumentsChange?.(parsedDocs)
         }
@@ -56,11 +54,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     try {
       if (documents.length > 0) {
         localStorage.setItem('pabo-documents', JSON.stringify(documents))
-        console.log('DocumentManager: Saved documents to localStorage:', documents)
       } else {
         // If no documents, remove from localStorage
         localStorage.removeItem('pabo-documents')
-        console.log('DocumentManager: Removed documents from localStorage (empty)')
       }
       
       onDocumentsChange?.(documents)
@@ -72,7 +68,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       if (typeof window !== 'undefined') {
         window.dispatchEvent(event)
       }
-      console.log('DocumentManager: Dispatched documentUploaded event')
     } catch (error) {
       console.error('Error saving documents:', error)
     }
@@ -82,7 +77,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
     const file = event.target.files?.[0]
     if (!file) return
 
-    console.log('Starting file upload for:', file.name, 'Type:', file.type)
     setIsUploading(true)
     setUploadError(null)
 
@@ -90,23 +84,18 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       const formData = new FormData()
       formData.append('file', file)
 
-      console.log('Sending upload request...')
       const response = await fetch('/api/upload-document', {
         method: 'POST',
         body: formData
       })
 
-      console.log('Upload response status:', response.status)
-
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('Upload failed with error:', errorData)
         setUploadError(errorData.error || 'Upload failed')
         throw new Error(errorData.error || 'Upload failed')
       }
 
       const result = await response.json()
-      console.log('Upload successful, result:', result)
       
       const newDocument: UploadedDocument = {
         id: Date.now().toString(),
@@ -119,12 +108,9 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
         mimeType: result.mimeType
       }
 
-      console.log('Creating new document object:', newDocument)
-
       // Update documents state
       setDocuments(prev => {
         const updated = [...prev, newDocument]
-        console.log('Updated documents array:', updated)
         return updated
       })
       
@@ -133,8 +119,6 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       
       // Hide upload area
       setShowUploadArea(false)
-      
-      console.log('Upload process completed successfully')
       
     } catch (error) {
       console.error('Upload error:', error)
@@ -153,16 +137,11 @@ export default function PersistentDocumentPanel({ onDocumentsChange, currentModu
       }
 
       if (confirm(`Weet je zeker dat je "${docToDelete.fileName}" wilt verwijderen?`)) {
-        console.log('Deleting document:', documentId)
-        
         // Update state
         setDocuments(prev => {
           const updated = prev.filter(doc => doc.id !== documentId)
-          console.log('Documents after deletion:', updated)
           return updated
         })
-        
-        console.log('Document deletion completed successfully')
       }
     } catch (error) {
       console.error('Error deleting document:', error)
