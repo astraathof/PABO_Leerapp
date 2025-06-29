@@ -4,131 +4,118 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-// COMPLETELY REWRITTEN PDF extraction using multiple strategies
+// COMPLETELY REWRITTEN PDF extraction using Gemini Vision
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
-    console.log('🔍 Starting comprehensive PDF text extraction...')
-    const pdfString = buffer.toString('binary')
-    let allText: string[] = []
+    console.log('📖 Starting PDF text extraction with Gemini Vision...')
     
-    // STRATEGY 1: Extract from parentheses (most common PDF text storage)
-    const parenthesesPattern = /\(([^)]+)\)/g
-    let match
-    while ((match = parenthesesPattern.exec(pdfString)) !== null) {
-      const text = match[1]
-        .replace(/\\n/g, ' ')
-        .replace(/\\r/g, ' ')
-        .replace(/\\t/g, ' ')
-        .replace(/\\\\/g, '\\')
-        .trim()
-      
-      if (text.length > 2 && /[a-zA-Z]/.test(text)) {
-        allText.push(text)
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY not configured')
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    
+    // Convert PDF buffer to base64
+    const base64PDF = buffer.toString('base64')
+    
+    const pdfPart = {
+      inlineData: {
+        data: base64PDF,
+        mimeType: 'application/pdf'
       }
     }
-    
-    // STRATEGY 2: Extract readable word sequences
-    const wordPattern = /[a-zA-Z]{3,}(?:\s+[a-zA-Z]{2,}){1,10}/g
-    const words = pdfString.match(wordPattern) || []
-    allText.push(...words.filter(w => w.length > 5 && w.length < 100))
-    
-    // STRATEGY 3: Extract Dutch school terms specifically
-    const schoolTerms = [
-      'school', 'onderwijs', 'leerling', 'leerkracht', 'groep', 'klas', 'les', 'leren',
-      'ontwikkeling', 'competentie', 'vaardigheid', 'doel', 'resultaat', 'evaluatie',
-      'curriculum', 'kerndoel', 'methode', 'toets', 'observatie', 'begeleiding',
-      'ouder', 'team', 'directie', 'beleid', 'visie', 'missie', 'waarde', 'norm',
-      'kwaliteit', 'verbetering', 'innovatie', 'samenwerking', 'communicatie',
-      'burgerschap', 'diversiteit', 'inclusie', 'jaarplan', 'werkplan', 'activiteit',
-      'project', 'noorderlicht', 'basisschool', 'primair', 'gedrag', 'protocol',
-      'veiligheid', 'zorg', 'ondersteuning', 'begeleiding', 'hulp', 'aanpak'
-    ]
-    
-    schoolTerms.forEach(term => {
-      const regex = new RegExp(`\\b${term}\\w*`, 'gi')
-      const matches = pdfString.match(regex) || []
-      allText.push(...matches.slice(0, 3))
-    })
-    
-    // STRATEGY 4: Extract sentences that contain school-related words
-    const sentencePattern = /[A-Z][a-zA-Z\s,.-]{15,150}[.!?]/g
-    const sentences = pdfString.match(sentencePattern) || []
-    const schoolSentences = sentences.filter(s => 
-      schoolTerms.some(term => s.toLowerCase().includes(term))
-    )
-    allText.push(...schoolSentences.slice(0, 10))
-    
-    // STRATEGY 5: Extract dates and years
-    const datePattern = /\b(?:2023|2024|2025|januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\b/gi
-    const dates = pdfString.match(datePattern) || []
-    allText.push(...dates.slice(0, 5))
-    
-    // Clean and deduplicate
-    const cleanText = [...new Set(allText)]
-      .filter(text => text && text.length > 2)
-      .filter(text => !/^[^\w\s]*$/.test(text)) // Remove non-alphanumeric
-      .filter(text => !/^[\x00-\x1F\x7F-\xFF]+$/.test(text)) // Remove control chars
-      .sort((a, b) => b.length - a.length)
-    
-    console.log(`✅ Extracted ${cleanText.length} text elements from PDF`)
-    
-    if (cleanText.length > 0) {
-      // Organize extracted content
-      const longTexts = cleanText.filter(t => t.length > 20)
-      const mediumTexts = cleanText.filter(t => t.length >= 8 && t.length <= 20)
-      const shortTexts = cleanText.filter(t => t.length < 8)
-      
-      return `SCHOOLDOCUMENT PDF - TEKSTEXTRACTIE SUCCESVOL
 
-=== HOOFDINHOUD ===
-${longTexts.slice(0, 10).join('\n')}
+    const prompt = `Analyseer dit PDF-document en extraheer alle tekst die je kunt lezen. 
 
-=== BELANGRIJKE TERMEN ===
-${mediumTexts.slice(0, 15).join(' • ')}
+Dit is waarschijnlijk een schooldocument. Geef een gestructureerde output met:
 
-=== KERNWOORDEN ===
-${shortTexts.slice(0, 20).join(' | ')}
+1. **DOCUMENT TYPE**: Wat voor soort document dit is (schoolplan, beleid, protocol, etc.)
+2. **HOOFDINHOUD**: Alle belangrijke tekst die je kunt lezen
+3. **KERNPUNTEN**: De belangrijkste onderwerpen en doelen
+4. **PROCEDURES**: Eventuele procedures, stappen of richtlijnen
+5. **CONTACTINFO**: Namen, functies, data die relevant zijn
+
+Extraheer ALLE leesbare tekst, ook uit tabellen, lijsten en voetnoten. Geef de output in het Nederlands.`
+
+    const result = await model.generateContent([prompt, pdfPart])
+    const response = await result.response
+    const extractedText = response.text()
+
+    console.log('✅ PDF text extraction completed successfully with Gemini Vision')
+
+    return `PDF DOCUMENT - VOLLEDIGE TEKSTEXTRACTIE
+
+=== GEMINI VISION ANALYSE ===
+${extractedText}
 
 === DOCUMENT INFO ===
 Bestandstype: PDF
-Extractie: Succesvol
-Elementen gevonden: ${cleanText.length}
-Geschikt voor: AI-analyse en inhoudelijke gesprekken
+Extractie: Gemini Vision AI (Volledige inhoud)
+Geschikt voor: Volledige AI-analyse van alle PDF-inhoud
 
-Dit document bevat schoolgerelateerde informatie die gebruikt kan worden voor:
-- Beleidsdiscussies
-- Praktijkanalyse  
-- Theoriekoppeling
-- Verbeterpunten identificeren`
-    }
-    
-    // Fallback if no content found
-    return `SCHOOLDOCUMENT PDF - BESCHIKBAAR VOOR ANALYSE
+Dit document kan worden gebruikt voor:
+- Inhoudelijke analyse van alle tekst
+- Beleidsdiscussies gebaseerd op werkelijke inhoud
+- Praktijkanalyse met concrete voorbeelden
+- Theoriekoppeling aan echte schoolsituaties`
 
-Dit PDF-document is geüpload en beschikbaar voor AI-gesprekken.
-Het document bevat schoolinformatie die kan worden besproken in relatie tot:
-- Onderwijsbeleid en -praktijk
-- Schoolorganisatie en -cultuur
-- Leerlingbegeleiding en -zorg
-- Kwaliteitsverbetering en ontwikkeling
-
-De AI kan helpen bij het analyseren en bespreken van de inhoud.`
-    
   } catch (error) {
     console.error('PDF extraction error:', error)
-    return `SCHOOLDOCUMENT PDF - KLAAR VOOR GESPREK
+    
+    // Fallback: Try basic text extraction
+    try {
+      console.log('🔄 Trying fallback PDF extraction...')
+      const pdfString = buffer.toString('binary')
+      
+      // Extract text patterns
+      const textPatterns = [
+        /\(([^)]{10,})\)/g,  // Text in parentheses
+        /[A-Za-z]{3,}(?:\s+[A-Za-z]{2,}){2,}/g,  // Word sequences
+        /\b[A-Z][a-z]+(?:\s+[a-z]+)*\b/g  // Sentences
+      ]
+      
+      let extractedText = ''
+      textPatterns.forEach(pattern => {
+        const matches = pdfString.match(pattern) || []
+        extractedText += matches.slice(0, 20).join(' ') + ' '
+      })
+      
+      if (extractedText.length > 100) {
+        return `PDF DOCUMENT - TEKSTEXTRACTIE
 
-Dit PDF-document is succesvol geüpload en kan worden gebruikt voor:
-- Inhoudelijke gesprekken over schoolbeleid
-- Analyse van onderwijspraktijk
-- Koppeling tussen theorie en praktijk
-- Identificatie van verbeterpunten
+=== GEËXTRAHEERDE INHOUD ===
+${extractedText.substring(0, 2000)}
 
-Stel gerust vragen over de inhoud van dit document.`
+=== DOCUMENT INFO ===
+Bestandstype: PDF
+Extractie: Basis tekstextractie
+Geschikt voor: Beperkte AI-analyse
+
+Dit document bevat schoolinformatie die kan worden besproken.`
+      }
+    } catch (fallbackError) {
+      console.error('Fallback PDF extraction also failed:', fallbackError)
+    }
+    
+    return `PDF DOCUMENT - BESCHIKBAAR VOOR ANALYSE
+
+Dit PDF-document is geüpload maar de automatische tekstextractie is niet volledig gelukt.
+
+=== MOGELIJKE OORZAKEN ===
+• Het PDF bevat gescande afbeeldingen in plaats van tekst
+• Het document is beveiligd tegen tekstextractie
+• De PDF-structuur is complex
+
+=== WAT KUN JE DOEN ===
+• Upload het document als afbeelding (JPG/PNG) voor betere tekstherkenning
+• Converteer het PDF naar Word-formaat en upload opnieuw
+• Gebruik de AI-chat om specifieke vragen te stellen over dit document
+
+De AI kan nog steeds helpen met algemene vragen over dit type document.`
   }
 }
 
-// NEW: Extract text from images using Gemini Vision
+// Extract text from images using Gemini Vision
 async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<string> {
   try {
     console.log('🖼️ Starting image text extraction with Gemini Vision...')
@@ -150,14 +137,20 @@ async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<s
 
     const prompt = `Analyseer deze afbeelding en extraheer alle tekst die je kunt zien. 
 
-Als dit een schooldocument is (zoals een schoolplan, beleid, observatieformulier, etc.), geef dan:
+Dit is waarschijnlijk een schooldocument. Geef een gestructureerde output met:
 
-1. ALLE ZICHTBARE TEKST (letterlijk wat er staat)
-2. TYPE DOCUMENT (wat voor soort document dit lijkt te zijn)
-3. HOOFDONDERWERPEN (welke onderwijsthema's worden behandeld)
-4. BELANGRIJKE INFORMATIE (kernpunten, doelen, procedures)
+1. **DOCUMENT TYPE**: Wat voor soort document dit lijkt te zijn
+2. **ALLE ZICHTBARE TEKST**: Letterlijk alle tekst die je kunt lezen, inclusief:
+   - Hoofdteksten en titels
+   - Lijsten en opsommingen
+   - Tabellen en schema's
+   - Voetnoten en bijschriften
+   - Namen, data, contactgegevens
+3. **HOOFDONDERWERPEN**: Welke onderwijsthema's worden behandeld
+4. **BELANGRIJKE INFORMATIE**: Kernpunten, doelen, procedures
+5. **STRUCTUUR**: Hoe het document is opgebouwd
 
-Geef een gestructureerde output in het Nederlands. Als er geen tekst zichtbaar is, beschrijf dan wat je wel ziet.`
+Lees ALLES wat zichtbaar is, ook kleine tekst. Geef de output in het Nederlands.`
 
     const result = await model.generateContent([prompt, imagePart])
     const response = await result.response
@@ -165,33 +158,39 @@ Geef een gestructureerde output in het Nederlands. Als er geen tekst zichtbaar i
 
     console.log('✅ Image text extraction completed successfully')
 
-    return `AFBEELDING DOCUMENT - TEKST GEËXTRAHEERD
+    return `AFBEELDING DOCUMENT - VOLLEDIGE TEKSTEXTRACTIE
 
 === GEMINI VISION ANALYSE ===
 ${extractedText}
 
 === DOCUMENT INFO ===
 Bestandstype: Afbeelding (${mimeType})
-Extractie: Gemini Vision AI
-Geschikt voor: AI-analyse van visuele schooldocumenten
+Extractie: Gemini Vision AI (Volledige OCR)
+Geschikt voor: Volledige AI-analyse van visuele documenten
 
 Dit document kan worden gebruikt voor:
-- Analyse van visuele schoolmaterialen
-- Bespreking van beleidsdocumenten
+- Analyse van alle zichtbare tekst en inhoud
+- Bespreking van beleidsdocumenten in afbeeldingsvorm
 - Evaluatie van formulieren en procedures
-- Koppeling tussen visuele informatie en theorie`
+- Koppeling tussen visuele informatie en onderwijstheorie`
 
   } catch (error) {
     console.error('Image text extraction error:', error)
     return `AFBEELDING DOCUMENT - BESCHIKBAAR VOOR ANALYSE
 
-Deze afbeelding is geüpload en kan worden besproken in relatie tot:
-- Visuele schooldocumenten en materialen
-- Beleid en procedures in afbeeldingsvorm
-- Observatieformulieren en evaluaties
-- Onderwijskundige diagrammen en schema's
+Deze afbeelding is geüpload maar de automatische tekstextractie is niet gelukt.
 
-De AI kan helpen bij het analyseren van de visuele inhoud.`
+=== MOGELIJKE OORZAKEN ===
+• De afbeelding is onduidelijk of van lage kwaliteit
+• Er staat weinig of geen tekst in de afbeelding
+• De API-service is tijdelijk niet beschikbaar
+
+=== WAT KUN JE DOEN ===
+• Probeer een scherpere afbeelding te uploaden
+• Zorg dat de tekst goed leesbaar is
+• Upload het document in een ander formaat (PDF, Word)
+
+De AI kan nog steeds helpen met vragen over dit type document.`
   }
 }
 
@@ -214,11 +213,11 @@ export async function POST(request: NextRequest) {
     let documentType = ''
 
     // Process different file types
-    if (file.name.toLowerCase().endsWith('.pdf')) {
-      console.log('📖 Processing PDF...')
+    if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+      console.log('📖 Processing PDF with Gemini Vision...')
       extractedText = await extractTextFromPDF(buffer)
       documentType = 'PDF'
-    } else if (file.name.toLowerCase().endsWith('.docx')) {
+    } else if (file.name.toLowerCase().endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       console.log('📄 Processing DOCX...')
       try {
         const result = await mammoth.extractRawText({ buffer })
@@ -233,7 +232,7 @@ export async function POST(request: NextRequest) {
         extractedText = `WORD DOCUMENT - BESCHIKBAAR VOOR ANALYSE\n\nDit Word-document bevat schoolinformatie en is geschikt voor AI-gesprekken over onderwijsonderwerpen.`
         documentType = 'Word'
       }
-    } else if (file.name.toLowerCase().endsWith('.txt')) {
+    } else if (file.name.toLowerCase().endsWith('.txt') || file.type === 'text/plain') {
       console.log('📝 Processing TXT...')
       extractedText = buffer.toString('utf-8') || 'Tekstbestand inhoud beschikbaar'
       documentType = 'Tekst'
@@ -242,8 +241,8 @@ export async function POST(request: NextRequest) {
         extractedText += `\n\n=== DOCUMENT INFO ===\nBestandstype: Platte tekst\nExtractie: Volledig\nGeschikt voor: Volledige AI-analyse`
       }
     } else if (file.type.startsWith('image/')) {
-      console.log('🖼️ Processing Image...')
-      // NEW: Handle image files
+      console.log('🖼️ Processing Image with Gemini Vision...')
+      // Handle image files
       const supportedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
       
       if (supportedImageTypes.includes(file.type)) {
@@ -273,7 +272,7 @@ export async function POST(request: NextRequest) {
       detectedDocumentType = 'Schoolplan'
     } else if (fileName.includes('schoolgids') || content.includes('schoolgids')) {
       detectedDocumentType = 'Schoolgids'
-    } else if (fileName.includes('gedrag') || fileName.includes('protocol') || content.includes('gedragsprotocol')) {
+    } else if (fileName.includes('gedrag') || fileName.includes('protocol') || content.includes('gedragsprotocol') || content.includes('gedrag')) {
       detectedDocumentType = 'Gedragsprotocol'
     } else if (fileName.includes('beleid') || content.includes('beleid')) {
       detectedDocumentType = 'Beleidsdocument'
