@@ -4,32 +4,32 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-// Improved PDF extraction with better Gemini integration
+// Verbeterde PDF extractie met Gemini 2.5 Flash
 async function extractTextFromPDF(buffer: Buffer, fileName: string): Promise<string> {
   try {
-    console.log(`📖 Starting PDF text extraction for: ${fileName} (${buffer.length} bytes)`)
+    console.log(`📖 Starting enhanced PDF text extraction for: ${fileName} (${buffer.length} bytes)`)
     
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY not configured')
     }
 
-    // Check file size - Gemini has limits
+    // Check file size - Gemini heeft een limiet van 20MB
     const maxSize = 20 * 1024 * 1024 // 20MB limit for Gemini
     if (buffer.length > maxSize) {
       console.log(`⚠️ PDF too large (${Math.round(buffer.length / 1024 / 1024)}MB), using fallback extraction`)
       return await fallbackPDFExtraction(buffer, fileName)
     }
 
-    // Use Gemini 2.5 Flash for better PDF processing
+    // Use Gemini 2.5 Flash for superior PDF processing
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.5-flash',
       generationConfig: {
-        maxOutputTokens: 8000, // Increase output limit
-        temperature: 0.1, // Lower temperature for more accurate extraction
+        maxOutputTokens: 8000,
+        temperature: 0.1, // Lage temperature voor nauwkeurige extractie
       }
     })
     
-    // Convert PDF buffer to base64 with proper MIME type
+    // Convert PDF buffer to base64 met correcte MIME type
     const base64PDF = buffer.toString('base64')
     
     const pdfPart = {
@@ -39,45 +39,60 @@ async function extractTextFromPDF(buffer: Buffer, fileName: string): Promise<str
       }
     }
 
-    // Improved prompt for better text extraction
-    const prompt = `Extraheer ALLE tekst uit dit PDF-document. Behoud de structuur en opmaak waar mogelijk.
+    // Verbeterde prompt specifiek voor Nederlandse schooldocumenten
+    const prompt = `Extraheer ALLE tekst uit dit PDF-document. Dit is een Nederlands schooldocument.
 
 INSTRUCTIES:
-1. Lees het volledige document zorgvuldig
-2. Extraheer alle leesbare tekst, inclusief headers, paragrafen, lijsten
-3. Behoud de logische volgorde van de inhoud
-4. Als er tabellen zijn, behoud de structuur
-5. Negeer decoratieve elementen, focus op de inhoud
+1. Lees het volledige document zeer zorgvuldig
+2. Extraheer ALLE leesbare tekst, inclusief:
+   - Headers en titels
+   - Alle paragrafen en tekstblokken
+   - Lijsten en opsommingen
+   - Tabellen (behoud de structuur)
+   - Voetnoten en bijschriften
+3. Behoud de logische volgorde en structuur van de inhoud
+4. Als er tabellen zijn, probeer de structuur te behouden
+5. Negeer alleen decoratieve elementen
 6. Als tekst onduidelijk is, geef aan wat je wel kunt lezen
+7. Geef de volledige tekstinhoud terug zonder samenvatting
 
-Geef de volledige tekstinhoud terug zonder samenvatting.`
+BELANGRIJK: Dit is een schooldocument, dus alle tekst is relevant voor onderwijsanalyse.`
 
-    console.log('🤖 Sending PDF to Gemini 2.5 Flash for text extraction...')
+    console.log('🤖 Sending PDF to Gemini 2.5 Flash for enhanced text extraction...')
 
-    // Create a timeout promise (30 seconds)
+    // Verhoogde timeout voor complexe PDFs
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('PDF processing timeout after 30 seconds')), 30000)
+      setTimeout(() => reject(new Error('PDF processing timeout after 45 seconds')), 45000)
     })
 
-    // Race between API call and timeout
+    // API call met timeout
     const apiPromise = model.generateContent([prompt, pdfPart])
     
     const result = await Promise.race([apiPromise, timeoutPromise])
     const response = await (result as any).response
     const extractedText = response.text()
 
-    console.log(`✅ PDF text extraction completed successfully (${extractedText.length} characters)`)
+    console.log(`✅ Enhanced PDF text extraction completed successfully (${extractedText.length} characters)`)
 
-    // Validate extracted text quality
-    if (extractedText.length < 50) {
+    // Valideer kwaliteit van geëxtraheerde tekst
+    if (extractedText.length < 100) {
       console.log('⚠️ Extracted text too short, trying fallback method')
       return await fallbackPDFExtraction(buffer, fileName)
     }
 
-    // Check for garbled text (too many special characters)
+    // Check voor onleesbare tekst (te veel speciale karakters)
     const specialCharRatio = (extractedText.match(/[^\w\s\.\,\!\?\-\(\)\[\]]/g) || []).length / extractedText.length
-    if (specialCharRatio > 0.3) {
+    if (specialCharRatio > 0.4) {
       console.log('⚠️ Text appears garbled, trying fallback method')
+      return await fallbackPDFExtraction(buffer, fileName)
+    }
+
+    // Check voor Nederlandse tekst
+    const dutchWords = ['de', 'het', 'een', 'van', 'en', 'in', 'op', 'voor', 'met', 'aan', 'school', 'leerling']
+    const hasDutchContent = dutchWords.some(word => extractedText.toLowerCase().includes(word))
+    
+    if (!hasDutchContent && extractedText.length > 500) {
+      console.log('⚠️ No Dutch content detected, trying fallback method')
       return await fallbackPDFExtraction(buffer, fileName)
     }
 
@@ -91,13 +106,14 @@ Bestandstype: PDF
 Extractie: Gemini 2.5 Flash AI (Volledig)
 Geschikt voor: Volledige AI-analyse van PDF-inhoud
 Kwaliteit: Hoge kwaliteit tekstextractie
+Karakters: ${extractedText.length}
 
 Dit document is volledig geanalyseerd en klaar voor gebruik in onderwijsgesprekken.`
 
   } catch (error) {
-    console.error('PDF extraction error:', error)
+    console.error('Enhanced PDF extraction error:', error)
     
-    // Enhanced error handling
+    // Verbeterde error handling
     if (error instanceof Error) {
       if (error.message.includes('timeout')) {
         console.log('⏰ PDF processing timeout, using fallback method')
@@ -105,36 +121,42 @@ Dit document is volledig geanalyseerd en klaar voor gebruik in onderwijsgesprekk
         console.log('🌐 Gemini API server error, using fallback method')
       } else if (error.message.includes('quota') || error.message.includes('limit')) {
         console.log('📊 API quota exceeded, using fallback method')
+      } else if (error.message.includes('API_KEY_INVALID')) {
+        console.log('🔑 Invalid API key, using fallback method')
       } else {
-        console.log('❌ Gemini API error, using fallback method')
+        console.log('❌ Gemini API error, using fallback method:', error.message)
       }
     }
     
-    // Use fallback extraction
+    // Use enhanced fallback extraction
     return await fallbackPDFExtraction(buffer, fileName)
   }
 }
 
-// Enhanced fallback PDF extraction
+// Verbeterde fallback PDF extractie
 async function fallbackPDFExtraction(buffer: Buffer, fileName: string): Promise<string> {
   try {
     console.log('🔄 Using enhanced fallback PDF extraction...')
     
-    // Convert buffer to string and try to extract readable text
+    // Convert buffer to string en probeer leesbare tekst te extraheren
     const pdfString = buffer.toString('binary')
     
-    // Enhanced text extraction patterns
+    // Verbeterde text extraction patterns voor Nederlandse documenten
     const textPatterns = [
-      // Text in parentheses (common in PDFs)
-      /\(([^)]{5,200})\)/g,
-      // Text between 'BT' and 'ET' markers (PDF text objects)
+      // Tekst tussen haakjes (veel voorkomend in PDFs)
+      /\(([^)]{10,500})\)/g,
+      // Tekst tussen 'BT' en 'ET' markers (PDF text objects)
       /BT\s+.*?ET/gs,
-      // Text after 'Tj' operators
+      // Tekst na 'Tj' operators
       /\[(.*?)\]\s*TJ/g,
-      // Direct text patterns
-      /[A-Za-z]{3,}(?:\s+[A-Za-z]{2,}){1,10}/g,
-      // Dutch text patterns
-      /\b[A-Z][a-z]+(?:\s+[a-z]+){0,5}\b/g
+      // Nederlandse woorden en zinnen
+      /\b[A-Z][a-z]+(?:\s+[a-z]+){2,15}\b/g,
+      // Schoolgerelateerde termen
+      /(?:school|leerling|onderwijs|gedrag|protocol|regel|klas)[a-z\s]{5,100}/gi,
+      // Datum patronen
+      /\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}/g,
+      // Nederlandse zinnen
+      /[A-Z][a-z\s,]{20,200}[\.!?]/g
     ]
     
     let extractedText = ''
@@ -144,22 +166,23 @@ async function fallbackPDFExtraction(buffer: Buffer, fileName: string): Promise<
       const matches = pdfString.match(pattern) || []
       console.log(`Pattern ${index + 1}: Found ${matches.length} matches`)
       
-      // Clean and filter matches
+      // Clean en filter matches
       const cleanMatches = matches
         .map(match => {
-          // Clean up the match
+          // Clean up de match
           let cleaned = match.replace(/[^\w\s\.\,\!\?\-\(\)]/g, ' ')
           cleaned = cleaned.replace(/\s+/g, ' ').trim()
           return cleaned
         })
         .filter(match => {
-          // Filter out very short or nonsensical matches
-          return match.length > 3 && 
-                 match.split(' ').length > 1 &&
-                 !/^\d+$/.test(match) && // Not just numbers
-                 !/^[A-Z]+$/.test(match) // Not just capitals
+          // Filter out zeer korte of onzinnige matches
+          return match.length > 5 && 
+                 match.split(' ').length > 2 &&
+                 !/^\d+$/.test(match) && // Niet alleen nummers
+                 !/^[A-Z]+$/.test(match) && // Niet alleen hoofdletters
+                 /[aeiou]/i.test(match) // Moet klinkers bevatten
         })
-        .slice(0, 20) // Limit per pattern
+        .slice(0, 30) // Meer matches per pattern
       
       extractedText += cleanMatches.join(' ') + ' '
       totalMatches += cleanMatches.length
@@ -168,60 +191,60 @@ async function fallbackPDFExtraction(buffer: Buffer, fileName: string): Promise<
     // Clean up final text
     extractedText = extractedText
       .replace(/\s+/g, ' ')
+      .replace(/(.)\1{3,}/g, '$1') // Remove excessive repetition
       .trim()
     
-    console.log(`📝 Fallback extraction: ${extractedText.length} characters, ${totalMatches} text segments`)
+    console.log(`📝 Enhanced fallback extraction: ${extractedText.length} characters, ${totalMatches} text segments`)
     
-    if (extractedText.length > 100) {
-      return `PDF DOCUMENT - BASIS TEKSTEXTRACTIE
+    if (extractedText.length > 200) {
+      return `PDF DOCUMENT - VERBETERDE TEKSTEXTRACTIE
 
 === DOCUMENT: ${fileName} ===
-${extractedText.substring(0, 2000)}${extractedText.length > 2000 ? '...' : ''}
+${extractedText.substring(0, 3000)}${extractedText.length > 3000 ? '...' : ''}
 
 === DOCUMENT INFO ===
 Bestandstype: PDF
-Extractie: Fallback tekstextractie
-Geschikt voor: Beperkte AI-analyse
-Kwaliteit: Basis tekstextractie
+Extractie: Verbeterde fallback tekstextractie
+Geschikt voor: AI-analyse van geëxtraheerde content
+Kwaliteit: Basis tekstextractie met verbeteringen
+Karakters: ${extractedText.length}
 
-OPMERKING: Dit document is geëxtraheerd met een fallback-methode. Voor betere resultaten:
-- Probeer het document te converteren naar Word-formaat
-- Upload het als afbeelding (JPG/PNG) voor OCR-verwerking
-- Controleer of het PDF-bestand niet beveiligd is
-
-De AI kan nog steeds helpen met vragen over dit type document.`
+OPMERKING: Dit document is geëxtraheerd met een verbeterde fallback-methode. 
+De AI kan helpen met vragen over dit type document en de geëxtraheerde inhoud.`
     }
   } catch (fallbackError) {
-    console.error('Fallback PDF extraction failed:', fallbackError)
+    console.error('Enhanced fallback PDF extraction failed:', fallbackError)
   }
   
   return `PDF DOCUMENT - BESCHIKBAAR VOOR ANALYSE
 
 === DOCUMENT: ${fileName} ===
-Dit PDF-document is geüpload maar de automatische tekstextractie heeft problemen ondervonden.
+Dit PDF-document "${fileName}" is geüpload maar de automatische tekstextractie heeft problemen ondervonden.
 
 === MOGELIJKE OORZAKEN ===
 • Het PDF-bestand is beveiligd of gecodeerd
-• Het document bevat voornamelijk afbeeldingen zonder tekst
+• Het document bevat voornamelijk afbeeldingen zonder tekst (gescande PDF)
 • De PDF-structuur is complex of beschadigd
-• Het bestand is te groot voor automatische verwerking
+• Het bestand gebruikt een ongewone encoding
 
 === WAT KUN JE DOEN ===
 • Probeer het document te converteren naar Word-formaat (.docx)
 • Maak screenshots van belangrijke pagina's en upload als afbeeldingen
 • Controleer of het PDF-bestand niet beveiligd is tegen kopiëren
 • Upload een kleinere versie of specifieke pagina's
+• Gebruik een OCR-tool om het PDF eerst naar tekst te converteren
 
 === AI-ONDERSTEUNING ===
 Ook zonder volledige tekstextractie kan de AI je helpen met:
-• Algemene vragen over dit type document
-• Advies over hoe dit document te gebruiken in je onderwijs
+• Algemene vragen over gedragsprotocollen
+• Advies over hoe dit type document te gebruiken in je onderwijs
 • Suggesties voor vergelijkbare documenten of bronnen
+• Structuur en opzet van gedragsprotocollen
 
-De AI staat klaar om je te helpen met vragen over dit document type.`
+De AI staat klaar om je te helpen met vragen over dit document type en gedragsmanagement in het algemeen.`
 }
 
-// Extract text from images using Gemini Vision with improved handling
+// Extract text from images using Gemini Vision
 async function extractTextFromImage(buffer: Buffer, mimeType: string, fileName: string): Promise<string> {
   try {
     console.log(`🖼️ Starting image text extraction for: ${fileName} (${buffer.length} bytes)`)
@@ -260,22 +283,23 @@ Deze afbeelding (${Math.round(buffer.length / 1024 / 1024)}MB) is te groot voor 
       }
     }
 
-    // Improved prompt for better OCR
-    const prompt = `Analyseer deze afbeelding en extraheer ALLE zichtbare tekst.
+    // Verbeterde prompt voor OCR van Nederlandse schooldocumenten
+    const prompt = `Analyseer deze afbeelding en extraheer ALLE zichtbare tekst. Dit is waarschijnlijk een Nederlands schooldocument.
 
 INSTRUCTIES:
-1. Lees alle tekst die zichtbaar is in de afbeelding
+1. Lees alle tekst die zichtbaar is in de afbeelding zeer zorgvuldig
 2. Behoud de structuur en volgorde van de tekst
 3. Als er tabellen zijn, behoud de tabelstructuur
 4. Vermeld ook headers, titels, en bijschriften
 5. Als tekst onduidelijk is, geef aan wat je wel kunt lezen
 6. Beschrijf kort wat voor type document dit is
+7. Let extra op Nederlandse schoolterminologie
 
 Geef een volledige transcriptie van alle tekst in de afbeelding.`
 
     // Create timeout promise
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Image processing timeout')), 20000) // 20 second timeout
+      setTimeout(() => reject(new Error('Image processing timeout')), 30000) // 30 second timeout
     })
 
     const apiPromise = model.generateContent([prompt, imagePart])
@@ -338,7 +362,7 @@ export async function POST(request: NextRequest) {
     let extractedText = ''
     let documentType = ''
 
-    // Process different file types with improved handling
+    // Process different file types with enhanced handling
     if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
       console.log('📖 Processing PDF with enhanced Gemini extraction...')
       extractedText = await extractTextFromPDF(buffer, file.name)
