@@ -40,11 +40,13 @@
 
 | Variable | Value | Required | Purpose |
 |----------|-------|----------|---------|
-| `GEMINI_API_KEY` | `gai_xxxxxxx` | ✅ Yes | Alle AI functionaliteiten (Chat, TTS, Audio transcriptie) |
+| `GEMINI_API_KEY` | `AIza_nieuwe_key` | ✅ Yes | Alle AI functionaliteiten (Chat, TTS, Audio transcriptie) |
 | `NODE_ENV` | `production` | ✅ Auto-set | Production optimizations |
 
 🔑 **API Key Sources:**
 - **Gemini**: [Google AI Studio](https://makersuite.google.com/app/apikey) - Alle functionaliteiten
+
+⚠️ **BELANGRIJK:** Als je API key errors krijgt, ga naar https://makersuite.google.com/app/apikey om een nieuwe key aan te maken!
 
 ## 🚀 Function Configuration
 
@@ -140,7 +142,7 @@ src/app/api/upload-docx/route.ts    → /.netlify/functions/upload-docx
 # Best practices:
 ✅ Never commit API keys to code
 ✅ Use Netlify env vars only
-✅ Rotate keys regularly  
+✅ Rotate keys regularly (especially when expired!)
 ✅ Monitor API usage/costs
 ✅ Restrict API key permissions waar mogelijk
 ```
@@ -168,6 +170,7 @@ src/app/api/upload-docx/route.ts    → /.netlify/functions/upload-docx
 - Error rates per endpoint
 - API quota usage (Gemini/OpenAI)
 - Bandwidth usage (TTS audio files)
+- API key expiration warnings
 ```
 
 ### Custom Monitoring
@@ -203,8 +206,25 @@ console.log('Function execution:', {
 # TTS Function Issues:
 ❌ "Function timeout"               → Upgrade to Pro
 ❌ "API key not found"             → Check env vars exactly  
+❌ "API key expired"               → Get new key from Google AI Studio
 ❌ "CORS error"                    → Add headers (zie config)
 ❌ "Audio generation failed"       → Check Gemini API quota
+```
+
+### API Key Issues (COMMON PROBLEM)
+```bash
+# API Key Expired/Invalid:
+❌ "API key expired. Please renew"  → Get new key from Google AI Studio
+❌ "401 - Ongeldige Gemini API key" → Update both local and Netlify env vars
+❌ "400 Bad Request"               → Check key format (should start with AIza)
+
+# Fix Steps:
+1. Go to https://makersuite.google.com/app/apikey
+2. Create new API key
+3. Update .env.local locally
+4. Update Netlify Environment Variables
+5. Trigger new deploy
+6. Test all AI features
 ```
 
 ### Performance Issues
@@ -330,7 +350,7 @@ Pro Plan ($19/month) Adds:
 ## 🎯 Production Checklist
 
 ### Pre-Launch
-- [ ] **Environment variables** correctly set
+- [ ] **Environment variables** correctly set (NEW API KEY!)
 - [ ] **Custom domain** configured (optional)
 - [ ] **HTTPS** enabled (automatic)
 - [ ] **Build settings** verified
@@ -381,5 +401,5 @@ Deze Netlify-specifieke guide dekt alle aspecten van het deployen en beheren van
 
 ---
 
-*Netlify Deployment Guide v1.0*  
-*Last updated: December 2024* 
+*Netlify Deployment Guide v1.1 - Met API Key Renewal Instructions*  
+*Last updated: December 2024*

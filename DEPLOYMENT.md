@@ -23,14 +23,16 @@ Ga direct naar je Netlify dashboard en controleer:
 
 **VEREIST:**
 - **Key:** `GEMINI_API_KEY`
-- **Value:** jouw_echte_gemini_api_key
+- **Value:** jouw_nieuwe_gemini_api_key (OUDE KEY IS VERLOPEN!)
 - **Scope:** Alle scopes
 
 🔑 **API Keys verkrijgen:**
 - [Gemini API Key](https://makersuite.google.com/app/apikey) - Google AI Studio (alle functionaliteiten)
 
+⚠️ **BELANGRIJK:** Je huidige Gemini API key is verlopen! Ga naar https://makersuite.google.com/app/apikey om een nieuwe key aan te maken.
+
 ### Stap 4: Redeploy & Test
-Na het instellen van de API keys:
+Na het instellen van de nieuwe API key:
 - **Deploys tab → Trigger deploy** 
 - **Test alle functionaliteiten** (zie Post-Deploy Checklist hieronder)
 
@@ -59,6 +61,17 @@ Voor nieuwe TTS en streaming features:
 ## 🔧 Complete Troubleshooting Guide
 
 ### 🚨 Critical Issues
+
+#### Probleem: API Key Expired Error (HUIDIGE PROBLEEM)
+**Symptomen:** "API key expired. Please renew the API key" of "401 - Ongeldige Gemini API key"
+**Oplossing:**
+1. Ga naar [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Maak een nieuwe API key aan
+3. Update `.env.local` bestand lokaal met nieuwe key
+4. Update Netlify Environment Variables met nieuwe key
+5. Restart development server: `npm run dev`
+6. Trigger nieuwe deploy op Netlify
+7. Test alle AI functionaliteiten
 
 #### Probleem: Blanco/Witte Pagina
 **Oorzaak:** Verkeerde publish directory of build failure
@@ -189,6 +202,7 @@ Voor nieuwe TTS en streaming features:
 ❌ "Function build failed"              # Kritisch - check logs
 ❌ "Environment variable missing"       # Kritisch - fix immediately
 ❌ "TTS endpoint build failed"          # Kritisch - check Gemini API
+❌ "API key expired"                    # Kritisch - renew API key
 ```
 
 ### Function Performance Monitoring
@@ -280,8 +294,8 @@ Internet connectivity test:
 4. Update team/documentation
 
 # Voor TTS testing:
-GEMINI_API_KEY=your_key_here     # Moet TTS ondersteunen
-OPENAI_API_KEY=optional_key      # Voor audio transcriptie
+GEMINI_API_KEY=your_new_key_here     # Moet TTS ondersteunen
+OPENAI_API_KEY=optional_key          # Voor audio transcriptie
 ```
 
 ## 🆘 Emergency Troubleshooting
@@ -452,5 +466,5 @@ Deze deployment guide dekt alle aspecten van de geavanceerde AI template inclusi
 
 ---
 
-*Complete Deployment Guide v3.0 - Met TTS & Streaming Features*  
-*Last updated: December 2024* 
+*Complete Deployment Guide v3.1 - Met API Key Renewal Instructions*  
+*Last updated: December 2024*
