@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         // Try to extract key sections
         const sections = content.split(/\n\n|\n===|\n---/)
         const meaningfulSections = sections
-          .filter(section => section.trim().length > 50)
+          .filter((section: string) => section.trim().length > 50)
           .slice(0, 3) // Take first 3 meaningful sections
           .join('\n\n')
         
