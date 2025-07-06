@@ -1000,9 +1000,7 @@ export default function PABOLeerApp() {
               <button
                 onClick={goToDocuments}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors relative ${
-                  currentView === 'documenten'
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-blue-600'
+                  'text-gray-600 hover:text-blue-600'
                 }`}
               >
                 📚 Documenten
